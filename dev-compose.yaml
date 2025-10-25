@@ -35,6 +35,7 @@ services:
       PHOTOVIEW_POSTGRES_URL: postgres://photoview:photosecret@postgres:5432/photoview_test
     volumes:
       - .:/app:rw
+      - ./photos:/photos:ro
     ports:
       - 4001:4001
     command:
