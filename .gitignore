@@ -16,6 +16,8 @@ docker-compose.yml
 /database
 /tmp
 
+_container_dir/
+
 # dependencies
 node_modules/
 
