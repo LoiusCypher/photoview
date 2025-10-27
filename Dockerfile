@@ -1,5 +1,5 @@
 ### Build UI ###
-FROM --platform=${BUILDPLATFORM:-linux/arm64} node:18 AS ui
+FROM --platform=${BUILDPLATFORM:-linux/arm64} node:25 AS ui
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -10,7 +10,7 @@ WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
 # NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@10 \
+RUN npm install --global npm@11 \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \
@@ -161,6 +161,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
         --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
     || exit 1
 
-LABEL org.opencontainers.image.source=https://github.com/photoview/photoview/
+# LABEL org.opencontainers.image.source=https://github.com/photoview/photoview/
 USER photoview
 ENTRYPOINT ["/app/photoview"]
+

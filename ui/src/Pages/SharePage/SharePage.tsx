@@ -72,6 +72,7 @@ export const SHARE_TOKEN_QUERY = gql`
             longitude
             latitude
           }
+          categories
         }
       }
     }

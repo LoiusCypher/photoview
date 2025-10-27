@@ -15,7 +15,7 @@ docker-compose.yml
 /storage
 /database
 /tmp
-
+_media_dir/
 _container_dir/
 
 # dependencies

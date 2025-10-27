@@ -55,6 +55,7 @@ func (p *ExifParser) ParseExif(mediaPath string) (*models.MediaEXIF, ParseFailur
 		"Model":            &retEXIF.Camera, // camera model
 		"Make":             &retEXIF.Maker,  // camera make
 		"LensModel":        &retEXIF.Lens,
+		"Categories":       &retEXIF.Categories,
 	} {
 		value, err := fileInfo.GetString(field)
 		if err != nil {

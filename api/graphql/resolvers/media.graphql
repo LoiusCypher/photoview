@@ -55,6 +55,8 @@ type MediaEXIF {
   exposureProgram: Int
   "GPS coordinates of where the image was taken"
   coordinates: Coordinates
+  "Categories as set by Digikam"
+  categories: String
 }
 
 "Metadata specific to video media"

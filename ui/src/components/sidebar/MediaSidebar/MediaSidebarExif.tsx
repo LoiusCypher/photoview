@@ -40,6 +40,10 @@ const ExifDetails = ({ media }: ExifDetailsProps) => {
       }
     }, {} as { [key: string]: string | number })
 
+    if (exif.categories && String(exif.categories).trim().length > 0) {
+      exif.categories = String(exif.categories).trim();
+    }
+
     if (exif.dateShot && String(exif.dateShot).trim().length > 0) {
       exif.dateShot = String(exif.dateShot).trim();
       const dateString = String(exif.dateShot);
@@ -154,6 +158,7 @@ const exifNameLookup = (t: TranslationFn): { [key: string]: string } => ({
   focalLength: t('sidebar.media.exif.name.focal_length', 'Focal length'),
   flash: t('sidebar.media.exif.name.flash', 'Flash'),
   coordinates: t('sidebar.media.exif.name.coordinates', 'Coordinates'),
+  categories: t('sidebar.media.exif.name.categories', 'Categories'),
 })
 
 // From https://exiftool.org/TagNames/EXIF.html

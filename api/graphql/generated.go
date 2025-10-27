@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 	MediaEXIF struct {
 		Aperture        func(childComplexity int) int
 		Camera          func(childComplexity int) int
+		Categories      func(childComplexity int) int
 		Coordinates     func(childComplexity int) int
 		DateShot        func(childComplexity int) int
 		Description     func(childComplexity int) int
@@ -693,6 +694,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.MediaEXIF.Camera(childComplexity), true
+	case "MediaEXIF.categories":
+		if e.complexity.MediaEXIF.Categories == nil {
+			break
+		}
+
+		return e.complexity.MediaEXIF.Categories(childComplexity), true
 	case "MediaEXIF.coordinates":
 		if e.complexity.MediaEXIF.Coordinates == nil {
 			break
@@ -3654,6 +3661,8 @@ func (ec *executionContext) fieldContext_Media_exif(_ context.Context, field gra
 				return ec.fieldContext_MediaEXIF_exposureProgram(ctx, field)
 			case "coordinates":
 				return ec.fieldContext_MediaEXIF_coordinates(ctx, field)
+			case "categories":
+				return ec.fieldContext_MediaEXIF_categories(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MediaEXIF", field.Name)
 		},
@@ -4153,6 +4162,35 @@ func (ec *executionContext) _MediaEXIF_camera(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_MediaEXIF_camera(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MediaEXIF",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MediaEXIF_categories(ctx context.Context, field graphql.CollectedField, obj *models.MediaEXIF) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MediaEXIF_categories,
+		func(ctx context.Context) (any, error) {
+			return obj.Categories, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_MediaEXIF_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MediaEXIF",
 		Field:      field,
@@ -11671,6 +11709,8 @@ func (ec *executionContext) _MediaEXIF(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = ec._MediaEXIF_exposureProgram(ctx, field, obj)
 		case "coordinates":
 			out.Values[i] = ec._MediaEXIF_coordinates(ctx, field, obj)
+		case "categories":
+			out.Values[i] = ec._MediaEXIF_categories(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
