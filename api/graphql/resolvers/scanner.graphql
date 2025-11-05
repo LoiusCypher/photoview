@@ -20,4 +20,8 @@ extend type Mutation {
 
   "Set max number of concurrent scanner jobs running at once"
   setScannerConcurrentWorkers(workers: Int!): Int! @isAdmin
+
+  "Wheter to watch media file modification time when scanning "
+  setEnableWatchModificationTime(enable: Boolean!): Boolean! @isAdmin
 }
+

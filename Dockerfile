@@ -142,6 +142,8 @@ RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
         zstd -k -f -19 -T0 --no-progress "$file"; \
     done' sh {} +
 
+COPY --from=ui /app /app_ui
+COPY --from=api /app /app_api
 WORKDIR /home/photoview
 
 ENV PHOTOVIEW_LISTEN_IP=127.0.0.1

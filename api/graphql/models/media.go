@@ -2,10 +2,14 @@ package models
 
 import (
 	"fmt"
+	"io"
 	"path"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+	"crypto/sha512"
+	"encoding/hex"
 
 	"github.com/photoview/photoview/api/utils"
 	"github.com/pkg/errors"
@@ -30,6 +34,7 @@ type Media struct {
 	SideCarHash     *string      `gorm:"unique"`
 	Faces           []*ImageFace `gorm:"constraint:OnDelete:CASCADE;"`
 	Blurhash        *string      `gorm:""`
+	MediaHash       string         `gorm:"not null;unique"`
 }
 
 func (Media) TableName() string {
@@ -39,6 +44,20 @@ func (Media) TableName() string {
 func (m *Media) BeforeSave(tx *gorm.DB) error {
 	// Update path hash
 	m.PathHash = MD5Hash(m.Path)
+
+	file, err := os.Open(m.Path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	hasher := sha512.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return err
+	}
+
+	hash := hasher.Sum(nil)
+	m.MediaHash = hex.EncodeToString(hash[:])
 
 	return nil
 }

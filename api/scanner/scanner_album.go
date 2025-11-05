@@ -92,16 +92,15 @@ func ScanAlbum(ctx scanner_task.TaskContext) error {
 	ctx = newCtx
 
 	// Scan for photos
-	albumMedia, err := findMediaForAlbum(ctx)
+	albumMedia, changedMedia, err := findMediaForAlbum(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "find media for album (%s): %s", ctx.GetAlbum().Path, err)
 	}
 
-	changedMedia := make([]*models.Media, 0)
-	for i, media := range albumMedia {
+	for i, media := range changedMedia {
 		mediaData := media_encoding.NewEncodeMediaData(media)
 
-		if err := scanMedia(ctx, media, &mediaData, i, len(albumMedia)); err != nil {
+		if err := scanMedia(ctx, media, &mediaData, i, len(changedMedia)); err != nil {
 			scanner_utils.ScannerError(ctx, "Error scanning media for album (%d) file (%s): %s\n", ctx.GetAlbum().ID, media.Path, err)
 		}
 	}
@@ -113,13 +112,14 @@ func ScanAlbum(ctx scanner_task.TaskContext) error {
 	return nil
 }
 
-func findMediaForAlbum(ctx scanner_task.TaskContext) ([]*models.Media, error) {
+func findMediaForAlbum(ctx scanner_task.TaskContext) ([]*models.Media, []*models.Media, error) {
 
 	albumMedia := make([]*models.Media, 0)
+	changedMedia := make([]*models.Media, 0)
 
 	dirContent, err := os.ReadDir(ctx.GetAlbum().Path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for _, item := range dirContent {
@@ -135,11 +135,11 @@ func findMediaForAlbum(ctx scanner_task.TaskContext) ([]*models.Media, error) {
 		if !item.IsDir() && !isDirSymlink && ctx.GetCache().IsPathMedia(mediaPath) {
 			itemInfo, err := item.Info()
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			skip, err := scanner_tasks.Tasks.MediaFound(ctx, itemInfo, mediaPath)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			if skip {
 				continue
@@ -156,6 +156,9 @@ func findMediaForAlbum(ctx scanner_task.TaskContext) ([]*models.Media, error) {
 				}
 
 				albumMedia = append(albumMedia, media)
+				if isNewMedia {
+					changedMedia = append(changedMedia, media)
+				}
 
 				return nil
 			})
@@ -168,7 +171,7 @@ func findMediaForAlbum(ctx scanner_task.TaskContext) ([]*models.Media, error) {
 
 	}
 
-	return albumMedia, nil
+	return albumMedia, changedMedia, nil
 }
 
 func processMedia(ctx scanner_task.TaskContext, mediaData *media_encoding.EncodeMediaData) ([]*models.MediaURL, error) {

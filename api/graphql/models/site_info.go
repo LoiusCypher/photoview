@@ -10,6 +10,7 @@ type SiteInfo struct {
 	InitialSetup         bool `gorm:"not null"`
 	PeriodicScanInterval int  `gorm:"not null"`
 	ConcurrentWorkers    int  `gorm:"not null"`
+	WatchModifiedTime    bool `gorm:"not null"`
 }
 
 func (SiteInfo) TableName() string {
@@ -21,11 +22,13 @@ func DefaultSiteInfo(db *gorm.DB) SiteInfo {
 	if db_drivers.SQLITE.MatchDatabase(db) {
 		defaultConcurrentWorkers = 1
 	}
+	defaultWatchModifiedTime := false
 
 	return SiteInfo{
 		InitialSetup:         true,
 		PeriodicScanInterval: 0,
 		ConcurrentWorkers:    defaultConcurrentWorkers,
+		WatchModifiedTime:    defaultWatchModifiedTime,
 	}
 }
 

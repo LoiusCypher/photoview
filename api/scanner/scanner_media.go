@@ -31,7 +31,25 @@ func ScanMedia(tx *gorm.DB, mediaPath string, albumId int, cache *scanner_cache.
 
 		if result.RowsAffected > 0 {
 			// log.Printf("Media already scanned: %s\n", mediaPath)
-			return media[0], false, nil
+			stat, err := os.Stat(mediaPath)
+			if err != nil {
+				// log.Printf("Media file should be there, but could not get stat: %s\n", mediaPath)
+				return nil, false, err
+			}
+			// log.Printf("Media mtime diff: %s\n", stat.ModTime().Sub(media[0].DateShot).Abs().String())
+			// Time threshold may be necessary to be increased for non unix systems
+			if stat.ModTime().Sub(media[0].DateShot).Abs().Milliseconds() < 1 {
+				// log.Printf("Media mtime did not change: %s\n", mediaPath)
+				return media[0], false, nil
+			}
+			// log.Printf("Media mtime changed: %s\n", stat.ModTime().Sub(media[0].DateShot).Abs().String())
+			// if err := tx.Where("ID = ?", media[0].ID).Delete(models.Media{}).Error; err != nil {
+			//if err := tx.Unscoped().Model(models.MediaEXIF{}).Where("ID = ?",media[0].ExifID).Delete(media).Error; err != nil {
+			if err := tx.Model(models.MediaEXIF{}).Where("ID = ?",media[0].ExifID).Delete(media).Error; err != nil {
+				// log.Printf("Media deletion from DB failed: %s\n", mediaPath)
+				return nil, false, err
+			}
+			log.Printf("Media.ID delete for update : %d\n", media[0].ID)
 		}
 	}
 

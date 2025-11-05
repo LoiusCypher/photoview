@@ -8,6 +8,8 @@ type SiteInfo {
   periodicScanInterval: Int! @isAdmin
   "How many max concurrent scanner jobs that should run at once"
   concurrentWorkers: Int! @isAdmin
+  "Whether or not scans should watch media file modified times"
+  watchModifiedTime: Boolean! @isAdmin
 }
 
 extend type Query {
