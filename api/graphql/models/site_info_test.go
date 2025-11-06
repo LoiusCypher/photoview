@@ -37,7 +37,7 @@ func TestSiteInfo(t *testing.T) {
 		InitialSetup:         false,
 		PeriodicScanInterval: 360,
 		ConcurrentWorkers:    10,
-		WatchModifiedTime:    false;
+		WatchModifiedTime:    false,
 	}, *site_info)
 
 }
