@@ -13,7 +13,7 @@ import (
 
 	"github.com/photoview/photoview/api/utils"
 	"github.com/pkg/errors"
-	//"gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 type Media struct {
@@ -41,9 +41,9 @@ func (Media) TableName() string {
 	return "media"
 }
 
-//func (m *Media) BeforeSave(tx *gorm.DB) error {
-	//// Update path hash
-	//m.PathHash = MD5Hash(m.Path)
+func (m *Media) BeforeSave(tx *gorm.DB) error {
+	// Update path hash
+	m.PathHash = MD5Hash(m.Path)
 
 	//file, err := os.Open(m.Path)
 	//if err != nil {
@@ -59,8 +59,8 @@ func (Media) TableName() string {
 	//hash := hasher.Sum(nil)
 	//m.MediaHash = hex.EncodeToString(hash[:])
 
-	//return nil
-//}
+	return nil
+}
 
 func (m *Media) Date() time.Time {
 	return m.DateShot
