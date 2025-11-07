@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import {
-  useMutation,
-  useQuery,
   gql,
-  useLazyQuery,
   DocumentNode,
 } from '@apollo/client'
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover } from '@headlessui/react'
@@ -34,11 +32,11 @@ import {
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 
-import { ReactComponent as LinkIcon } from './icons/shareLinkIcon.svg'
-import { ReactComponent as CopyIcon } from './icons/shareCopyIcon.svg'
-import { ReactComponent as DeleteIcon } from './icons/shareDeleteIcon.svg'
-import { ReactComponent as MoreIcon } from './icons/shareMoreIcon.svg'
-import { ReactComponent as AddIcon } from './icons/shareAddIcon.svg'
+import LinkIcon from './icons/shareLinkIcon.svg?react'
+import CopyIcon from './icons/shareCopyIcon.svg?react'
+import DeleteIcon from './icons/shareDeleteIcon.svg?react'
+import MoreIcon from './icons/shareMoreIcon.svg?react'
+import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import styled from 'styled-components'

@@ -2,18 +2,18 @@ package models
 
 import (
 	"fmt"
-	"io"
+	//"io"
 	"path"
-	"os"
+	//"os"
 	"strconv"
 	"strings"
 	"time"
-	"crypto/sha512"
-	"encoding/hex"
+	//"crypto/sha512"
+	//"encoding/hex"
 
 	"github.com/photoview/photoview/api/utils"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
+	//"gorm.io/gorm"
 )
 
 type Media struct {
@@ -41,15 +41,15 @@ func (Media) TableName() string {
 	return "media"
 }
 
-func (m *Media) BeforeSave(tx *gorm.DB) error {
-	// Update path hash
-	m.PathHash = MD5Hash(m.Path)
+//func (m *Media) BeforeSave(tx *gorm.DB) error {
+	//// Update path hash
+	//m.PathHash = MD5Hash(m.Path)
 
-	file, err := os.Open(m.Path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	//file, err := os.Open(m.Path)
+	//if err != nil {
+		//return err
+	//}
+	//defer file.Close()
 
 	//hasher := sha512.New()
 	//if _, err := io.Copy(hasher, file); err != nil {
@@ -59,8 +59,8 @@ func (m *Media) BeforeSave(tx *gorm.DB) error {
 	//hash := hasher.Sum(nil)
 	//m.MediaHash = hex.EncodeToString(hash[:])
 
-	return nil
-}
+	//return nil
+//}
 
 func (m *Media) Date() time.Time {
 	return m.DateShot

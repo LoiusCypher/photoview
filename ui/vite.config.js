@@ -11,6 +11,9 @@ export default defineConfig({
   server: {
     port: 1234,
   },
+  build: {
+    chunkSizeWarningLimit: 2000,
+  },
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },

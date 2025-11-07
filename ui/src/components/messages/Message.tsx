@@ -1,6 +1,9 @@
 import React from 'react'
 import { forwardRef } from 'react'
-import { ReactComponent as DismissIcon } from './icons/dismissIcon.svg'
+import svgr from "vite-plugin-svgr";
+
+//import { ReactComponent as DismissIcon } from './icons/dismissIcon.svg?react'
+import DismissIcon from './icons/dismissIcon.svg?react'
 
 export type MessageProps = {
   header: string

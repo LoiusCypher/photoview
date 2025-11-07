@@ -1,5 +1,5 @@
 ### Build UI ###
-FROM --platform=${BUILDPLATFORM:-linux/arm64} node:25 AS ui
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:25 AS ui
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -9,8 +9,9 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-# NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@11 \
+# RUN npm install node@25.1.0 -g -f 
+# RUN npm install glob@11.0.3 -g 
+RUN npm install --global npm@11.6.2 \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \
@@ -41,7 +42,7 @@ RUN export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"; \
     npm run build"$( [ "$NODE_ENV" != "production" ] && echo :dev )" -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
-FROM --platform=${BUILDPLATFORM:-linux/arm64} golang:1.25-trixie AS api
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.25-trixie AS api
 ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
@@ -142,8 +143,6 @@ RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
         zstd -k -f -19 -T0 --no-progress "$file"; \
     done' sh {} +
 
-COPY --from=ui /app /app_ui
-COPY --from=api /app /app_api
 WORKDIR /home/photoview
 
 ENV PHOTOVIEW_LISTEN_IP=127.0.0.1
@@ -163,7 +162,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
         --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
     || exit 1
 
-# LABEL org.opencontainers.image.source=https://github.com/photoview/photoview/
+LABEL org.opencontainers.image.source=https://github.com/photoview/photoview/
 USER photoview
 ENTRYPOINT ["/app/photoview"]
 

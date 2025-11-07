@@ -1,11 +1,11 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import gql from 'graphql-tag'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
 import { FavoriteCheckboxProps, FavoritesCheckbox } from '../album/AlbumFilter'
 
-import { ReactComponent as DateIcon } from './icons/date.svg'
+import DateIcon from './icons/date.svg?react'
 import { earliestMedia } from './__generated__/earliestMedia'
 
 const EARLIEST_MEDIA_QUERY = gql`
