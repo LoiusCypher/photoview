@@ -59,7 +59,7 @@ describe('Initial setup page', () => {
     )
 
     await waitFor(() => {
-      expect(history.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/')
     })
   })
 
@@ -75,7 +75,7 @@ describe('Initial setup page', () => {
     )
 
     await waitFor(() => {
-      expect(history.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/')
     })
   })
 })
