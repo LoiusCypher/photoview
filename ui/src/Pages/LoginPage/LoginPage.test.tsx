@@ -31,11 +31,11 @@ const authToken = vi.mocked(authentication.authToken)
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 1,
       errorElement: <>NotFound </>,
-      children: [
-        { path: "/", element: <Home /> },
-        { path: "/posts", element: <Posts /> },
-        { path: "/post/:postId", element: <PostPage /> },
-      ],
+//      children: [
+//        { path: "/", element: <Home /> },
+//        { path: "/posts", element: <Posts /> },
+//        { path: "/post/:postId", element: <PostPage /> },
+//      ],
     },
   )
 
