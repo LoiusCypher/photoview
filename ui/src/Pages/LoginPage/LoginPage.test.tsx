@@ -30,13 +30,13 @@ const authToken = vi.mocked(authentication.authToken)
       initialEntries: ['/', '/login'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 1,
+      errorElement: <NotFound />,
+      children: [
+        { path: "/", element: <Home /> },
+        { path: "/posts", element: <Posts /> },
+        { path: "/post/:postId", element: <PostPage /> },
+      ],
     },
-    errorElement: <NotFound />,
-    children: [
-      { path: "/", element: <Home /> },
-      { path: "/posts", element: <Posts /> },
-      { path: "/post/:postId", element: <PostPage /> },
-    ],
   )
 
 //  const router2 = createMemoryRouter(
