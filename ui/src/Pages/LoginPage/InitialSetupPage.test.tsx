@@ -11,7 +11,12 @@ vi.mock('../../helpers/authentication.ts')
 const authToken = vi.mocked(authentication.authToken)
 
   const history = createMemoryRouter(
-    [],
+    [
+      {
+        path: '/',
+        element: <>Navigated from Start</>,
+      },
+    ],
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/initialSetup'],
