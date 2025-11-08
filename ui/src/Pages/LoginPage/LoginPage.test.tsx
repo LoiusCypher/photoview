@@ -49,8 +49,6 @@ describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    //const { router } = setupMyTest('/')
-
     render(
       <MockedProvider mocks={[]}>
         <RouterProvider router={router}>
@@ -66,9 +64,6 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    //const { router } = setupMyTest('/login')
-          //<LoginPage />
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router}>
@@ -80,7 +75,7 @@ describe('Login page redirects', () => {
       expect(router.state.location.pathname).toBe('/initialSetup')
     })
   })
-
+})
 
 describe('Login page', () => {
   test('Render login form', () => {
