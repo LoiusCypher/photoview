@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import LoginPage from './LoginPage'
 import * as authentication from '../../helpers/authentication'
+import { createMemoryRouter, RouterProvider } from "react-router-dom"
 import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
 import { MockedProvider } from "@apollo/client/testing/react";
@@ -11,19 +12,30 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+  const history = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element: <>Navigated from Start</>,
+      },
+    ],
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/login'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+    }
+  )
+
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
-
     render(
       <MockedProvider mocks={[]}>
-        <HistoryRouter history={history}>
+        <RouterProvider router={history}>
           <LoginPage />
-        </HistoryRouter>
+        </RouterProvider>
       </MockedProvider>
     )
 
@@ -35,15 +47,11 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <HistoryRouter history={history}>
+        <RouterProvider router={history}>
           <LoginPage />
-        </HistoryRouter>
+        </RouterProvider>
       </MockedProvider>
     )
 
@@ -57,15 +65,11 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <HistoryRouter history={history}>
+        <RouterProvider router={history}>
           <LoginPage />
-        </HistoryRouter>
+        </RouterProvider>
       </MockedProvider>
     )
 
