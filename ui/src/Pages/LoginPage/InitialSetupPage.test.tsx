@@ -10,17 +10,26 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+  const FAKE_EVENT_2 = { name: "test event 2" };
+  const FAKE_EVENT_3 = { name: "test event 3" };
+  const routes = [
+    {
+      path: '/',
+      element: <>App </>,
+    },
+    {
+      path: '/login',
+      element: <>LoginPage </>,
+      loader: () => FAKE_EVENT_2,
+    },
+    {
+      path: '/initialSetup',
+      element: <InitialSetupPage />,
+      loader: () => FAKE_EVENT_3,
+    },
+  ];
   const router = createMemoryRouter(
-    [
-      {
-        path: '/',
-        element: <>Navigated from Start</>,
-      },
-      {
-        path: '/login',
-        element: <>LoginPage </>,
-      },
-    ],
+    routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/'],
@@ -36,7 +45,6 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router}>
-          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>,
     )
@@ -53,7 +61,6 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router}>
-          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
@@ -69,7 +76,6 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
         <RouterProvider router={router}>
-          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
