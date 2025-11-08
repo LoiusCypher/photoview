@@ -14,23 +14,34 @@ import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
 
+  const FAKE_EVENT_2 = { name: "test event 2" };
+  const FAKE_EVENT_3 = { name: "test event 3" };
+  const routes = [
+    {
+      path: '/',
+      element: <>App </>,
+    },
+    {
+      path: '/people',
+      element: <PeoplePage />,
+      loader: () => FAKE_EVENT_2,
+    },
+    {
+      path: '/initialSetup',
+      element: <>InitialSetupPage </>,
+      loader: () => FAKE_EVENT_3,
+    },
+  ];
+
   const router = createMemoryRouter(
-    [
-      {
-        path: '/',
-        element: <>App </>,
-      },
-      {
-        path: '/people',
-        element: <>People </>,
-      },
-    ],
+    routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/people'],
+      initialEntries: ['/', '/people'],
       // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
-    }
+      initialIndex: 1,
+      errorElement: <>NotFound </>,
+    },
   )
 
 describe('PeoplePage component', () => {
@@ -91,10 +102,8 @@ describe('PeoplePage component', () => {
 
   test('people page', async () => {
     render(
-//      <MemoryRouter initialEntries={['/people']}>
       <RouterProvider router={router}>
         <MockedProvider mocks={graphqlMocks} addTypename={false}>
-          <PeoplePage />
         </MockedProvider>
       </RouterProvider>
     )
