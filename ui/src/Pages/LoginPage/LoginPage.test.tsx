@@ -23,7 +23,7 @@ const authToken = vi.mocked(authentication.authToken)
     ],
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/', '/login'],
+      initialEntries: ['/'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
     }
@@ -42,7 +42,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/')
     })
   })
 
@@ -58,7 +58,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router.location.pathname).toBe('/initialSetup')
+      expect(router.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
