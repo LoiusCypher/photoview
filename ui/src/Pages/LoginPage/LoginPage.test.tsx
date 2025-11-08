@@ -10,6 +10,7 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+const setupMyTest = (url: string) => {
   const router = createMemoryRouter(
     [
       {
@@ -23,15 +24,23 @@ const authToken = vi.mocked(authentication.authToken)
     ],
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/'],
+      initialEntries: [url],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
     }
   )
 
+  render(<RouterProvider router={router} />)
+
+  // Objectify the router so we can explicitly pull when calling setupMyTest
+  return { router }
+}
+
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
+
+    const { router } = setupMyTest('/')
 
     render(
       <MockedProvider mocks={[]}>
@@ -48,6 +57,8 @@ describe('Login page redirects', () => {
 
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
+
+    const { router } = setupMyTest('/login')
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
@@ -66,6 +77,8 @@ describe('Login page redirects', () => {
 describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
+
+    const { router } = setupMyTest('/login')
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
