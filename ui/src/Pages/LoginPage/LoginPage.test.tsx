@@ -25,7 +25,7 @@ const authToken = vi.mocked(authentication.authToken)
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/', '/login'],
       // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 1,
+      initialIndex: 0,
     }
   )
 
@@ -51,14 +51,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(history.location.pathname).toBe('/initialSetup')
+      expect(router.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
@@ -69,7 +69,7 @@ describe('Login page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
