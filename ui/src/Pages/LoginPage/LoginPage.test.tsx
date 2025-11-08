@@ -62,6 +62,7 @@ describe('Login page redirects', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router}>
+          <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
@@ -84,6 +85,9 @@ describe('Login page', () => {
       </MockedProvider>
     )
 
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/')
+    })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Sign in')).toBeInTheDocument()
