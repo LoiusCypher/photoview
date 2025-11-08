@@ -22,11 +22,11 @@ const authToken = vi.mocked(authentication.authToken)
       element: <LoginPage />,
       loader: () => FAKE_EVENT_2,
     },
-    {
-      path: "/events/:id",
-      element: <CalendarEvent />,
-      loader: () => FAKE_EVENT,
-    },
+//    {
+//      path: "/events/:id",
+//      element: <CalendarEvent />,
+//      loader: () => FAKE_EVENT,
+//    },
   ];
 
 //const setupMyTest = (url: string) => {
