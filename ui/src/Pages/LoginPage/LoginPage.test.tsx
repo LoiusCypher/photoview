@@ -42,7 +42,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(router.location.pathname).toBe('/')
     })
   })
 
@@ -58,7 +58,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/initialSetup')
+      expect(router.location.pathname).toBe('/initialSetup')
     })
   })
 })
