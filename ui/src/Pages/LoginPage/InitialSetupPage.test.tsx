@@ -39,7 +39,6 @@ describe('Initial setup page', () => {
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>,
-      {wrapper: BrowserRouter}
     )
 
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
@@ -53,7 +52,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
@@ -69,7 +68,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
