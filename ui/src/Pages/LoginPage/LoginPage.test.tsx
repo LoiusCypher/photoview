@@ -29,24 +29,24 @@ const authToken = vi.mocked(authentication.authToken)
     },
   ];
 
-  const router = createMemoryRouter(
+  const router1 = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/', '/login'],
+      initialEntries: ['/'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
       errorElement: <>NotFound </>,
     },
   )
 
-  const routerL = createMemoryRouter(
+  const router2 = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/', '/login'],
+      initialEntries: ['/login'],
       // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 1,
+      initialIndex: 0,
       errorElement: <>NotFound </>,
     },
   )
@@ -55,9 +55,9 @@ const authToken = vi.mocked(authentication.authToken)
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/', '/login'],
+      initialEntries: ['/login'],
       // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 1,
+      initialIndex: 0,
       errorElement: <>NotFound </>,
     },
   )
@@ -68,13 +68,13 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router1}>
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(router1.state.location.pathname).toBe('/')
     })
   })
 
@@ -83,13 +83,13 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router3}>
+        <RouterProvider router={router2}>
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router3.state.location.pathname).toBe('/initialSetup')
+      expect(router2.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
@@ -100,14 +100,14 @@ describe('Login page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={routerL}>
+        <RouterProvider router={router3}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(routerL.state.location.pathname).toBe('/')
+      expect(router3.state.location.pathname).toBe('/')
     })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
