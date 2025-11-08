@@ -73,8 +73,8 @@ describe('Login page redirects', () => {
   })
 })
 
-describe('Login page', async () => {
-  test('Render login form', () => {
+describe('Login page', () => {
+  test('Render login form', async () => {
     authToken.mockImplementation(() => null)
 
     render(

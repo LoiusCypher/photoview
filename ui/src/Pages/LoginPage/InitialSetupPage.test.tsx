@@ -40,16 +40,20 @@ const authToken = vi.mocked(authentication.authToken)
   )
 
 describe('Initial setup page', () => {
-  test('Render initial setup form', () => {
+  test('Render initial setup form', async () => {
     authToken.mockImplementation(() => null)
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router}>
+          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>,
     )
 
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/')
+    })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
     expect(screen.getByLabelText('Photo path')).toBeInTheDocument()
