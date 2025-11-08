@@ -1,7 +1,7 @@
 import React from 'react'
 import { MockedProvider } from "@apollo/client/testing/react";
 import { render, screen, waitFor } from '@testing-library/react'
-import { createMemoryRouter, createBrowserRouter, RouterProvider } from "react-router-dom"
+import { createMemoryRouter, BrowserRouter, RouterProvider } from "react-router-dom"
 import * as authentication from '../../helpers/authentication'
 import InitialSetupPage from './InitialSetupPage'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
@@ -25,12 +25,9 @@ const authToken = vi.mocked(authentication.authToken)
     }
   )
 
-
-// =============================================================================
 describe('Initial setup page', () => {
   test('Render initial setup form', () => {
     authToken.mockImplementation(() => null)
-
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
