@@ -44,7 +44,7 @@ const authToken = vi.mocked(authentication.authToken)
       },
       {
         path: '/initialSetup',
-        element: <InitialSetupPage />,
+        element: <>InitialSetupPage </>,
       },
     ],
     {
