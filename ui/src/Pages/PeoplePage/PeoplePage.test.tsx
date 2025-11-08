@@ -1,6 +1,3 @@
-import * as authentication from '../../helpers/authentication'
-import { mockInitialSetupGraphql } from './loginTestHelpers'
-
 import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import {
@@ -22,6 +19,10 @@ vi.mock('../../hooks/useScrollPagination')
       {
         path: '/',
         element: <>App </>,
+      },
+      {
+        path: '/people',
+        element: <>People </>,
       },
     ],
     {
