@@ -9,9 +9,9 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-# RUN npm install node@25.1.0 -g -f 
-# RUN npm install glob@11.0.3 -g 
-RUN npm install --global npm@11.6.2 \
+# RUN npm install node@25.1.0 -g -f  --no-audit --no-fund
+# RUN npm install glob@11.0.3 -g  --no-audit --no-fund
+RUN npm install --global npm@11.6.2 --no-audit --no-fund \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \
