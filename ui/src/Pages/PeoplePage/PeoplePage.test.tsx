@@ -1,3 +1,6 @@
+import * as authentication from '../../helpers/authentication'
+import { mockInitialSetupGraphql } from './loginTestHelpers'
+
 import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import {
@@ -8,10 +11,26 @@ import {
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
 import { MockedProvider } from "@apollo/client/testing/react";
-import { MemoryRouter } from 'react-router'
+//import { MemoryRouter } from 'react-router'
+import { createMemoryRouter, BrowserRouter, RouterProvider } from "react-router-dom"
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
+
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element: <>App </>,
+      },
+    ],
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/people'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+    }
+  )
 
 describe('PeoplePage component', () => {
   const graphqlMocks = [
@@ -71,11 +90,12 @@ describe('PeoplePage component', () => {
 
   test('people page', async () => {
     render(
-      <MemoryRouter initialEntries={['/people']}>
+//      <MemoryRouter initialEntries={['/people']}>
+      <RouterProvider router={router}>
         <MockedProvider mocks={graphqlMocks} addTypename={false}>
           <PeoplePage />
         </MockedProvider>
-      </MemoryRouter>
+      </RouterProvider>
     )
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()

@@ -16,11 +16,11 @@ const authToken = vi.mocked(authentication.authToken)
         path: '/',
         element: <>Navigated from Start</>,
       },
-    ],
       {
         path: '/login',
         element: <>LoginPage </>,
       },
+    ],
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/'],
