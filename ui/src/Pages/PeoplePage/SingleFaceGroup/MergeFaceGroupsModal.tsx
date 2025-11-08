@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions } from '@apollo/client'
+import { gql } from '@apollo/client';
+import type { PureQueryOptions } from "@apollo/client/v4-migration";
 import { useMutation, useQuery } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

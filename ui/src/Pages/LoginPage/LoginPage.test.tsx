@@ -4,7 +4,7 @@ import LoginPage from './LoginPage'
 import * as authentication from '../../helpers/authentication'
 import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from "@apollo/client/testing/react";
 import { mockInitialSetupGraphql } from './loginTestHelpers'
 
 vi.mock('../../helpers/authentication.ts')

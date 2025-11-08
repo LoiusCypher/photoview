@@ -7,7 +7,7 @@ import {
   MY_FACES_QUERY,
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from "@apollo/client/testing/react";
 import { MemoryRouter } from 'react-router'
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 

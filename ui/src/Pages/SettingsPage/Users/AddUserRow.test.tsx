@@ -4,7 +4,7 @@ import AddUserRow, {
   CREATE_USER_MUTATION,
   USER_ADD_ROOT_PATH_MUTATION,
 } from './AddUserRow'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from "@apollo/client/testing/react";
 
 const gqlMock = [
   {

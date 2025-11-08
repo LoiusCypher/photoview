@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
-import {
-  FetchResult,
-  gql,
-  MutationFunctionOptions,
-} from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { gql, ApolloLink } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
 import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
@@ -46,9 +42,9 @@ interface UserRowState extends settingsUsersQuery_user {
 }
 
 type ApolloMutationFn<MutationType, VariablesType> = (
-  options?: MutationFunctionOptions<MutationType, VariablesType>
+  options?: useMutation.MutationFunctionOptions<MutationType, VariablesType>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => Promise<FetchResult<MutationType, any, any>>
+) => Promise<ApolloLink.Result<MutationType, any>>
 
 export type UserRowChildProps = {
   user: settingsUsersQuery_user

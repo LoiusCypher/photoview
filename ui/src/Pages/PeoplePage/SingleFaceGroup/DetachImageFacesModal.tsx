@@ -1,4 +1,5 @@
-import { BaseMutationOptions, gql} from '@apollo/client'
+import { gql } from '@apollo/client';
+import type { BaseMutationOptions } from "@apollo/client/v4-migration";
 import { useMutation } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

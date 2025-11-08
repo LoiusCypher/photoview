@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import MergeFaceGroupsModal, { MergeFaceGroupsModalState } from './MergeFaceGroupsModal'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from "@apollo/client/testing/react";
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 

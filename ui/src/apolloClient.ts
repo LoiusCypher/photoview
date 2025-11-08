@@ -1,14 +1,15 @@
 import {
   InMemoryCache,
   ApolloClient,
-  split,
   ApolloLink,
   HttpLink,
   ServerError,
   FieldMergeFunction,
 } from '@apollo/client'
+import { Defer20220824Handler } from "@apollo/client/incremental";
+import { LocalState } from "@apollo/client/local-state";
 import { getMainDefinition } from '@apollo/client/utilities'
-import { onError } from '@apollo/client/link/error'
+import { ErrorLink } from '@apollo/client/link/error'
 import { WebSocketLink } from '@apollo/client/link/ws'
 
 import urlJoin from 'url-join'
@@ -40,7 +41,7 @@ const wsLink = new WebSocketLink({
   // credentials: 'include',
 })
 
-const link = split(
+const link = ApolloLink.split(
   // split based on operation type
   ({ query }) => {
     const definition = getMainDefinition(query)
@@ -53,7 +54,7 @@ const link = split(
   httpLink
 )
 
-const linkError = onError(({ graphQLErrors, networkError }) => {
+const linkError = new ErrorLink(({ graphQLErrors, networkError }) => {
   const errorMessages = []
 
   const formatPath = (path: readonly (string | number)[] | undefined) =>
@@ -179,7 +180,41 @@ const memoryCache = new InMemoryCache({
 const client = new ApolloClient({
   // link: ApolloLink.from([linkError, authLink.concat(link)]),
   link: ApolloLink.from([linkError, link]),
+
   cache: memoryCache,
+
+  /*
+  Inserted by Apollo Client 3->4 migration codemod.
+  If you are not using the `@client` directive in your application,
+  you can safely remove this option.
+  */
+  localState: new LocalState({}),
+
+  /*
+  Inserted by Apollo Client 3->4 migration codemod.
+  If you are not using the `@defer` directive in your application,
+  you can safely remove this option.
+  */
+  incrementalHandler: new Defer20220824Handler()
 })
 
 export default client
+
+/*
+Start: Inserted by Apollo Client 3->4 migration codemod.
+Copy the contents of this block into a `.d.ts` file in your project to enable correct response types in your custom links.
+If you do not use the `@defer` directive in your application, you can safely remove this block.
+*/
+
+
+import "@apollo/client";
+import { Defer20220824Handler } from "@apollo/client/incremental";
+
+declare module "@apollo/client" {
+  export interface TypeOverrides extends Defer20220824Handler.TypeOverrides {}
+}
+
+/*
+End: Inserted by Apollo Client 3->4 migration codemod.
+*/
+

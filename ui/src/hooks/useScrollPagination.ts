@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from '@apollo/client'
+import { ObservableQuery } from '@apollo/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface ScrollPaginationArgs<D> {
@@ -6,7 +6,7 @@ interface ScrollPaginationArgs<D> {
   data: D | undefined
   fetchMore: (args: {
     variables: { offset: number }
-  }) => Promise<ApolloQueryResult<D>>
+  }) => Promise<ObservableQuery.Result<D>>
   getItems: (data: D) => unknown[]
 }
 
