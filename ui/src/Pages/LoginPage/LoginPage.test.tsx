@@ -21,6 +21,10 @@ const authToken = vi.mocked(authentication.authToken)
       element: <LoginPage />,
       loader: () => FAKE_EVENT_2,
     },
+    {
+      path: '/initialSetup',
+      element: <>InitialSetupPage </>,
+    },
   ];
 
   const router = createMemoryRouter(
@@ -68,7 +72,6 @@ describe('Login page redirects', () => {
 
     //const { router } = setupMyTest('/')
 
- //         <LoginPage />
     render(
       <MockedProvider mocks={[]}>
         <RouterProvider router={router}>
@@ -81,24 +84,24 @@ describe('Login page redirects', () => {
     })
   })
 
-//  test('Initial setup redirect', async () => {
-//    authToken.mockImplementation(() => null)
-//
-//    //const { router } = setupMyTest('/login')
-//
-//    render(
-//      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-//        <RouterProvider router={router2}>
-//          <LoginPage />
-//        </RouterProvider>
-//      </MockedProvider>
-//    )
-//
-//    await waitFor(() => {
-//      expect(router.state.location.pathname).toBe('/initialSetup')
-//    })
-//  })
-})
+  test('Initial setup redirect', async () => {
+    authToken.mockImplementation(() => null)
+
+    //const { router } = setupMyTest('/login')
+          //<LoginPage />
+
+    render(
+      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
+        <RouterProvider router={router2}>
+        </RouterProvider>
+      </MockedProvider>
+    )
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/initialSetup')
+    })
+  })
+
 
 //describe('Login page', () => {
 //  test('Render login form', () => {
