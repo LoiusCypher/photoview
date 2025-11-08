@@ -11,7 +11,6 @@ vi.mock('../../helpers/authentication.ts')
 const authToken = vi.mocked(authentication.authToken)
 
   const FAKE_EVENT_2 = { name: "test event 2" };
-  const FAKE_EVENT = { name: "test event" };
   const routes = [
     {
       path: '/',
@@ -22,29 +21,17 @@ const authToken = vi.mocked(authentication.authToken)
       element: <LoginPage />,
       loader: () => FAKE_EVENT_2,
     },
-//    {
-//      path: "/events/:id",
-//      element: <CalendarEvent />,
-//      loader: () => FAKE_EVENT,
-//    },
   ];
 
-//const setupMyTest = (url: string) => {
   const router = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/'],
+      initialEntries: ['/', '/login'],
       // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
+      initialIndex: 1,
     }
   )
-
-  //render(<RouterProvider router={router} />)
-
-  // Objectify the router so we can explicitly pull when calling setupMyTest
-  //return { router }
-//}
 
   const router2 = createMemoryRouter(
     [
