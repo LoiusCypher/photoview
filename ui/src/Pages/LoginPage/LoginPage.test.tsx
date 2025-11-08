@@ -10,7 +10,7 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-const setupMyTest = (url: string) => {
+//const setupMyTest = (url: string) => {
   const router = createMemoryRouter(
     [
       {
@@ -24,23 +24,42 @@ const setupMyTest = (url: string) => {
     ],
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: [url],
+      initialEntries: ['/'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
     }
   )
 
-  render(<RouterProvider router={router} />)
+  //render(<RouterProvider router={router} />)
 
   // Objectify the router so we can explicitly pull when calling setupMyTest
-  return { router }
-}
+  //return { router }
+//}
+
+  const router2 = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element: <>App </>,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+    ],
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/login'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+    }
+  )
 
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const { router } = setupMyTest('/')
+    //const { router } = setupMyTest('/')
 
     render(
       <MockedProvider mocks={[]}>
@@ -58,11 +77,11 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const { router } = setupMyTest('/login')
+    //const { router } = setupMyTest('/login')
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router2}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -78,11 +97,11 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const { router } = setupMyTest('/login')
+    //const { router } = setupMyTest('/login')
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router2}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
