@@ -28,6 +28,7 @@ const authToken = vi.mocked(authentication.authToken)
       loader: () => FAKE_EVENT_3,
     },
   ];
+
   const router = createMemoryRouter(
     routes,
     {

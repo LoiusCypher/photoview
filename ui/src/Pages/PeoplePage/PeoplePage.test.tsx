@@ -8,8 +8,7 @@ import {
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
 import { MockedProvider } from "@apollo/client/testing/react";
-//import { MemoryRouter } from 'react-router'
-import { createMemoryRouter, BrowserRouter, RouterProvider } from "react-router-dom"
+import { createMemoryRouter, RouterProvider } from "react-router-dom"
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
@@ -224,9 +223,9 @@ describe('FaceDetails component', () => {
     ]
     render(
       <MockedProvider mocks={graphqlMocks} addTypename={false}>
-        <MemoryRouter>
+        <RouterProvider router={router}>
           <FaceGroup group={faceGroup} />
-        </MemoryRouter>
+        </RouterProvider>
       </MockedProvider>
     )
 
@@ -251,9 +250,9 @@ describe('FaceDetails component', () => {
   test('cancel add label to face group', () => {
     render(
       <MockedProvider mocks={[]} addTypename={false}>
-        <MemoryRouter>
+        <RouterProvider router={router}>
           <FaceGroup group={faceGroup} />
-        </MemoryRouter>
+        </RouterProvider>
       </MockedProvider>
     )
 
