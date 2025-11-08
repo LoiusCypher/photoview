@@ -6,8 +6,6 @@ package resolvers
 
 import (
 	api "github.com/photoview/photoview/api/graphql"
-	//api "github.com/LoiusCypher/photoview/api/graphql"
-	//api "../../../api/graphql"
 )
 
 // Mutation returns api.MutationResolver implementation.

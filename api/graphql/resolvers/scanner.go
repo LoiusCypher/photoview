@@ -106,3 +106,7 @@ func (r *mutationResolver) SetScannerConcurrentWorkers(ctx context.Context, work
 	return siteInfo.ConcurrentWorkers, nil
 }
 
+// SetEnableWatchModificationTime is the resolver for the setEnableWatchModificationTime field.
+func (r *mutationResolver) SetEnableWatchModificationTime(ctx context.Context, enable bool) (bool, error) {
+	panic(fmt.Errorf("not implemented: SetEnableWatchModificationTime - setEnableWatchModificationTime"))
+}

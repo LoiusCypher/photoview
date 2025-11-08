@@ -153,30 +153,31 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AuthorizeUser               func(childComplexity int, username string, password string) int
-		ChangeUserPreferences       func(childComplexity int, language *string) int
-		CombineFaceGroups           func(childComplexity int, destinationFaceGroupID int, sourceFaceGroupIDs []int) int
-		CreateUser                  func(childComplexity int, username string, password *string, admin bool) int
-		DeleteShareToken            func(childComplexity int, token string) int
-		DeleteUser                  func(childComplexity int, id int) int
-		DetachImageFaces            func(childComplexity int, imageFaceIDs []int) int
-		FavoriteMedia               func(childComplexity int, mediaID int, favorite bool) int
-		InitialSetupWizard          func(childComplexity int, username string, password string, rootPath string) int
-		MoveImageFaces              func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
-		ProtectShareToken           func(childComplexity int, token string, password *string) int
-		RecognizeUnlabeledFaces     func(childComplexity int) int
-		ResetAlbumCover             func(childComplexity int, albumID int) int
-		ScanAll                     func(childComplexity int) int
-		ScanUser                    func(childComplexity int, userID int) int
-		SetAlbumCover               func(childComplexity int, coverID int) int
-		SetFaceGroupLabel           func(childComplexity int, faceGroupID int, label *string) int
-		SetPeriodicScanInterval     func(childComplexity int, interval int) int
-		SetScannerConcurrentWorkers func(childComplexity int, workers int) int
-		ShareAlbum                  func(childComplexity int, albumID int, expire *time.Time, password *string) int
-		ShareMedia                  func(childComplexity int, mediaID int, expire *time.Time, password *string) int
-		UpdateUser                  func(childComplexity int, id int, username *string, password *string, admin *bool) int
-		UserAddRootPath             func(childComplexity int, id int, rootPath string) int
-		UserRemoveRootAlbum         func(childComplexity int, userID int, albumID int) int
+		AuthorizeUser                  func(childComplexity int, username string, password string) int
+		ChangeUserPreferences          func(childComplexity int, language *string) int
+		CombineFaceGroups              func(childComplexity int, destinationFaceGroupID int, sourceFaceGroupIDs []int) int
+		CreateUser                     func(childComplexity int, username string, password *string, admin bool) int
+		DeleteShareToken               func(childComplexity int, token string) int
+		DeleteUser                     func(childComplexity int, id int) int
+		DetachImageFaces               func(childComplexity int, imageFaceIDs []int) int
+		FavoriteMedia                  func(childComplexity int, mediaID int, favorite bool) int
+		InitialSetupWizard             func(childComplexity int, username string, password string, rootPath string) int
+		MoveImageFaces                 func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
+		ProtectShareToken              func(childComplexity int, token string, password *string) int
+		RecognizeUnlabeledFaces        func(childComplexity int) int
+		ResetAlbumCover                func(childComplexity int, albumID int) int
+		ScanAll                        func(childComplexity int) int
+		ScanUser                       func(childComplexity int, userID int) int
+		SetAlbumCover                  func(childComplexity int, coverID int) int
+		SetEnableWatchModificationTime func(childComplexity int, enable bool) int
+		SetFaceGroupLabel              func(childComplexity int, faceGroupID int, label *string) int
+		SetPeriodicScanInterval        func(childComplexity int, interval int) int
+		SetScannerConcurrentWorkers    func(childComplexity int, workers int) int
+		ShareAlbum                     func(childComplexity int, albumID int, expire *time.Time, password *string) int
+		ShareMedia                     func(childComplexity int, mediaID int, expire *time.Time, password *string) int
+		UpdateUser                     func(childComplexity int, id int, username *string, password *string, admin *bool) int
+		UserAddRootPath                func(childComplexity int, id int, rootPath string) int
+		UserRemoveRootAlbum            func(childComplexity int, userID int, albumID int) int
 	}
 
 	Notification struct {
@@ -238,6 +239,7 @@ type ComplexityRoot struct {
 		FaceDetectionEnabled func(childComplexity int) int
 		InitialSetup         func(childComplexity int) int
 		PeriodicScanInterval func(childComplexity int) int
+		WatchModifiedTime    func(childComplexity int) int
 	}
 
 	Subscription struct {
@@ -324,6 +326,7 @@ type MutationResolver interface {
 	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
 	SetPeriodicScanInterval(ctx context.Context, interval int) (int, error)
 	SetScannerConcurrentWorkers(ctx context.Context, workers int) (int, error)
+	SetEnableWatchModificationTime(ctx context.Context, enable bool) (bool, error)
 	ShareAlbum(ctx context.Context, albumID int, expire *time.Time, password *string) (*models.ShareToken, error)
 	ShareMedia(ctx context.Context, mediaID int, expire *time.Time, password *string) (*models.ShareToken, error)
 	DeleteShareToken(ctx context.Context, token string) (*models.ShareToken, error)
@@ -964,6 +967,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.SetAlbumCover(childComplexity, args["coverID"].(int)), true
+	case "Mutation.setEnableWatchModificationTime":
+		if e.complexity.Mutation.SetEnableWatchModificationTime == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setEnableWatchModificationTime_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetEnableWatchModificationTime(childComplexity, args["enable"].(bool)), true
 	case "Mutation.setFaceGroupLabel":
 		if e.complexity.Mutation.SetFaceGroupLabel == nil {
 			break
@@ -1376,6 +1390,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.SiteInfo.PeriodicScanInterval(childComplexity), true
+	case "SiteInfo.watchModifiedTime":
+		if e.complexity.SiteInfo.WatchModifiedTime == nil {
+			break
+		}
+
+		return e.complexity.SiteInfo.WatchModifiedTime(childComplexity), true
 
 	case "Subscription.notification":
 		if e.complexity.Subscription.Notification == nil {
@@ -1913,6 +1933,17 @@ func (ec *executionContext) field_Mutation_setAlbumCover_args(ctx context.Contex
 		return nil, err
 	}
 	args["coverID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setEnableWatchModificationTime_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "enable", ec.unmarshalNBoolean2bool)
+	if err != nil {
+		return nil, err
+	}
+	args["enable"] = arg0
 	return args, nil
 }
 
@@ -4174,35 +4205,6 @@ func (ec *executionContext) fieldContext_MediaEXIF_camera(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _MediaEXIF_categories(ctx context.Context, field graphql.CollectedField, obj *models.MediaEXIF) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_MediaEXIF_categories,
-		func(ctx context.Context) (any, error) {
-			return obj.Categories, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_MediaEXIF_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MediaEXIF",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _MediaEXIF_maker(ctx context.Context, field graphql.CollectedField, obj *models.MediaEXIF) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4494,6 +4496,35 @@ func (ec *executionContext) fieldContext_MediaEXIF_coordinates(_ context.Context
 				return ec.fieldContext_Coordinates_longitude(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Coordinates", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MediaEXIF_categories(ctx context.Context, field graphql.CollectedField, obj *models.MediaEXIF) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MediaEXIF_categories,
+		func(ctx context.Context) (any, error) {
+			return obj.Categories, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_MediaEXIF_categories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MediaEXIF",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5381,6 +5412,60 @@ func (ec *executionContext) fieldContext_Mutation_setScannerConcurrentWorkers(ct
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_setScannerConcurrentWorkers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setEnableWatchModificationTime(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setEnableWatchModificationTime,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetEnableWatchModificationTime(ctx, fc.Args["enable"].(bool))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setEnableWatchModificationTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setEnableWatchModificationTime_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7162,6 +7247,8 @@ func (ec *executionContext) fieldContext_Query_siteInfo(_ context.Context, field
 				return ec.fieldContext_SiteInfo_periodicScanInterval(ctx, field)
 			case "concurrentWorkers":
 				return ec.fieldContext_SiteInfo_concurrentWorkers(ctx, field)
+			case "watchModifiedTime":
+				return ec.fieldContext_SiteInfo_watchModifiedTime(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SiteInfo", field.Name)
 		},
@@ -8200,6 +8287,48 @@ func (ec *executionContext) fieldContext_SiteInfo_concurrentWorkers(_ context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SiteInfo_watchModifiedTime(ctx context.Context, field graphql.CollectedField, obj *models.SiteInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SiteInfo_watchModifiedTime,
+		func(ctx context.Context) (any, error) {
+			return obj.WatchModifiedTime, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, obj, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SiteInfo_watchModifiedTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SiteInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11891,6 +12020,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "setEnableWatchModificationTime":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setEnableWatchModificationTime(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "shareAlbum":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_shareAlbum(ctx, field)
@@ -12725,6 +12861,11 @@ func (ec *executionContext) _SiteInfo(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "concurrentWorkers":
 			out.Values[i] = ec._SiteInfo_concurrentWorkers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "watchModifiedTime":
+			out.Values[i] = ec._SiteInfo_watchModifiedTime(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

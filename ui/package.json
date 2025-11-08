@@ -38,6 +38,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "^5.1.35",
     "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/coverage-v8": "^4.0.8",
     "autoprefixer": "^10.4.21",
     "blurhash": "^2.0.5",
     "classnames": "^2.5.1",
