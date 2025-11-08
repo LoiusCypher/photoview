@@ -10,11 +10,11 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const routes = createMemoryRouter(
+  const router = createMemoryRouter(
     [
       {
         path: '/',
-        element: <>Navigated from Start</>,
+        element: <App />,
       },
       {
         path: '/login',
@@ -35,14 +35,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(history.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/')
     })
   })
 
