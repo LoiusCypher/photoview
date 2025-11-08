@@ -79,6 +79,7 @@ describe('Login page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
         <RouterProvider router={router}>
+          <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
