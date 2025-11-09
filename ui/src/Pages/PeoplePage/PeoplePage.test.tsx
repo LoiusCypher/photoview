@@ -8,7 +8,7 @@ import {
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
 import { MockedProvider } from "@apollo/client/testing/react";
-import { createMemoryRouter, RouterProvider } from "react-router-dom"
+import { createMemoryRouter, RouterProvider } from "react-router"
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')

@@ -1,7 +1,7 @@
 import React from 'react'
 import { MockedProvider } from "@apollo/client/testing/react";
 import { render, screen, waitFor } from '@testing-library/react'
-import { createMemoryRouter, BrowserRouter, RouterProvider } from "react-router-dom"
+import { createMemoryRouter, BrowserRouter, RouterProvider } from "react-router"
 import * as authentication from '../../helpers/authentication'
 import InitialSetupPage from './InitialSetupPage'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
