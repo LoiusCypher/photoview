@@ -70,20 +70,19 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={routerRoot}>
+        <RouterProvider router={routerLogin}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(routerRoot.state.location.pathname).toBe('/initialSetup')
+      expect(routerLogin.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
 
 describe('Login page', () => {
-//  test('Render login form', async () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
