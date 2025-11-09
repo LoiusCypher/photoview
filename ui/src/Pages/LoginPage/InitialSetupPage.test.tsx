@@ -13,7 +13,7 @@ const authToken = vi.mocked(authentication.authToken)
   const routes = [
     {
       path: '/',
-      element: <LoginPage />,
+      element: <>Root </>,
       children: [
         {
           path: 'login',
@@ -49,7 +49,7 @@ describe('Initial setup page', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/initialSetup')
+      expect(router1.state.location.pathname).toBe('/initialSetup')
     })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
@@ -68,7 +68,7 @@ describe('Initial setup page', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(router1.state.location.pathname).toBe('/')
     })
   })
 
@@ -83,7 +83,7 @@ describe('Initial setup page', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(router1.state.location.pathname).toBe('/')
     })
   })
 })
