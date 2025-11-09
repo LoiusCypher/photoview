@@ -107,7 +107,7 @@ describe('Login page', () => {
     )
 
     await waitFor(() => {
-      expect(router3.state.location.pathname).toBe('/')
+      expect(router3.state.location.pathname).toBe('/login')
     })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
