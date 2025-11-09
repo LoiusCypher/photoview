@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
 

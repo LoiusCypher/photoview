@@ -7,8 +7,8 @@ import { COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 
 // Mock useNavigate before any imports that use it
 const navigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-    const actual: object = await vi.importActual('react-router-dom')
+vi.mock('react-router', async () => {
+    const actual: object = await vi.importActual('react-router')
     return { ...actual, useNavigate: () => navigate }
 })
 

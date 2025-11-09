@@ -1,5 +1,5 @@
 import React from 'react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { MockedProvider } from "@apollo/client/testing/react";
 
 import {

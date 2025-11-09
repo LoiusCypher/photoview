@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'

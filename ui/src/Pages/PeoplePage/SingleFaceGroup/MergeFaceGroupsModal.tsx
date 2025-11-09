@@ -3,7 +3,7 @@ import type { PureQueryOptions } from "@apollo/client/v4-migration";
 import { useMutation, useQuery } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
 import Modal, { ModalAction, ModalProps } from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'

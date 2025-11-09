@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react'
 
 import * as authentication from '../../helpers/authentication'
 import { ADMIN_QUERY } from './Layout'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import MainMenu, { MAPBOX_QUERY } from './MainMenu'
 
 vi.mock('../../helpers/authentication.ts')

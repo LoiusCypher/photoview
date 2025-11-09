@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'

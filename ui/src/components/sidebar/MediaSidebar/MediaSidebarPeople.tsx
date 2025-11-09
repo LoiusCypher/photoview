@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'

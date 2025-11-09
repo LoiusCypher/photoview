@@ -1,7 +1,7 @@
 import React from 'react'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router'
 import styled from 'styled-components'
 import {
   getSharePassword,

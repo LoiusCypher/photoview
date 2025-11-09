@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'

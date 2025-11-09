@@ -4,7 +4,7 @@ import { gql } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {
   searchQuery,
