@@ -38,7 +38,7 @@ const authToken = vi.mocked(authentication.authToken)
   )
 
 describe('Login page redirects', () => {
-  test('Auth token redirect', async () => {
+  test('Auth token redirect', () => {
     authToken.mockImplementation(() => 'some-token')
 
     render(
