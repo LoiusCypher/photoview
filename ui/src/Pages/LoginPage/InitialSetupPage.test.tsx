@@ -46,8 +46,8 @@ describe('Initial setup page', () => {
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router1} />
           <InitialSetupPage />
-        </RouterProvider/>
-      </MockedProvider>,
+        </RouterProvider>
+      </MockedProvider>
     )
 
     await waitFor(() => {

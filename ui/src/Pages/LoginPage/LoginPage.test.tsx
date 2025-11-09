@@ -28,18 +28,7 @@ const authToken = vi.mocked(authentication.authToken)
     },
   ];
 
-  const routerRoot = createMemoryRouter(
-    routes,
-    {
-      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/'],
-      // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
-      errorElement: <>NotFound </>,
-    },
-  )
-
-  const routerLogin = createMemoryRouter(
+  const router = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
@@ -56,12 +45,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={routerLogin} />
+        <RouterProvider router={router}>
+          <LoginPage />
+        </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(routerLogin.state.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/')
     })
   })
 
@@ -70,14 +61,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={routerLogin}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(routerLogin.state.location.pathname).toBe('/initialSetup')
+      expect(router.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
@@ -88,7 +79,7 @@ describe('Login page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={routerLogin}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
