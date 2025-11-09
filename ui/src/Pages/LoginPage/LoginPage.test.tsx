@@ -10,8 +10,6 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const FAKE_EVENT_2 = { name: "test event 2" };
-  const FAKE_EVENT_3 = { name: "test event 3" };
   const routes = [
     {
       path: '/',

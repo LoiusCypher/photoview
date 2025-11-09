@@ -10,26 +10,35 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const FAKE_EVENT_2 = { name: "test event 2" };
-  const FAKE_EVENT_3 = { name: "test event 3" };
   const routes = [
     {
       path: '/',
-      element: <>App </>,
-    },
-    {
-      path: '/login',
-      element: <>LoginPage </>,
-      loader: () => FAKE_EVENT_2,
-    },
-    {
-      path: '/initialSetup',
-      element: <InitialSetupPage />,
-      loader: () => FAKE_EVENT_3,
+      element: <LoginPage />,
+      children: [
+        {
+          path: 'login',
+          element: <>LoginPage </>,
+        },
+        {
+          path: 'initialSetup',
+          Component: <InitialSetupPage />,
+        },
+      ],
     },
   ];
 
-  const router = createMemoryRouter(
+  const router1 = createMemoryRouter(
+    routes,
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+      errorElement: <>NotFound </>,
+    },
+  )
+
+  const router1 = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
@@ -45,14 +54,12 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router}>
-          <InitialSetupPage />
-        </RouterProvider>
+        <RouterProvider router={router1} />
       </MockedProvider>,
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(router.state.location.pathname).toBe('/initialSetup')
     })
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
@@ -65,7 +72,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router1}>
         </RouterProvider>
       </MockedProvider>
     )
@@ -80,7 +87,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router1}>
         </RouterProvider>
       </MockedProvider>
     )
