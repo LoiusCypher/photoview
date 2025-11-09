@@ -31,13 +31,13 @@ describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryRouter( routes, {
+    const router = createMemoryRouter( routes, {
       initialEntries: ['/login'],
     })
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
