@@ -45,6 +45,8 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router1} />
+          <InitialSetupPage />
+        </RouterProvider/>
       </MockedProvider>,
     )
 
@@ -63,6 +65,7 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router1}>
+          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
@@ -78,6 +81,7 @@ describe('Initial setup page', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
         <RouterProvider router={router1}>
+          <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
