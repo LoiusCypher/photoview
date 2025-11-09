@@ -56,12 +56,12 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={routerRoot} />
+        <RouterProvider router={routerLogin} />
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(routerRoot.state.location.pathname).toBe('/')
+      expect(routerLogin.state.location.pathname).toBe('/')
     })
   })
 

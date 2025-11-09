@@ -16,51 +16,27 @@ vi.mock('../../hooks/useScrollPagination')
   const routes = [
     {
       path: '/',
-      element: <LoginPage />,
+      element: <>Root </>,
       //Component: <>App </>,
       children: [
         {
-          path: 'login',
+          path: 'people',
           Component: <PeoplePage />,
-        },
-        {
-          path: 'initialSetup',
-          element: <>InitialSetupPage </>,
         },
       ],
     },
   ];
 
-  const router1 = createMemoryRouter(
+  const router = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/'],
+      initialEntries: ['/people'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
       errorElement: <>NotFound </>,
     },
   )
-
-  const router2 = createMemoryRouter(
-  const FAKE_EVENT_2 = { name: "test event 2" };
-  const FAKE_EVENT_3 = { name: "test event 3" };
-  const routes = [
-    {
-      path: '/',
-      element: <>App </>,
-    },
-    {
-      path: '/people',
-      element: <PeoplePage />,
-      loader: () => FAKE_EVENT_2,
-    },
-    {
-      path: '/initialSetup',
-      element: <>InitialSetupPage </>,
-      loader: () => FAKE_EVENT_3,
-    },
-  ];
 
   const router = createMemoryRouter(
     routes,

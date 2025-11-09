@@ -31,7 +31,7 @@ const authToken = vi.mocked(authentication.authToken)
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/'],
+      initialEntries: ['/initialSetup'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
       errorElement: <>NotFound </>,
