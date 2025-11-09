@@ -28,7 +28,7 @@ const authToken = vi.mocked(authentication.authToken)
     },
   ];
 
-  const router1 = createMemoryRouter(
+  const routerRoot = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
@@ -39,19 +39,7 @@ const authToken = vi.mocked(authentication.authToken)
     },
   )
 
-  const router2 = createMemoryRouter(
-    routes,
-    {
-      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      //initialEntries: ['/login'],
-      initialEntries: ['/'],
-      // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
-      errorElement: <>NotFound </>,
-    },
-  )
-
-  const router3 = createMemoryRouter(
+  const routerLogin = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
@@ -68,12 +56,12 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router1} />
+        <RouterProvider router={routerRoot} />
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router1.state.location.pathname).toBe('/')
+      expect(routerRoot.state.location.pathname).toBe('/')
     })
   })
 
@@ -82,14 +70,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router1}>
+        <RouterProvider router={routerRoot}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router2.state.location.pathname).toBe('/initialSetup')
+      expect(routerRoot.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
@@ -101,7 +89,7 @@ describe('Login page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router3}>
+        <RouterProvider router={routerLogin}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
