@@ -15,8 +15,8 @@ const authToken = vi.mocked(authentication.authToken)
   const routes = [
     {
       path: '/',
-      //element: <LoginPage />,
-      Component: <>App </>,
+      element: <LoginPage />,
+      //Component: <>App </>,
       children: [
         {
           path: 'login',
