@@ -16,10 +16,6 @@ const authToken = vi.mocked(authentication.authToken)
       element: <>Root </>,
       children: [
         {
-          path: 'login',
-          element: <>LoginPage </>,
-        },
-        {
           path: 'initialSetup',
           Component: <InitialSetupPage />,
         },
