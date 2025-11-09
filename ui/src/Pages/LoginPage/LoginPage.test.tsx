@@ -18,15 +18,16 @@ const authToken = vi.mocked(authentication.authToken)
       //element: <LoginPage />,
       Component: <>App </>,
       children: [
-       {
+        {
           path: 'login',
           element: <LoginPage />,
-       },
-       {
-         path: 'initialSetup',
-         element: <>InitialSetupPage </>,
-       },
-     ],
+        },
+        {
+          path: 'initialSetup',
+          element: <>InitialSetupPage </>,
+        },
+      ],
+    },
   ];
 
   const router1 = createMemoryRouter(
