@@ -83,8 +83,7 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router2}>
-        </RouterProvider>
+        <RouterProvider router={router1} />
       </MockedProvider>
     )
 
