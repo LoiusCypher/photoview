@@ -15,18 +15,18 @@ const authToken = vi.mocked(authentication.authToken)
   const routes = [
     {
       path: '/',
-      element: <LoginPage />,
-    },
-    {
-      path: '/login',
-      element: <LoginPage />,
-      loader: () => FAKE_EVENT_2,
-    },
-    {
-      path: '/initialSetup',
-      element: <>InitialSetupPage </>,
-      loader: () => FAKE_EVENT_3,
-    },
+      //element: <LoginPage />,
+      Component: <>App </>,
+      children: {
+       {
+          path: 'login',
+          element: <LoginPage />,
+       },
+       {
+         path: 'initialSetup',
+         element: <>InitialSetupPage </>,
+       },
+     },
   ];
 
   const router1 = createMemoryRouter(
@@ -44,6 +44,7 @@ const authToken = vi.mocked(authentication.authToken)
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      //initialEntries: ['/login'],
       initialEntries: ['/login'],
       // We don't need to explicitly set this, but it's nice to have.
       initialIndex: 0,
