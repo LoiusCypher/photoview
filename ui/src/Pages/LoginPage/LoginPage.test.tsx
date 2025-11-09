@@ -10,39 +10,34 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const router = createMemoryRouter(
-    [
-      {
-        path: '/',
-        element: <LoginPage />,
-        children: [
-          {
-            path: 'login',
-            Component: <LoginPage />,
-          },
-          {
-            path: 'initialSetup',
-            element: <>InitialSetupPage </>,
-          },
-        ],
-      },
-    ],
+  const routes = [
     {
-      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/login'],
-      // We don't need to explicitly set this, but it's nice to have.
-  //    initialIndex: 0,
-  //    errorElement: <>NotFound </>,
+      path: '/',
+      element: <LoginPage />,
+      children: [
+        {
+          path: 'login',
+          Component: <LoginPage />,
+        },
+        {
+          path: 'initialSetup',
+          element: <>InitialSetupPage </>,
+        },
+      ],
     },
-  )
+  ]
 
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
+    const history = createMemoryRouter( routes, {
+      initialEntries: ['/login'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={history}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -56,9 +51,13 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
+    const history = createMemoryRouter( routes, {
+      initialEntries: ['/login'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={history}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -74,9 +73,13 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
+    const history = createMemoryRouter( routes, {
+      initialEntries: ['/login'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={history}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
