@@ -20,7 +20,7 @@ const authToken = vi.mocked(authentication.authToken)
       children: [
         {
           path: 'login',
-          element: <LoginPage />,
+          Component: <LoginPage />,
         },
         {
           path: 'initialSetup',
@@ -86,6 +86,7 @@ describe('Login page redirects', () => {
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router2}>
+          <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
