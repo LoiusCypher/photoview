@@ -10,7 +10,8 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-const router = createMemoryRouter(
+
+  const router = createMemoryRouter(
     [
       {
         path: '/',
@@ -36,35 +37,13 @@ const router = createMemoryRouter(
     },
   )
 
-  const routes = [
-    {
-      path: '/',
-      element: <>App </>,
-      children: [
-        {
-          path: 'login',
-          Component: <LoginPage />,
-        },
-        {
-          path: 'initialSetup',
-          element: <>InitialSetupPage </>,
-        },
-      ],
-    },
-  ]
-
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryRouter( routes, {
-      initialEntries: ['/login'],
-      initialIndex: 0,
-    })
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -78,13 +57,9 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter( routes, {
-      initialEntries: ['/login'],
-    })
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -100,13 +75,9 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter( routes, {
-      initialEntries: ['/login'],
-    })
-
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <RouterProvider router={router}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
