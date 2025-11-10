@@ -60,6 +60,10 @@ describe('Initial setup page', () => {
   test('Render initial setup form', () => {
     authToken.mockImplementation(() => null)
 
+    const history = createMemoryRouter(routes, {
+      initialEntries: ['/initialSetup'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <RouterProvider router={router1}>

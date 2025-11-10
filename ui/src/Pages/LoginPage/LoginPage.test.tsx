@@ -10,54 +10,26 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const routes = 
-    [
+const routes = [
+  {
+    path: '/',
+    element: <LoginPage />,
+    children: [
       {
-        path: '/',
-        element: <LoginPage />,
-        children: [
-          {
-            path: 'login',
-            Component: <LoginPage />,
-          },
-          {
-            path: 'initialSetup',
-            element: <>InitialSetupPage </>,
-          },
-        ],
+        path: 'login',
+        Component: <LoginPage />,
       },
-    ];
-
-  const router2 = createMemoryRouter(
-    [
       {
-        path: '/',
-        element: <LoginPage />,
-        children: [
-          {
-            path: 'login',
-            Component: <LoginPage />,
-          },
-          {
-            path: 'initialSetup',
-            element: <>InitialSetupPage </>,
-          },
-        ],
+        path: 'initialSetup',
+        element: <>InitialSetupPage </>,
       },
     ],
-    {
-      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/login'],
-      // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
-      errorElement: <>NotFound </>,
-    },
-  )
+  },
+];
 
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
-
 
     const history = createMemoryRouter(routes, {
       initialEntries: ['/login'],
@@ -65,14 +37,14 @@ describe('Login page redirects', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={istory}>
+        <RouterProvider router={history}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/')
+      expect(history.state.location.pathname).toBe('/')
     })
   })
 
