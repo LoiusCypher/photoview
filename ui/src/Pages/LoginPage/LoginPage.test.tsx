@@ -38,7 +38,7 @@ const router = createMemoryRouter(
 
 
 
-  const routes := [
+  const routes = [
     {
       path: '/',
       element: <LoginPage />,
