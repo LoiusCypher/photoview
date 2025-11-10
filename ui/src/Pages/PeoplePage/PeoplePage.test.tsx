@@ -8,7 +8,7 @@ import {
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
 import { MockedProvider } from "@apollo/client/testing/react";
-import { createMemoryRouter, RouterProvider } from "react-router"
+import { MemoryRouter, createMemoryRouter, RouterProvider } from "react-router"
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
@@ -142,11 +142,11 @@ describe('PeoplePage component', () => {
 
   test('people page', async () => {
     render(
-      <RouterProvider router={router3}>
+      <MemoryRouter initialEntries={['/people']}>
         <MockedProvider mocks={graphqlMocks} addTypename={false}>
           <PeoplePage />
         </MockedProvider>
-      </RouterProvider>
+      </MemoryRouter>
     )
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
@@ -265,7 +265,7 @@ describe('FaceDetails component', () => {
     ]
     render(
       <MockedProvider mocks={graphqlMocks} addTypename={false}>
-        <RouterProvider router={router}>
+        <RouterProvider router={router3}>
           <FaceGroup group={faceGroup} />
         </RouterProvider>
       </MockedProvider>
