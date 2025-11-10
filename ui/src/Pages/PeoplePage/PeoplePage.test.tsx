@@ -144,6 +144,7 @@ describe('PeoplePage component', () => {
     render(
       <RouterProvider router={router3}>
         <MockedProvider mocks={graphqlMocks} addTypename={false}>
+          <PeoplePage />
         </MockedProvider>
       </RouterProvider>
     )
