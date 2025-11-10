@@ -39,7 +39,7 @@ const router = createMemoryRouter(
   const routes = [
     {
       path: '/',
-      element: <LoginPage />,
+      element: <>App </>,
       children: [
         {
           path: 'login',
@@ -59,6 +59,7 @@ describe('Login page redirects', () => {
 
     const history = createMemoryRouter( routes, {
       initialEntries: ['/login'],
+      initialIndex: 0,
     })
 
     render(
