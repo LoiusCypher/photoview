@@ -16,16 +16,22 @@ const routes = [{
     children: [
       {
         path: 'login',
-        Component: <LoginPage />,
+        element: <LoginPage />,
       },
     ],
+}];
+
+const routes2 = [{
+    path: '/login',
+    element: <LoginPage />,
+    children: [
 }];
 
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryRouter(routes, {
+    const history = createMemoryRouter(routes2, {
       initialEntries: ['/login'],
     })
 

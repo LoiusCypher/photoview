@@ -11,7 +11,7 @@ const routes = [{
     element: <AlbumPage />,
     children: [
       {
-        path: 'album',
+        path: 'album:id',
         Component: <AlbumPage />,
       },
     ],
