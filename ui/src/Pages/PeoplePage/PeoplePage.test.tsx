@@ -49,7 +49,7 @@ const routes2 = [
     },
   )
 
-  const router = createMemoryRouter(
+  const router2 = createMemoryRouter(
     routes,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
