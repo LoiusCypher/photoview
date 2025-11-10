@@ -265,9 +265,9 @@ describe('FaceDetails component', () => {
     ]
     render(
       <MockedProvider mocks={graphqlMocks} addTypename={false}>
-        <RouterProvider router={router3}>
+        <MemoryRouter>
           <FaceGroup group={faceGroup} />
-        </RouterProvider>
+        </MemoryRouter>
       </MockedProvider>
     )
 
