@@ -28,17 +28,6 @@ const authToken = vi.mocked(authentication.authToken)
       },
     ];
 
-  const router = createMemoryRouter(
-    routesC,
-    {
-      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
-      initialEntries: ['/login'],
-      // We don't need to explicitly set this, but it's nice to have.
-      initialIndex: 0,
-      errorElement: <>NotFound </>,
-    },
-  )
-
   const router2 = createMemoryRouter(
     [
       {
@@ -103,7 +92,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router2.state.location.pathname).toBe('/initialSetup')
+      expect(history.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
@@ -112,9 +101,13 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
+    const history = createMemoryRouter(routesC, {
+      initialEntries: ['/login'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={history}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
