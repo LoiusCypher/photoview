@@ -10,22 +10,6 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-const routes = [{
-    path: '/',
-    element: <LoginPage />,
-    children: [
-      {
-        path: 'login',
-        element: <LoginPage />,
-      },
-    ],
-}];
-
-const routes2 = [{
-    path: '/login',
-    element: <LoginPage />,
-}];
-
 const routes3 = [{
     path: '/',
     element: <LoginPage />,
@@ -86,10 +70,6 @@ describe('Login page redirects', () => {
 describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
-
-    const history = createMemoryRouter(routes3, {
-      initialEntries: ['/login'],
-    })
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
