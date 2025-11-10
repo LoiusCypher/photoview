@@ -24,7 +24,6 @@ const routes = [{
 const routes2 = [{
     path: '/login',
     element: <LoginPage />,
-    children: [
 }];
 
 describe('Login page redirects', () => {

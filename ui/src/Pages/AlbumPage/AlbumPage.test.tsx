@@ -6,21 +6,10 @@ import AlbumPage from './AlbumPage'
 
 vi.mock('../../hooks/useScrollPagination')
 
-const routes = [{
-    path: '/',
-    element: <AlbumPage />,
-    children: [
-      {
-        path: 'album:id',
-        Component: <AlbumPage />,
-      },
-    ],
-}];
-
 test('AlbumPage renders', () => {
   render(
     <MockedProvider mocks={[]}>
-      <MemoryRouter routes={routes} initialEntries={['/album/1']}>
+      <MemoryRouter initialEntries={['/album/1']}>
         <Routes>
           <Route path="/album/:id" element={<AlbumPage />} />
         </Routes>
