@@ -38,7 +38,7 @@ const router = createMemoryRouter(
 
 
 
-  const routes = [
+  const routes := [
     {
       path: '/',
       element: <LoginPage />,
@@ -59,7 +59,7 @@ describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const routerx = createMemoryRouter( routes: routes, opts: {
+    const routerx = createMemoryRouter( routes, {
       initialEntries: ['/login'],
     })
 
