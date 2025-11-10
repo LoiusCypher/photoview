@@ -18,10 +18,6 @@ const routes = [{
         path: 'login',
         Component: <LoginPage />,
       },
-      {
-        path: 'initialSetup',
-        element: <>InitialSetupPage </>,
-      },
     ],
 }];
 
