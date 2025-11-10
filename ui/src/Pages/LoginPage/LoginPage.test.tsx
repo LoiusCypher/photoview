@@ -81,22 +81,6 @@ describe('Login page redirects', () => {
       expect(history.state.location.pathname).toBe('/initialSetup')
     })
   })
-
-  test('Initial setup redirect V2', async () => {
-    authToken.mockImplementation(() => null)
-
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <MemoryRouter initialEntries={['/login']}>
-          <LoginPage />
-        </MemoryRouter>
-      </MockedProvider>
-    )
-
-    await waitFor(() => {
-      expect(history.state.location.pathname).toBe('/initialSetup')
-    })
-  })
 })
 
 describe('Login page', () => {
@@ -109,9 +93,9 @@ describe('Login page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={history}>
+        <MemoryRouter initialEntries={['/login']}>
           <LoginPage />
-        </RouterProvider>
+        </MemoryRouter>
       </MockedProvider>
     )
 
