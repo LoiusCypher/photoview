@@ -60,6 +60,17 @@ const routes2 = [
     },
   )
 
+  const router3 = createMemoryRouter(
+    routes2,
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/people'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+      errorElement: <>NotFound </>,
+    },
+  )
+
 describe('PeoplePage component', () => {
   const graphqlMocks = [
     {
@@ -118,7 +129,7 @@ describe('PeoplePage component', () => {
 
   test('people page', async () => {
     render(
-      <RouterProvider router={router}>
+      <RouterProvider router={router3}>
         <MockedProvider mocks={graphqlMocks} addTypename={false}>
         </MockedProvider>
       </RouterProvider>
