@@ -28,7 +28,7 @@ const routes2 = [{
 
 const routes3 = [{
     path: '/',
-    element: <>Root </>,
+    element: <LoginPage />,
     children: [
       {
         path: 'login',
