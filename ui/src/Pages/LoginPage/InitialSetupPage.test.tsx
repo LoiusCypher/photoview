@@ -10,6 +10,28 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+  const router2 = createMemoryRouter(
+    [
+      {
+        path: '/',
+        Component: <InitialSetupPage />,
+        children: [
+          {
+            path: 'initialSetup',
+          Component: <InitialSetupPage />,
+          },
+        ],
+      },
+    ],
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/initialSetup'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+      errorElement: <>NotFound </>,
+    },
+  )
+
   const routes = [
     {
       path: '/',
@@ -40,7 +62,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router1}>
+        <RouterProvider router={router2}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
@@ -57,14 +79,14 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router1}>
+        <RouterProvider router={router2}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router1.state.location.pathname).toBe('/')
+      expect(router2.state.location.pathname).toBe('/')
     })
   })
 

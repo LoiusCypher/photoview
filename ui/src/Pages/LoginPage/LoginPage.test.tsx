@@ -10,7 +10,6 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-
   const router = createMemoryRouter(
     [
       {
