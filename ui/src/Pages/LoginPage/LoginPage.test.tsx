@@ -70,7 +70,7 @@ describe('Login page redirects', () => {
     authToken.mockImplementation(() => 'some-token')
 
 
-    const history = createMemoryRouter({
+    const history = createMemoryRouter(routesC, {
       initialEntries: ['/login'],
     })
 
