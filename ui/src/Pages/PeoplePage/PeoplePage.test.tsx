@@ -292,9 +292,9 @@ describe('FaceDetails component', () => {
   test('cancel add label to face group', () => {
     render(
       <MockedProvider mocks={[]} addTypename={false}>
-        <RouterProvider router={router}>
+        <MemoryRouter>
           <FaceGroup group={faceGroup} />
-        </RouterProvider>
+        </MemoryRouter>
       </MockedProvider>
     )
 

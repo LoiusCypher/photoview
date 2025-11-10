@@ -86,7 +86,7 @@ describe('Login page redirects', () => {
     authToken.mockImplementation(() => null)
 
     render(
-      <MockedProvider mocks={graphqlMocks} addTypename={false}>
+      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
         <MemoryRouter initialEntries={['/login']}>
           <LoginPage />
         </MemoryRouter>
