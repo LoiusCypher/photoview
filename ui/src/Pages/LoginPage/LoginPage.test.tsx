@@ -50,7 +50,7 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routes, {
+    const history = createMemoryRouter(routes2, {
       initialEntries: ['/login'],
     })
 
@@ -72,7 +72,7 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routes, {
+    const history = createMemoryRouter(routes2, {
       initialEntries: ['/login'],
     })
 
