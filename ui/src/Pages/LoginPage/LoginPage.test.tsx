@@ -10,6 +10,34 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+const router = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element: <LoginPage />,
+        children: [
+          {
+            path: 'login',
+            Component: <LoginPage />,
+          },
+          {
+            path: 'initialSetup',
+            element: <>InitialSetupPage </>,
+          },
+        ],
+      },
+    ],
+    {
+      // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
+      initialEntries: ['/login'],
+      // We don't need to explicitly set this, but it's nice to have.
+      initialIndex: 0,
+      errorElement: <>NotFound </>,
+    },
+  )
+
+
+
   const routes = [
     {
       path: '/',
@@ -31,7 +59,7 @@ describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const router = createMemoryRouter( routes, {
+    const routerx = createMemoryRouter( routes: routes, opts: {
       initialEntries: ['/login'],
     })
 
