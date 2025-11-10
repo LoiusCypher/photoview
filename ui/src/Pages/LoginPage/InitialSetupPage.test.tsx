@@ -35,7 +35,7 @@ const authToken = vi.mocked(authentication.authToken)
   const routes = [
     {
       path: '/',
-      element: <>Root </>,
+      element: <InitialSetupPage />,
       children: [
         {
           path: 'initialSetup',
@@ -81,16 +81,20 @@ describe('Initial setup page', () => {
   test('Redirect if auth token is present', async () => {
     authToken.mockImplementation(() => 'some-token')
 
+    const history = createMemoryRouter(routes, {
+      initialEntries: ['/initialSetup'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router2}>
+        <RouterProvider router={history}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router2.state.location.pathname).toBe('/')
+      expect(history.state.location.pathname).toBe('/')
     })
   })
 
