@@ -13,6 +13,18 @@ import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
 
+const routes = [
+  {
+    path: '/',
+    Component: <PeoplePage />,
+    children: [
+      {
+        path: 'people',
+        Component: <PeoplePage />,
+      },
+    ],
+  },
+];
   const routes = [
     {
       path: '/',
