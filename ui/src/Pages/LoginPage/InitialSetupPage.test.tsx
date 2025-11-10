@@ -62,7 +62,7 @@ describe('Initial setup page', () => {
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <RouterProvider router={router2}>
+        <RouterProvider router={router1}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
