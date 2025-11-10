@@ -26,11 +26,26 @@ const routes2 = [{
     element: <LoginPage />,
 }];
 
+const routes3 = [{
+    path: '/',
+    element: <>Root </>,
+    children: [
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
+      {
+        path: '*',
+        element: <>Other </>,
+      },
+    ],
+}];
+
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryRouter(routes2, {
+    const history = createMemoryRouter(routes3, {
       initialEntries: ['/login'],
     })
 
@@ -50,7 +65,7 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routes2, {
+    const history = createMemoryRouter(routes3, {
       initialEntries: ['/login'],
     })
 
@@ -72,7 +87,7 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routes2, {
+    const history = createMemoryRouter(routes3, {
       initialEntries: ['/login'],
     })
 

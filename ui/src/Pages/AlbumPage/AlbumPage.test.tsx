@@ -13,7 +13,6 @@ test('AlbumPage renders', () => {
         <Routes>
           <Route path="/album/:id" element={<AlbumPage />} />
         </Routes>
-        <AlbumPage />,
       </MemoryRouter>
     </MockedProvider>
   )
