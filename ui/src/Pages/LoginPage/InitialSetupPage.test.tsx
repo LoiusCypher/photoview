@@ -97,16 +97,20 @@ describe('Initial setup page', () => {
   test('Redirect if not initial setup', async () => {
     authToken.mockImplementation(() => null)
 
+    const history = createMemoryRouter(routes, {
+      initialEntries: ['/initialSetup'],
+    })
+
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router1}>
+        <RouterProvider router={history}>
           <InitialSetupPage />
         </RouterProvider>
       </MockedProvider>
     )
 
     await waitFor(() => {
-      expect(router1.state.location.pathname).toBe('/')
+      expect(history.state.location.pathname).toBe('/')
     })
   })
 })
