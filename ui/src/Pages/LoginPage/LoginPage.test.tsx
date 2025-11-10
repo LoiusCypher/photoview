@@ -10,8 +10,7 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-const routes = [
-  {
+const routes = [{
     path: '/',
     element: <LoginPage />,
     children: [
@@ -24,8 +23,7 @@ const routes = [
         element: <>InitialSetupPage </>,
       },
     ],
-  },
-];
+}];
 
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
