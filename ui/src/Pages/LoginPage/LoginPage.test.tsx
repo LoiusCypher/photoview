@@ -10,7 +10,7 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const routesC = 
+  const routes = 
     [
       {
         path: '/',
@@ -59,13 +59,13 @@ describe('Login page redirects', () => {
     authToken.mockImplementation(() => 'some-token')
 
 
-    const history = createMemoryRouter(routesC, {
+    const history = createMemoryRouter(routes, {
       initialEntries: ['/login'],
     })
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <RouterProvider router={router}>
+        <RouterProvider router={istory}>
           <LoginPage />
         </RouterProvider>
       </MockedProvider>
@@ -79,7 +79,7 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routesC, {
+    const history = createMemoryRouter(routes, {
       initialEntries: ['/login'],
     })
 
@@ -101,7 +101,7 @@ describe('Login page', () => {
   test('Render login form', () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryRouter(routesC, {
+    const history = createMemoryRouter(routes, {
       initialEntries: ['/login'],
     })
 
