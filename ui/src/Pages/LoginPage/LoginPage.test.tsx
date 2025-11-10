@@ -10,7 +10,7 @@ vi.mock('../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-  const router = createMemoryRouter(
+  const routesC = 
     [
       {
         path: '/',
@@ -26,7 +26,10 @@ const authToken = vi.mocked(authentication.authToken)
           },
         ],
       },
-    ],
+    ];
+
+  const router = createMemoryRouter(
+    routesC,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/login'],
@@ -65,6 +68,11 @@ const authToken = vi.mocked(authentication.authToken)
 describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
+
+
+    const history = createMemoryHistory({
+      initialEntries: ['/login'],
+    })
 
     render(
       <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
