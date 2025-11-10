@@ -91,7 +91,7 @@ describe('Login page redirects', () => {
     )
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/initialSetup')
+      expect(router2.state.location.pathname).toBe('/initialSetup')
     })
   })
 })
