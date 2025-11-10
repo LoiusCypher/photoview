@@ -13,6 +13,19 @@ import { myFaces_myFaceGroups } from './__generated__/myFaces'
 
 vi.mock('../../hooks/useScrollPagination')
 
+const routes3 = [
+  {
+    path: '/',
+    element: <PeoplePage />,
+    children: [
+      {
+        path: 'people',
+        element: <PeoplePage />,
+      },
+    ],
+  },
+];
+
 const routes2 = [
   {
     path: '/',
@@ -61,7 +74,7 @@ const routes2 = [
   )
 
   const router3 = createMemoryRouter(
-    routes2,
+    routes3,
     {
       // Set for where you want to start in the routes. Remember, KISS (Keep it simple, stupid) the routes.
       initialEntries: ['/people'],
