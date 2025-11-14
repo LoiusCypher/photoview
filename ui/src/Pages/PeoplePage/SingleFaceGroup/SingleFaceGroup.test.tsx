@@ -35,6 +35,7 @@ test('single face group', async () => {
                   id: '10',
                   type: 'Photo',
                   title: '122A2785-2.jpg',
+                  blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_122A2785-2_jpg_lFmZcaN5.jpg',
@@ -63,6 +64,7 @@ test('single face group', async () => {
                   id: '52',
                   type: 'Photo',
                   title: 'image.png',
+                  blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_image_png_OwTDG5fM.jpg',
