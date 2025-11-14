@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MockedProvider } from "@apollo/client/testing/react";
 import SingleFaceGroup, { SINGLE_FACE_GROUP } from './SingleFaceGroup'
 import { MemoryRouter } from 'react-router'
-import 'vitest-canvas-mock'
+import 'vitest-webgl-canvas-mock'
 
 vi.mock('../../../hooks/useScrollPagination')
 
