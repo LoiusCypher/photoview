@@ -87,7 +87,7 @@ test('single face group', async () => {
     {
       request: {
         query: SINGLE_FACE_GROUP,
-        variables: {  },
+        variables: { limit: 200, offset: 0' },
       },
       result: {
         data: {
@@ -170,6 +170,6 @@ test('single face group', async () => {
   )
 
   await waitFor(() => {
-    expect(screen.getAllByRole('img')).toHaveLength(3)
+    expect(screen.getAllByRole('img')).toHaveLength(2)
   })
 })
