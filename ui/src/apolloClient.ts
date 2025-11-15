@@ -10,7 +10,8 @@ import { Defer20220824Handler } from "@apollo/client/incremental";
 import { LocalState } from "@apollo/client/local-state";
 import { getMainDefinition } from '@apollo/client/utilities'
 import { ErrorLink } from '@apollo/client/link/error'
-import { WebSocketLink } from '@apollo/client/link/ws'
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 import urlJoin from 'url-join'
 import { clearTokenCookie } from './helpers/authentication'
@@ -36,10 +37,11 @@ const apiProtocol = new URL(GRAPHQL_ENDPOINT).protocol
 const websocketUri = new URL(GRAPHQL_ENDPOINT)
 websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
 
-const wsLink = new WebSocketLink({
-  uri: websocketUri.toString(),
-  // credentials: 'include',
-})
+const wsLink = new GraphQLWsLink(
+  createClientu({
+   url: websocketUri.toString(),
+  })
+)
 
 const link = ApolloLink.split(
   // split based on operation type
