@@ -1,60 +1,11 @@
+import React from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
+import { MockedProvider } from "@apollo/client/testing/react";
 import SingleFaceGroup, { SINGLE_FACE_GROUP } from './SingleFaceGroup'
 import { MemoryRouter } from 'react-router'
 import 'vitest-webgl-canvas-mock'
 
 vi.mock('../../../hooks/useScrollPagination')
-
-import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
-import { MockedProvider } from "@apollo/client/testing/react";
-import { ApolloError, ApolloLink } from '@apollo/client'
-import { onError } from '@apollo/client/link/error'
-import {
-  MockedProvider,
-  MockedProviderProps,
-  MockedResponse
-} from '@apollo/client/testing'
-import { MockLink } from '@apollo/react-testing'
-
-interface Props extends MockedProviderProps {
-  mocks?: ReadonlyArray<MockedResponse>
-  children?: React.ReactElement
-}
-
-const VerboseMockedProvider = (props: Props) => {
-  const { mocks = [], ...otherProps } = props
-
-  const mockLink = new MockLink(mocks)
-  const errorLoggingLink = onError(
-    ({ graphQLErrors, networkError }) => {
-      if (graphQLErrors) {
-        graphQLErrors.forEach(
-          ({ message, locations, path }) =>
-            console.log(
-              '[GraphQL error]:' +
-                `Message: ${message},` +
-                `Location: ${locations},` +
-                `Path: ${path}`
-            )
-        )
-      }
-
-      if (networkError) {
-        console.log(`[Network error]: ${networkError}`)
-      }
-    }
-  )
-  const link = ApolloLink.from([errorLoggingLink, mockLink])
-
-  return (
-    <MockedProvider
-      {...otherProps}
-      addTypename={false}
-      mocks={mocks}
-      link={link}
-    />
-  )
-}
 
 test('single face group', async () => {
   const graphqlMocks = [
@@ -187,9 +138,9 @@ test('single face group', async () => {
 
   render(
     <MemoryRouter initialEntries={['/person/123']}>
-      <VerboseMockedProvider mocks={graphqlMocks}>
+      <MockedProvider mocks={graphqlMocks}>
         <SingleFaceGroup faceGroupID="123" />
-      </VerboseMockedProvider>
+      </MockedProvider>
     </MemoryRouter>
   )
 
