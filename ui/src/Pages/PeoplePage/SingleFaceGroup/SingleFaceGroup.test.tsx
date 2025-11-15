@@ -65,7 +65,7 @@ test('single face group', async () => {
                   id: '52',
                   type: 'Photo',
                   title: 'image.png',
-                  blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
+                  //blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_image_png_OwTDG5fM.jpg',
