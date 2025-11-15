@@ -65,7 +65,7 @@ test('single face group', async () => {
                   id: '52',
                   type: 'Photo',
                   title: 'image.png',
-                  //blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
+                  blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_image_png_OwTDG5fM.jpg',
@@ -137,10 +137,10 @@ test('single face group', async () => {
                 },
                 media: {
                   __typename: 'Media',
-                  id: '52',
+                  id: '53',
                   type: 'Photo',
                   title: 'image.png',
-                  blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
+                  //blurhash: 'LeIEnWD%n$Rj~pRiM{ofIpW=Iot6',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_image_png_OwTDG5fM.jpg',
