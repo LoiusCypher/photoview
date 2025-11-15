@@ -118,6 +118,22 @@ test('single face group', async () => {
         },
       },
     },
+    {
+      request: {
+        query: SINGLE_FACE_GROUP,
+      },
+      result: {
+        data: {
+          faceGroup: {
+            __typename: 'FaceGroup',
+            id: '2',
+            label: 'Face Group Name',
+            imageFaces: [
+            ],
+          },
+        },
+      },
+    },
   ]
 
   render(
