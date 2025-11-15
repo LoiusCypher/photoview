@@ -87,7 +87,7 @@ test('single face group', async () => {
     {
       request: {
         query: SINGLE_FACE_GROUP,
-        variables: { limit: 200, offset: 0' },
+        variables: { limit: 200, offset: 0 },
       },
       result: {
         data: {
