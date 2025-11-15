@@ -38,7 +38,7 @@ const websocketUri = new URL(GRAPHQL_ENDPOINT)
 websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
 
 const wsLink = new GraphQLWsLink(
-  createClientu({
+  createClient({
    url: websocketUri.toString(),
   })
 )
