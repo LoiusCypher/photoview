@@ -96,11 +96,24 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 
 	var thumbnailURL *models.MediaURL
 	for _, url := range media.MediaURL {
-		if url.Purpose == models.PhotoThumbnail {
+		if url.Purpose == models.PhotoHighRes {
 			thumbnailURL = &url
 			thumbnailURL.Media = media
+			log.Println("  HighRes URL found")
 			break
 		}
+		if url.Purpose == models.MediaOriginal {
+			thumbnailURL = &url
+			thumbnailURL.Media = media
+			log.Println("  Original URL found")
+			// break
+		}
+		// if url.Purpose == models.PhotoThumbnail {
+			// thumbnailURL = &url
+			// thumbnailURL.Media = media
+			// log.Println("  Thumbnail URL found")
+			// break
+		// }
 	}
 
 	if thumbnailURL == nil {
