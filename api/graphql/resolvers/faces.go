@@ -9,10 +9,10 @@ import (
 	"context"
 	"errors"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 	"gorm.io/gorm"
 )
 

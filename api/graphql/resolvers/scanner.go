@@ -12,10 +12,10 @@ import (
 	"time"
 	"log"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/periodic_scanner"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/periodic_scanner"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"gorm.io/gorm"
 )
 
@@ -54,6 +54,24 @@ func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.Sc
 
 // ScanMediaAction is the resolver for the scanMediaAction field.
 func (r *mutationResolver) ScanMediaAction(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+	log.Printf("Media Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	scanner_queue.AddMediaAlbumToQueue(&media)
+
+	startMessage := "Media Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanMediaMutation is the resolver for the scanMediaAction field.
+func (r *mutationResolver) ScanMediaMutation(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
 	log.Printf("Media Id: %d\n", mediaID)
 	var media models.Media
 	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {

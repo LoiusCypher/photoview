@@ -9,9 +9,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/models/actions"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models/actions"
 )
 
 // MyTimeline is the resolver for the myTimeline field.

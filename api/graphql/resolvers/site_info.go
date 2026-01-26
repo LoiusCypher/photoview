@@ -8,9 +8,9 @@ package resolvers
 import (
 	"context"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 )
 
 // SiteInfo is the resolver for the siteInfo field.
