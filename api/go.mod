@@ -1,4 +1,4 @@
-module github.com/photoview/photoview/api
+module github.com/loiusycpher/photoview/api
 
 go 1.25.0
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/photoview/photoview/api/graphql/models"
 	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner"
+	"github.com/loiuscypher/photoview/api/scanner"
 )
 
 func RegisterPhotoRoutes(db *gorm.DB, router *mux.Router) {

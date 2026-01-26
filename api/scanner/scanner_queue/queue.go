@@ -9,7 +9,7 @@ import (
 
 	"github.com/photoview/photoview/api/graphql/models"
 	"github.com/photoview/photoview/api/graphql/notification"
-	"github.com/photoview/photoview/api/scanner"
+	"github.com/loiuscypher/photoview/api/scanner"
 	"github.com/photoview/photoview/api/scanner/scanner_cache"
 	"github.com/photoview/photoview/api/scanner/scanner_task"
 	"github.com/photoview/photoview/api/scanner/scanner_utils"

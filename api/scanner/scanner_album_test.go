@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner"
+	"github.com/loiuscypher/photoview/api/scanner"
 	"github.com/photoview/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
 )

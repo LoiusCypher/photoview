@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/photoview/photoview/api/graphql/auth"
 	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner"
+	"github.com/loiuscypher/photoview/api/scanner"
 	"github.com/photoview/photoview/api/test_utils"
 	"github.com/photoview/photoview/api/utils"
 	"github.com/stretchr/testify/assert"

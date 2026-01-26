@@ -18,7 +18,7 @@ import (
 	"github.com/photoview/photoview/api/database"
 	"github.com/photoview/photoview/api/dataloader"
 	"github.com/photoview/photoview/api/graphql/auth"
-	graphql_endpoint "github.com/photoview/photoview/api/graphql/endpoint"
+	graphql_endpoint "github.com/loiusycpher/photoview/api/graphql/endpoint"
 	"github.com/photoview/photoview/api/routes"
 	"github.com/photoview/photoview/api/scanner/externaltools/exif"
 	"github.com/photoview/photoview/api/scanner/face_detection"
