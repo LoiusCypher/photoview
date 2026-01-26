@@ -218,6 +218,31 @@ func AddAllToQueue() error {
 	return nil
 }
 
+// AddMediaToQueue finds containing album for given media and adds it to the scanner queue.
+// Function does not block.
+func AddMediaAlbumToQueue(media *models.Media) error {
+	var album models.Album
+
+	if media == nil {
+		return nil
+	}
+	log.Println( " AddMediaAlbumToQueue", media.ID)
+
+	if err := global_scanner_queue.db.First(&album, media.AlbumID).Error; err != nil {
+		return err
+	}
+
+	albumCache := scanner_cache.MakeAlbumCache()
+
+	global_scanner_queue.mutex.Lock()
+	global_scanner_queue.addJob(&ScannerJob{
+		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, &album, albumCache),
+	})
+	global_scanner_queue.mutex.Unlock()
+
+	return nil
+}
+
 // AddUserToQueue finds all root albums owned by the given user and adds them to the scanner queue.
 // Function does not block.
 func AddUserToQueue(user *models.User) error {

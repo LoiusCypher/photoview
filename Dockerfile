@@ -3,14 +3,14 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-ARG NODE_ENV=production
+ARG NODE_ENV=dev
 ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
 # NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@10 \
+RUN npm install --global npm@10.8.2 \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \

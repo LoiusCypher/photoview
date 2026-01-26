@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useMutation, gql } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
@@ -17,6 +18,18 @@ import MergeFaceGroupsModal, {
 import { useDetachImageFaces } from '../../../Pages/PeoplePage/SingleFaceGroup/DetachImageFacesModal'
 import MoveImageFacesModal from '../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal'
 import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
+import styled from 'styled-components'
+import { scanMediaMutation, scanMediaMutationVariables } from './__generated__/scanMediaMutation'
+import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
+
+const SCAN_MEDIA_MUTATION = gql`
+  mutation scanMediaMutation( $mediaId: ID!) {
+    scanMediaAction( mediaId: $mediaId) {
+      success
+      message
+    }
+  }
+`
 
 type PersonMoreMenuItemProps = {
   label: string
@@ -198,6 +211,7 @@ type MediaSidebarFacesProps = {
 
 const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
+  const [startMediaScanner, { calledMedia }] = useMutation<scanMediaMutation,scanMediaMutationVariables>(SCAN_MEDIA_MUTATION)
 
   const faceElms = (media.faces ?? []).map((face, i) => (
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
@@ -207,6 +221,20 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
 
   return (
     <SidebarSection>
+      <InputLabelDescription>
+        {t(
+          'sidebar.people.rescan.description',
+          'Gesichtserkennung'
+        )}
+      </InputLabelDescription>
+      <Button
+        onClick={() => {
+          startMediaScanner( { variables: { mediaId: media.id } });
+        }}
+        disabled={calledMedia}
+      >
+        {t('sidebar.people.rescan.thumbnail', 'Rescan Thumbnail')}
+      </Button>
       <SidebarSectionTitle>
         {t('sidebar.people.title', 'People')}
       </SidebarSectionTitle>

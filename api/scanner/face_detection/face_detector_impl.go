@@ -96,11 +96,24 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 
 	var thumbnailURL *models.MediaURL
 	for _, url := range media.MediaURL {
-		if url.Purpose == models.PhotoThumbnail {
+		if url.Purpose == models.PhotoHighRes {
 			thumbnailURL = &url
 			thumbnailURL.Media = media
+			log.Println("  HighRes URL found")
 			break
 		}
+		if url.Purpose == models.MediaOriginal {
+			thumbnailURL = &url
+			thumbnailURL.Media = media
+			log.Println("  Original URL found")
+			// break
+		}
+		// if url.Purpose == models.PhotoThumbnail {
+			// thumbnailURL = &url
+			// thumbnailURL.Media = media
+			// log.Println("  Thumbnail URL found")
+			// break
+		// }
 	}
 
 	if thumbnailURL == nil {
@@ -120,7 +133,9 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 		return errors.Wrap(err, "error read faces")
 	}
 
+	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
 	for _, face := range faces {
+		// log.Println("  Faces found for: ", face)
 		fd.classifyFace(db, &face, media, thumbnailPath)
 	}
 
@@ -128,7 +143,7 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 }
 
 func (fd *faceDetector) classifyDescriptor(descriptor face.Descriptor) int32 {
-	return int32(fd.rec.ClassifyThreshold(descriptor, 0.2))
+	return int32(fd.rec.ClassifyThreshold(descriptor, 0.1))
 }
 
 func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string) error {
@@ -153,6 +168,7 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
 		},
 	}
+	log.Printf("  Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
 
 	var faceGroup models.FaceGroup
 
