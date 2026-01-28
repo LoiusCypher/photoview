@@ -6,7 +6,7 @@ import (
 	"path"
 	"sync"
 
-	"github.com/photoview/photoview/api/scanner/media_type"
+	"github.com/loiuscypher/photoview/api/scanner/media_type"
 )
 
 type AlbumScannerCache struct {

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"unique"
 
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner/externaltools/exif"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/scanner/externaltools/exif"
 )
 
 type MediaType unique.Handle[string]

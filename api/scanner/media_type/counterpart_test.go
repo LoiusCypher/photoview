@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 func TestFindWebCounterpart(t *testing.T) {

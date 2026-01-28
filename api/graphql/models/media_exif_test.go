@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 // Different database has different behavior when storing date with timezone.

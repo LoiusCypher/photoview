@@ -3,8 +3,8 @@ package scanner_task
 import (
 	"io/fs"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/media_encoding"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding"
 )
 
 // ScannerTaskBase provides a default "empty" implementation of ScannerTask,

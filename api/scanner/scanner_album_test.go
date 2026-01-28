@@ -3,9 +3,9 @@ package scanner_test
 import (
 	"testing"
 
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/loiuscypher/photoview/api/scanner"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
