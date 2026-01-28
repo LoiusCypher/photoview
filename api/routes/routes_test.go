@@ -3,7 +3,7 @@ package routes_test
 import (
 	"testing"
 
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 func TestMain(m *testing.M) {

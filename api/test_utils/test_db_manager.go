@@ -3,7 +3,7 @@ package test_utils
 import (
 	"fmt"
 
-	"github.com/photoview/photoview/api/database"
+	"github.com/loiuscypher/photoview/api/database"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )

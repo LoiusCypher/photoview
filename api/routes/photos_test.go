@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/loiuscypher/photoview/api/scanner"
-	"github.com/photoview/photoview/api/test_utils"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )

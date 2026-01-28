@@ -8,10 +8,10 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
 	"github.com/loiuscypher/photoview/api/scanner"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )

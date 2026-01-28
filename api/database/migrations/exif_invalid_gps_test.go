@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/photoview/photoview/api/database/migrations"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/database/migrations"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 func TestExifMigration(t *testing.T) {

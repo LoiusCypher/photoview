@@ -3,7 +3,7 @@ package drivers
 import (
 	"strings"
 
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"gorm.io/gorm"
 )
 
