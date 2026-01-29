@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/otiai10/copy"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
-	"github.com/photoview/photoview/api/test_utils"
-	scanner_utils "github.com/photoview/photoview/api/test_utils/scanner"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/test_utils"
+	scanner_utils "github.com/loiuscypher/photoview/api/test_utils/scanner"
 	"github.com/stretchr/testify/assert"
 )
 

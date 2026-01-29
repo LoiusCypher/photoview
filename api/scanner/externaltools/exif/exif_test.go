@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	_ "github.com/photoview/photoview/api/test_utils/flags"
+	_ "github.com/loiuscypher/photoview/api/test_utils/flags"
 )
 
 func resetForTest() {

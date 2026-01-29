@@ -4,10 +4,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner/media_encoding"
-	"github.com/photoview/photoview/api/scanner/scanner_task"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_task"
 	"github.com/pkg/errors"
 )
 

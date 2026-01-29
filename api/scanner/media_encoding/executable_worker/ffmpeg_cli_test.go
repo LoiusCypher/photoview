@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
