@@ -237,7 +237,7 @@ func AddMediaAlbumToQueue(media *models.Media) error {
 
 	global_scanner_queue.mutex.Lock()
 	global_scanner_queue.addJob(&ScannerJob{
-		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, album, albumCache),
+		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, &album, albumCache),
 	})
 	global_scanner_queue.mutex.Unlock()
 

@@ -18,8 +18,9 @@ import {
 import { myUserPreferences } from './__generated__/myUserPreferences'
 import { TranslationFn } from '../../localization'
 import { changeTheme, getTheme } from '../../theme'
+/*
 import { exportAllFaces } from './__generated__/exportFaces'
-
+*/
 const languagePreferences = [
   { key: 1, label: 'English', value: LanguageTranslation.English },
   { key: 2, label: 'Français', value: LanguageTranslation.French },
@@ -66,7 +67,7 @@ const CHANGE_USER_PREFERENCES = gql`
     }
   }
 `
-
+/*
 const EXPORT_ALL_FACES = gql`
   mutation exportFaces {
     exportAllFaces {
@@ -75,7 +76,7 @@ const EXPORT_ALL_FACES = gql`
     }
   }
 `
-
+*/
 const MY_USER_PREFERENCES = gql`
   query myUserPreferences {
     myUserPreferences {
@@ -99,11 +100,11 @@ const LogoutButton = () => {
     </Button>
   )
 }
-
+/*
   const [exportAll] = useMutation<
     exportAllFaces
   >(EXPORT_ALL_FACES)
-
+*/
 
 const ExportAllFacesButton = () => {
   const { t } = useTranslation()
@@ -111,9 +112,9 @@ const ExportAllFacesButton = () => {
   return (
     <Button
       className="mb-4"
-      onClick={() => {
+      /* onClick={() => {
         exportAll()
-      }}
+      }} */
     >
       {t('settings.exportAllFaces', 'Export All Faces')}
     </Button>
@@ -155,7 +156,8 @@ const UserPreferences = () => {
         {t('settings.user_preferences.title', 'User preferences')}
       </SectionTitle>
       <LogoutButton />
-      <ExportAllFacesButton />
+      /*<MyTestButton /> */
+      /*<ExportAllFacesButton /> */
       <label htmlFor="user_pref_change_language_field">
         <InputLabelTitle>
           {t(
