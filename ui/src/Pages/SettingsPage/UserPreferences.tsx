@@ -153,7 +153,7 @@ const UserPreferences = () => {
         {t('settings.user_preferences.title', 'User preferences')}
       </SectionTitle>
       <LogoutButton />
-      /*<ExportAllFacesButton /> */
+      <ExportAllFacesButton />
       <label htmlFor="user_pref_change_language_field">
         <InputLabelTitle>
           {t(

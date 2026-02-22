@@ -74,12 +74,19 @@ func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.
 func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.ScannerResult, error) {
 	log.Printf("ExportAllFaces\n")
 
-	var faces models.ImageFace
-	result := r.DB(ctx).Find(&faces)
-	log.Printf("Faces: &d\n", result.RowsAffected)
+	db := r.DB(ctx)
+	var allImageFaces []*models.ImageFace
+	result := db.Find(&allImageFaces)
+	log.Printf("Face Count: %d\n", result.RowsAffected)
 
 	if result.Error != nil {
 		return nil, fmt.Errorf("get media from database: %w", result.Error)
+	}
+
+	for _, face := range allImageFaces {
+		if err := face.FillMedia(db); err != nil {
+			log.Printf("Face: %d %s\n", face.ID, face.Media.Path)
+		}
 	}
 
 	startMessage := "Export faces Done"
