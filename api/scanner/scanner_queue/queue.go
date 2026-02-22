@@ -231,12 +231,13 @@ func AddMediaAlbumToQueue(media *models.Media) error {
 	if err := global_scanner_queue.db.First(&album, media.AlbumID).Error; err != nil {
 		return err
 	}
+	log.Println( " AlbumPath", album.Path)
 
 	albumCache := scanner_cache.MakeAlbumCache()
 
 	global_scanner_queue.mutex.Lock()
 	global_scanner_queue.addJob(&ScannerJob{
-		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, &album, albumCache),
+		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, album, albumCache),
 	})
 	global_scanner_queue.mutex.Unlock()
 

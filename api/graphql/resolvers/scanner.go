@@ -82,7 +82,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.ScannerR
 		return nil, fmt.Errorf("get media from database: %w", result.Error)
 	}
 
-	startMessage := "Done"
+	startMessage := "Export faces Done"
 	return &models.ScannerResult{
 		Finished: true,
 		Success:  true,
