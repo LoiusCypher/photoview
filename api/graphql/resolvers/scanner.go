@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/loiuscypher/photoview/api/database/drivers"
@@ -74,17 +75,18 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.ScannerR
 	log.Printf("ExportAllFaces\n")
 
 	var faces models.ImageFace
-	result := db.Find(&faces)
+	result := r.DB(ctx).Find(&faces)
 	log.Printf("Faces: &d\n", result.RowsAffected)
 
 	if result.Error != nil {
-		return nil, fmt.Errorf("get media from database: %w", err)
+		return nil, fmt.Errorf("get media from database: %w", result.Error)
 	}
 
+	startMessage := "Done"
 	return &models.ScannerResult{
 		Finished: true,
 		Success:  true,
-		Message:  "Done",
+		Message:  &startMessage,
 	}, nil
 }
 
