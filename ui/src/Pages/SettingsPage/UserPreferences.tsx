@@ -68,8 +68,10 @@ const CHANGE_USER_PREFERENCES = gql`
 `
 
 const EXPORT_ALL_FACES = gql`
-  mutation exportFaces() {
-    exportAllFaces() {
+  mutation exportFaces {
+    exportAllFaces {
+      success
+      message
     }
   }
 `
