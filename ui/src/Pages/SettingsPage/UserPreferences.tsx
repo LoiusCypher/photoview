@@ -67,7 +67,7 @@ const CHANGE_USER_PREFERENCES = gql`
     }
   }
 `
-/*
+
 const EXPORT_ALL_FACES = gql`
   mutation exportFaces {
     exportAllFaces {
@@ -76,7 +76,7 @@ const EXPORT_ALL_FACES = gql`
     }
   }
 `
-*/
+
 const MY_USER_PREFERENCES = gql`
   query myUserPreferences {
     myUserPreferences {
