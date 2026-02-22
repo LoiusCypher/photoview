@@ -90,6 +90,25 @@ const LogoutButton = () => {
   )
 }
 
+  const myFunc = () => {
+      throw new Error('MyTestButton pressed')
+  }
+
+const MyTestButton = () => {
+  const { t } = useTranslation()
+
+  return (
+    <Button
+      className="mb-4"
+      onClick={() => {
+        location.href = '/logout'
+      }}
+    >
+      {t('settings.logout', 'My Test')}
+    </Button>
+  )
+}
+
 const UserPreferencesWrapper = styled.div`
   margin-bottom: 24px;
 `
@@ -125,6 +144,7 @@ const UserPreferences = () => {
         {t('settings.user_preferences.title', 'User preferences')}
       </SectionTitle>
       <LogoutButton />
+      <MyTestButton />
       <label htmlFor="user_pref_change_language_field">
         <InputLabelTitle>
           {t(
