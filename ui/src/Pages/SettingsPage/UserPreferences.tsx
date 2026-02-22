@@ -99,21 +99,19 @@ const LogoutButton = () => {
     </Button>
   )
 }
-/*
-  const [exportAll] = useMutation<
-    exportAllFaces
-  >(EXPORT_ALL_FACES)
-*/
 
 const ExportAllFacesButton = () => {
   const { t } = useTranslation()
 
+  const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
+
   return (
     <Button
       className="mb-4"
-      /* onClick={() => {
-        exportAll()
-      }} */
+      onClick={() => {
+        startExport()
+      }}
+      disabled={called}
     >
       {t('settings.exportAllFaces', 'Export All Faces')}
     </Button>
@@ -135,8 +133,6 @@ const UserPreferences = () => {
 
   const { data } = useQuery<myUserPreferences>(MY_USER_PREFERENCES)
 
-  const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
-
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
     changeUserPreferences,
     changeUserPreferencesVariables
@@ -157,7 +153,6 @@ const UserPreferences = () => {
         {t('settings.user_preferences.title', 'User preferences')}
       </SectionTitle>
       <LogoutButton />
-      /*<MyTestButton /> */
       /*<ExportAllFacesButton /> */
       <label htmlFor="user_pref_change_language_field">
         <InputLabelTitle>
