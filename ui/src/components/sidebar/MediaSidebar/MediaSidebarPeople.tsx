@@ -19,12 +19,12 @@ import { useDetachImageFaces } from '../../../Pages/PeoplePage/SingleFaceGroup/D
 import MoveImageFacesModal from '../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal'
 import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
 import styled from 'styled-components'
-import { scanMediaAction, scanMediaMutationVariables } from './__generated__/scanMediaAction'
+import { scanMediaAction, scanMediaVariables } from './__generated__/scanMediaAction'
 import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
 
 const SCAN_MEDIA_MUTATION = gql`
   mutation scanMediaAction( $mediaId: ID!) {
-    scanMediaAction( mediaId: $mediaId) {
+    scanMedia( mediaId: $mediaId) {
       success
       message
     }
@@ -211,7 +211,7 @@ type MediaSidebarFacesProps = {
 
 const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
-  const [startMediaScanner, { calledMedia }] = useMutation<scanMediaAction,scanMediaMutationVariables>(SCAN_MEDIA_MUTATION)
+  const [startMediaScanner, { calledMedia }] = useMutation<scanMediaAction,scanMediaVariables>(SCAN_MEDIA_MUTATION)
 
   const faceElms = (media.faces ?? []).map((face, i) => (
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />

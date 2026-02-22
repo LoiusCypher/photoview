@@ -159,6 +159,7 @@ type ComplexityRoot struct {
 		DeleteShareToken            func(childComplexity int, token string) int
 		DeleteUser                  func(childComplexity int, id int) int
 		DetachImageFaces            func(childComplexity int, imageFaceIDs []int) int
+		ExportAllFaces              func(childComplexity int) int
 		FavoriteMedia               func(childComplexity int, mediaID int, favorite bool) int
 		InitialSetupWizard          func(childComplexity int, username string, password string, rootPath string) int
 		MoveImageFaces              func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
@@ -166,7 +167,7 @@ type ComplexityRoot struct {
 		RecognizeUnlabeledFaces     func(childComplexity int) int
 		ResetAlbumCover             func(childComplexity int, albumID int) int
 		ScanAll                     func(childComplexity int) int
-		ScanMediaAction             func(childComplexity int, mediaID int) int
+		ScanMedia                   func(childComplexity int, mediaID int) int
 		ScanUser                    func(childComplexity int, userID int) int
 		SetAlbumCover               func(childComplexity int, coverID int) int
 		SetFaceGroupLabel           func(childComplexity int, faceGroupID int, label *string) int
@@ -322,7 +323,8 @@ type MutationResolver interface {
 	FavoriteMedia(ctx context.Context, mediaID int, favorite bool) (*models.Media, error)
 	ScanAll(ctx context.Context) (*models.ScannerResult, error)
 	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
-	ScanMediaAction(ctx context.Context, mediaID int) (*models.ScannerResult, error)
+	ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error)
+	ExportAllFaces(ctx context.Context) (*models.ScannerResult, error)
 	SetPeriodicScanInterval(ctx context.Context, interval int) (int, error)
 	SetScannerConcurrentWorkers(ctx context.Context, workers int) (int, error)
 	ShareAlbum(ctx context.Context, albumID int, expire *time.Time, password *string) (*models.ShareToken, error)
@@ -870,6 +872,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DetachImageFaces(childComplexity, args["imageFaceIDs"].([]int)), true
+	case "Mutation.exportAllFaces":
+		if e.complexity.Mutation.ExportAllFaces == nil {
+			break
+		}
+
+		return e.complexity.Mutation.ExportAllFaces(childComplexity), true
 	case "Mutation.favoriteMedia":
 		if e.complexity.Mutation.FavoriteMedia == nil {
 			break
@@ -937,17 +945,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ScanAll(childComplexity), true
-	case "Mutation.scanMediaAction":
-		if e.complexity.Mutation.ScanMediaAction == nil {
+	case "Mutation.scanMedia":
+		if e.complexity.Mutation.ScanMedia == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_scanMediaAction_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_scanMedia_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ScanMediaAction(childComplexity, args["mediaId"].(int)), true
+		return e.complexity.Mutation.ScanMedia(childComplexity, args["mediaId"].(int)), true
 	case "Mutation.scanUser":
 		if e.complexity.Mutation.ScanUser == nil {
 			break
@@ -1900,7 +1908,7 @@ func (ec *executionContext) field_Mutation_resetAlbumCover_args(ctx context.Cont
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_scanMediaAction_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_scanMedia_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "mediaId", ec.unmarshalNID2int)
@@ -5265,15 +5273,15 @@ func (ec *executionContext) fieldContext_Mutation_scanUser(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_scanMediaAction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_scanMedia(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_scanMediaAction,
+		ec.fieldContext_Mutation_scanMedia,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().ScanMediaAction(ctx, fc.Args["mediaId"].(int))
+			return ec.resolvers.Mutation().ScanMedia(ctx, fc.Args["mediaId"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -5295,7 +5303,7 @@ func (ec *executionContext) _Mutation_scanMediaAction(ctx context.Context, field
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_scanMediaAction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_scanMedia(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -5322,9 +5330,61 @@ func (ec *executionContext) fieldContext_Mutation_scanMediaAction(ctx context.Co
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_scanMediaAction_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_scanMedia_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_exportAllFaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_exportAllFaces,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Mutation().ExportAllFaces(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal *models.ScannerResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_exportAllFaces(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "finished":
+				return ec.fieldContext_ScannerResult_finished(ctx, field)
+			case "success":
+				return ec.fieldContext_ScannerResult_success(ctx, field)
+			case "progress":
+				return ec.fieldContext_ScannerResult_progress(ctx, field)
+			case "message":
+				return ec.fieldContext_ScannerResult_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ScannerResult", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -11925,9 +11985,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "scanMediaAction":
+		case "scanMedia":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_scanMediaAction(ctx, field)
+				return ec._Mutation_scanMedia(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "exportAllFaces":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_exportAllFaces(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

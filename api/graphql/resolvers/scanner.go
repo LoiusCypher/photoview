@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/loiuscypher/photoview/api/database/drivers"
@@ -52,8 +51,8 @@ func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.Sc
 	}, nil
 }
 
-// ScanMediaAction is the resolver for the scanMediaAction field.
-func (r *mutationResolver) ScanMediaAction(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+// ScanMedia is the resolver for the scanMedia field.
+func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
 	log.Printf("Media Id: %d\n", mediaID)
 	var media models.Media
 	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
@@ -67,6 +66,25 @@ func (r *mutationResolver) ScanMediaAction(ctx context.Context, mediaID int) (*m
 		Finished: false,
 		Success:  true,
 		Message:  &startMessage,
+	}, nil
+}
+
+// ExportAllFaces is the resolver for the exportAllFaces field.
+func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.ScannerResult, error) {
+	log.Printf("ExportAllFaces\n")
+
+	var faces models.ImageFace
+	result := db.Find(&faces)
+	log.Printf("Faces: &d\n", result.RowsAffected)
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	return &models.ScannerResult{
+		Finished: true,
+		Success:  true,
+		Message:  "Done",
 	}, nil
 }
 

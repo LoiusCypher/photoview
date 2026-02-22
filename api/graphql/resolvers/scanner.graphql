@@ -12,8 +12,11 @@ extend type Mutation {
   "Scan a single user for new media"
   scanUser(userId: ID!): ScannerResult! @isAdmin
 
-  "Scan a single media file for new media"
-  scanMediaAction(mediaId: ID!): ScannerResult! @isAdmin
+  "(Re-)Scan a single media file for faces"
+  scanMedia(mediaId: ID!): ScannerResult! @isAdmin
+
+  "Save al known portraits to dedicated folder"
+  exportAllFaces: ScannerResult! @isAdmin
 
   """
   Set how often, in seconds, the server should automatically scan for new media,

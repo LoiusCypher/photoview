@@ -226,7 +226,7 @@ func AddMediaAlbumToQueue(media *models.Media) error {
 	if media == nil {
 		return nil
 	}
-	log.Println( " AddMediaAlbumToQueue", media.ID)
+	log.Println( " AddMediaAlbumToQueue", media.ID, media.AlbumID)
 
 	if err := global_scanner_queue.db.First(&album, media.AlbumID).Error; err != nil {
 		return err

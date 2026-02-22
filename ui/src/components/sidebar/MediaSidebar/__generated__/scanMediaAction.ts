@@ -7,7 +7,7 @@
 // GraphQL mutation operation: scanMediaAction
 // ====================================================
 
-export interface scanMediaAction_scanMediaAction {
+export interface scanMediaAction_scanMedia {
   __typename: "ScannerResult";
   success: boolean;
   message: string | null;
@@ -15,9 +15,9 @@ export interface scanMediaAction_scanMediaAction {
 
 export interface scanMediaAction {
   /**
-   * Scan a single media file for new media
+   * (Re-)Scan a single media file for faces
    */
-  scanMediaAction: scanMediaAction_scanMediaAction;
+  scanMedia: scanMediaAction_scanMedia;
 }
 
 export interface scanMediaActionVariables {
