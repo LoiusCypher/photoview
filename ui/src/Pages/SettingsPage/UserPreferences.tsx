@@ -18,9 +18,8 @@ import {
 import { myUserPreferences } from './__generated__/myUserPreferences'
 import { TranslationFn } from '../../localization'
 import { changeTheme, getTheme } from '../../theme'
-/*
 import { exportAllFaces } from './__generated__/exportFaces'
-*/
+
 const languagePreferences = [
   { key: 1, label: 'English', value: LanguageTranslation.English },
   { key: 2, label: 'Français', value: LanguageTranslation.French },
@@ -135,6 +134,8 @@ const UserPreferences = () => {
   }
 
   const { data } = useQuery<myUserPreferences>(MY_USER_PREFERENCES)
+
+  const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
 
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
     changeUserPreferences,
