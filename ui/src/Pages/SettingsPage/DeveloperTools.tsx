@@ -10,19 +10,8 @@ import {
 } from './SettingsPage'
 import { exportFaces } from './__generated__/exportFaces'
 
-const EXPORT_ALL_FACES = gql`
-  mutation exportFaces {
-    exportAllFaces {
-      success
-      message
-    }
-  }
-`
-
 const ExportAllFacesButton = () => {
   const { t } = useTranslation()
-
-  const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
 
   return (
     <Button
