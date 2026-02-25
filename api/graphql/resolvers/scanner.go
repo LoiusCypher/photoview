@@ -10,12 +10,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/loiuscypher/photoview/api/database/drivers"
 	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/loiuscypher/photoview/api/scanner/periodic_scanner"
 	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
+	"gopkg.in/gographics/imagick.v3/imagick"
 	"gorm.io/gorm"
 )
 
@@ -76,17 +78,86 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.ScannerR
 
 	db := r.DB(ctx)
 	var allImageFaces []*models.ImageFace
-	result := db.Find(&allImageFaces)
+	result := db.Find(&allImageFaces).Order("MediaID asc, ID")
 	log.Printf("Face Count: %d\n", result.RowsAffected)
 
 	if result.Error != nil {
 		return nil, fmt.Errorf("get media from database: %w", result.Error)
 	}
 
+	imagick.Initialize()
+	defer imagick.Terminate()
+
 	for _, face := range allImageFaces {
+		log.Printf("Face ID: %d  FaceGroupID: %d\n", face.ID, face.FaceGroupID)
 		if err := face.FillMedia(db); err != nil {
-			log.Printf("Face: %d %s\n", face.ID, face.Media.Path)
+			log.Printf("Err: FillMedia %s\n", err)
+			continue
 		}
+		log.Printf(" Media ID: %d  Path: %s  URL Count: %d  Rectangle: %f %f %f %f\n", face.Media.ID, face.Media.Path, len(face.Media.MediaURL), face.Rectangle.MinX, face.Rectangle.MaxX, face.Rectangle.MinY, face.Rectangle.MaxY)
+
+		mw := imagick.NewMagickWand()
+		defer mw.Destroy()
+		if err := mw.ReadImage(face.Media.Path); err != nil {
+			log.Printf("Err: ReadImage %s\n", err)
+			continue
+		}
+		if err := mw.AutoOrientImage(); err != nil {
+			log.Printf("Err: AutoOrientImage %s\n", err)
+			continue
+		}
+		if err := mw.StripImage(); err != nil {
+			log.Printf("Err: StripImage %s\n", err)
+			continue
+		}
+		const framing_factor = 0.01
+		width := mw.GetImageWidth()
+		x := int(float64(width) * (1.0 - framing_factor) * face.Rectangle.MinX)
+		height := mw.GetImageHeight()
+		y := int(float64(height) * (1.0 - framing_factor) * face.Rectangle.MinY)
+		f_width := uint(int(float64(width)*(1.0+2.0*framing_factor)*face.Rectangle.MaxX) - x)
+		f_height := uint(int(float64(height)*(1.0+2.0*framing_factor)*face.Rectangle.MaxY) - y)
+		log.Printf(" Width: %d  Height: %d  X: %d  Y: %d  Width: %d  Height: %d\n", width, height, x, y, f_height, f_width)
+		if err := mw.CropImage(f_width, f_height, x, y); err != nil {
+			log.Printf("Err: CropImage %s\n", err)
+			continue
+		}
+		if err := mw.SetImagePage(f_width, f_height, x, y); err != nil {
+			log.Printf("Err: SetImagePage %s\n", err)
+			continue
+		}
+		r_name := "/home/photoview/media-cache/portraits"
+		d_name := fmt.Sprintf("%s/%08d", r_name, face.FaceGroupID)
+		if err := os.MkdirAll(d_name, 0775); err != nil {
+
+			log.Printf("Err: MkdirAll %s\n", err)
+			continue
+		}
+		s_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", r_name, face.Media.ID, face.ID, f_width, f_height, x, y)
+		if err := mw.WriteImage(s_name); err != nil {
+			log.Printf("Err: WriteImage %s\n", err)
+			continue
+		}
+		f_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", d_name, face.Media.ID, face.ID, f_width, f_height, x, y)
+		log.Printf(" Filename: %s\n", f_name)
+		if err := mw.WriteImage(f_name); err != nil {
+			log.Printf("Err: WriteImage %s\n", err)
+			continue
+		}
+
+		/*
+			if face.Media.MediaURL == nil {
+				if err := db.Model(&face.Media).Association("MediaURL").Find(&face.Media.MediaURL); err != nil {
+					log.Printf("Err: %w\n", err)
+					continue
+				}
+
+			}
+
+			for _, url := range face.Media.MediaURL {
+				log.Printf("  Media URL: %s %s\n", url.URL(), url.Purpose)
+			}
+		*/
 	}
 
 	startMessage := "Export faces Done"
