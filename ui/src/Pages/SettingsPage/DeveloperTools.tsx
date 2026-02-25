@@ -8,7 +8,7 @@ import {
   InputLabelTitle,
   SectionTitle,
 } from './SettingsPage'
-import { exportAllFaces } from './__generated__/exportFaces'
+import { exportFaces } from './__generated__/exportFaces'
 
 const EXPORT_ALL_FACES = gql`
   mutation exportFaces {
@@ -21,17 +21,14 @@ const EXPORT_ALL_FACES = gql`
 
 const ExportAllFacesButton = () => {
   const { t } = useTranslation()
+
   const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
 
   return (
     <Button
       className="mb-4"
-      onClick={() => {
-        startExport()
-      }}
-      disabled={called}
     >
-      {t('settings.export_all_faces', 'Export All Faces')}
+      {t('settings.export_all_faces', 'Export All Faces 1')}
     </Button>
   )
 }
@@ -50,7 +47,7 @@ const DeveloperTools = () => {
       </SectionTitle>
       <label htmlFor="dev_tools_export_all_faces_button">
         <InputLabelTitle>
-          {t('settings.developer_tools.export_all.title', 'Export Porttaits')}
+          {t('settings.developer_tools.export_all.title', 'Export Portraits')}
         </InputLabelTitle>
         <InputLabelDescription>
           {t(
