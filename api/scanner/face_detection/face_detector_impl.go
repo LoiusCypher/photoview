@@ -12,6 +12,7 @@ import (
 	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 type faceDetector struct {
@@ -94,18 +95,22 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 		return err
 	}
 
+	var orient int64
 	var thumbnailURL *models.MediaURL
 	for _, url := range media.MediaURL {
 		if url.Purpose == models.PhotoHighRes {
 			thumbnailURL = &url
 			thumbnailURL.Media = media
 			log.Println("  HighRes URL found")
+			orient = 1
 			break
 		}
 		if url.Purpose == models.MediaOriginal {
 			thumbnailURL = &url
 			thumbnailURL.Media = media
 			log.Println("  Original URL found")
+			log.Println("   Exif  ID", media.Exif.ID, " Orientation", *media.Exif.Orientation)
+			orient = *media.Exif.Orientation
 			// break
 		}
 		// if url.Purpose == models.PhotoThumbnail {
@@ -126,7 +131,35 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 	}
 
 	fd.mutex.Lock()
-	faces, err := fd.rec.RecognizeFile(thumbnailPath)
+	var faces []face.Face
+	if orient != 1 {
+		mw := imagick.NewMagickWand()
+		defer mw.Destroy()
+
+		if err = mw.ReadImage(thumbnailPath); err != nil {
+			log.Printf("Err: ReadImage %s\n", err)
+			return errors.Wrap(err, "error read faces")
+		}
+		if err = mw.AutoOrientImage(); err != nil {
+			log.Printf("Err: AutoOrientImage %s\n", err)
+			return errors.Wrap(err, "error read faces")
+		}
+		if err = mw.SetImageFormat("JPEG"); err != nil {
+			log.Printf("Err: SetImageFormat %s\n", err)
+			return errors.Wrap(err, "error read faces")
+		}
+		var blob []byte
+		if blob, err = mw.GetImageBlob(); err != nil {
+			log.Printf("Err: GetImageBlob %s\n", err)
+			return errors.Wrap(err, "error read faces")
+		}
+		if faces, err = fd.rec.Recognize(blob); err != nil {
+			log.Printf("Err: Recognize %s\n", err)
+			return errors.Wrap(err, "error read faces")
+		}
+	} else {
+		faces, err = fd.rec.RecognizeFile(thumbnailPath)
+	}
 	fd.mutex.Unlock()
 
 	if err != nil {
