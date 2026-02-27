@@ -9,7 +9,7 @@ import {
   SectionTitle,
 } from './SettingsPage'
 import { exportFaces } from './__generated__/exportFaces'
-import { checkGroups } from './__generated__/checkGroups'
+import { checkGroups, checkGroupsVariables } from './__generated__/checkGroups'
 
 const EXPORT_ALL_FACES = gql`
   mutation exportFaces {
@@ -20,8 +20,8 @@ const EXPORT_ALL_FACES = gql`
   }
 `
 const CHECK_FACE_GROUP = gql`
-  mutation checkGroups($groupId: ID!) {
-    checkFaceGroup(groupId: $groupId) {
+  mutation checkGroups($faceGroupID: ID!) {
+    checkFaceGroup(faceGroupID: $faceGroupID) {
       success
       message
     }
@@ -47,7 +47,7 @@ const ExportAllFacesButton = () => {
 
 const CheckFaceGroupButton = () => {
   const { t } = useTranslation()
-  const [startCheck, { called }] = useMutation<checkGroups, checkGroupVariables>(CHECK_FACE_GROUP, "2")
+  const [startCheck, { called }] = useMutation<checkGroups, checkGroupsVariables>(CHECK_FACE_GROUP, { variables: { faceGroupID: '2', }, } )
 
   return (
     <Button
@@ -86,9 +86,9 @@ const DeveloperTools = () => {
           )}
         </InputLabelDescription>
       </label>
-      <SectionTitle nospace>
-        {t('settings.developer_tools.title', 'Under Construction')}
-      </SectionTitle>
+      <ExportAllFacesButton
+        id="dev_tools_export_all_faces_button"
+      />
       <label htmlFor="dev_tools_check_face_gruop_button">
         <InputLabelTitle>
           {t('settings.developer_tools.check_group.title', 'Check Face Group')}

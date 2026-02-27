@@ -21,5 +21,5 @@ export interface checkGroups {
 }
 
 export interface checkGroupsVariables {
-  groupId: string;
+  faceGroupID: string;
 }
