@@ -117,7 +117,7 @@ func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) 
 	log.Printf("CheckFaceGroup %d\n", faceGroupID)
 	if face_detection.GlobalFaceDetector == nil {
 		errMessage := "No GlobalFaceDetector"
-		return &models.DevCmdResult{ Success: false, Message: &errartMessage, }, nil
+		return &models.DevCmdResult{ Success: false, Message: &errMessage, }, nil
 	}
 
 	face_detection.GlobalFaceDetector.CheckFaceGroup(int32(faceGroupID))

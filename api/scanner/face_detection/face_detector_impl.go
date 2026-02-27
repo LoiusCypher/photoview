@@ -359,20 +359,24 @@ func (fd *faceDetector) CheckFaceGroup(groupID int32) {
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
+	log.Printf("CheckFaceGroup %d\n", groupID)
+
 	descriptor := fd.faceDescriptors[0]
 	faceGroupID := fd.faceGroupIDs[0]
 	imageFaceID := fd.imageFaceIDs[0]
-	fd.faceDescriptor = fd.faceDescriptors[1:]
+	fd.faceDescriptors = fd.faceDescriptors[1:]
 	fd.faceGroupIDs = fd.faceGroupIDs[1:]
 	fd.imageFaceIDs = fd.imageFaceIDs[1:]
 	for i := range fd.faceGroupIDs {
-		if fd.faceGroupIDs[i] == groupID {
-			match := fd.classifyDescriptor(descriptor)
+		// if fd.faceGroupIDs[i] == groupID {
+		if true {
+			// match := fd.classifyDescriptor(descriptor)
+			match := int32(fd.rec.ClassifyThreshold(descriptor, 0.2)
 			if match != faceGroupID {
-				log.Printf("Face %d group %d different\n", imageFaceID, faceGroupID, match)
+				log.Printf("Face %d group %d different %d\n", imageFaceID, faceGroupID, match)
 			} else {
 				log.Printf("Face %d group %d confirmed\n", imageFaceID, faceGroupID)
-			]
+			}
 			t_descriptor := fd.faceDescriptors[i]
 			t_faceGroupID := fd.faceGroupIDs[i]
 			t_imageFaceID := fd.imageFaceIDs[i]
@@ -384,8 +388,8 @@ func (fd *faceDetector) CheckFaceGroup(groupID int32) {
 			imageFaceID = t_imageFaceID
 		}
 	}
-	append(fd.faceDescriptors, descriptor)
-	append(fd.faceGroupIDs, faceGroupID)
-	append(fd.imageFaceIDs, imageFaceID)
+	fd.faceDescriptors = append(fd.faceDescriptors, descriptor)
+	fd.faceGroupIDs = append(fd.faceGroupIDs, faceGroupID)
+	fd.imageFaceIDs = append(fd.imageFaceIDs, imageFaceID)
 }
 
