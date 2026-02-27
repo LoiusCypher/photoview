@@ -1,0 +1,16 @@
+type DevCmdResult {
+  success: Boolean!
+  message: String
+}
+
+extend type Mutation {
+
+  "Save all known portraits to dedicated folder"
+  exportAllFaces: DevCmdResult! @isAdmin
+
+  "Check FaceGroup consistency"
+  checkFaceGroup(faceGroupID: ID!): DevCmdResult! @isAdmin
+
+  "Set threshold for face classification"
+  setFaceClassifyThreshold(threshold: Float!): Float! @isAdmin
+}

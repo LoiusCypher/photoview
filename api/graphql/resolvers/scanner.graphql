@@ -15,9 +15,6 @@ extend type Mutation {
   "(Re-)Scan a single media file for faces"
   scanMedia(mediaId: ID!): ScannerResult! @isAdmin
 
-  "Save al known portraits to dedicated folder"
-  exportAllFaces: ScannerResult! @isAdmin
-
   """
   Set how often, in seconds, the server should automatically scan for new media,
   a value of 0 will disable periodic scans

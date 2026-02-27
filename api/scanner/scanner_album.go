@@ -85,11 +85,15 @@ func ValidRootPath(rootPath string) bool {
 }
 
 func ScanAlbum(ctx scanner_task.TaskContext) error {
+	log.Warn(nil, "ScanAlbum", ctx.GetAlbum().Path, "error", " ")
 	newCtx, err := scanner_tasks.Tasks.BeforeScanAlbum(ctx)
+	log.Warn(nil, "ScanAlbum", ctx.GetAlbum().Path, "error", " ")
+	log.Warn(nil, "ScanAlbum", "NewCtx", ctx.GetAlbum().Path, "error", " ")
 	if err != nil {
 		return errors.Wrapf(err, "before scan album (%s)", ctx.GetAlbum().Path)
 	}
 	ctx = newCtx
+	log.Warn(nil, "ScanAlbum", "NewCtx", ctx.GetAlbum().Path, "error", " ")
 
 	// Scan for photos
 	albumMedia, err := findMediaForAlbum(ctx)

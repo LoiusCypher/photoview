@@ -4,18 +4,22 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: exportFaces
+// GraphQL mutation operation: checkGroups
 // ====================================================
 
-export interface exportFaces_exportAllFaces {
+export interface checkGroups_checkFaceGroup {
   __typename: "DevCmdResult";
   success: boolean;
   message: string | null;
 }
 
-export interface exportFaces {
+export interface checkGroups {
   /**
-   * Save all known portraits to dedicated folder
+   * Check FaceGroup consistency
    */
-  exportAllFaces: exportFaces_exportAllFaces;
+  checkFaceGroup: checkGroups_checkFaceGroup;
+}
+
+export interface checkGroupsVariables {
+  groupId: string;
 }

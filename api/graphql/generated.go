@@ -82,6 +82,11 @@ type ComplexityRoot struct {
 		Longitude func(childComplexity int) int
 	}
 
+	DevCmdResult struct {
+		Message func(childComplexity int) int
+		Success func(childComplexity int) int
+	}
+
 	FaceGroup struct {
 		ID             func(childComplexity int) int
 		ImageFaceCount func(childComplexity int) int
@@ -154,6 +159,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AuthorizeUser               func(childComplexity int, username string, password string) int
 		ChangeUserPreferences       func(childComplexity int, language *string) int
+		CheckFaceGroup              func(childComplexity int, faceGroupID int) int
 		CombineFaceGroups           func(childComplexity int, destinationFaceGroupID int, sourceFaceGroupIDs []int) int
 		CreateUser                  func(childComplexity int, username string, password *string, admin bool) int
 		DeleteShareToken            func(childComplexity int, token string) int
@@ -170,6 +176,7 @@ type ComplexityRoot struct {
 		ScanMedia                   func(childComplexity int, mediaID int) int
 		ScanUser                    func(childComplexity int, userID int) int
 		SetAlbumCover               func(childComplexity int, coverID int) int
+		SetFaceClassifyThreshold    func(childComplexity int, threshold float64) int
 		SetFaceGroupLabel           func(childComplexity int, faceGroupID int, label *string) int
 		SetPeriodicScanInterval     func(childComplexity int, interval int) int
 		SetScannerConcurrentWorkers func(childComplexity int, workers int) int
@@ -320,11 +327,13 @@ type MutationResolver interface {
 	MoveImageFaces(ctx context.Context, imageFaceIDs []int, destinationFaceGroupID int) (*models.FaceGroup, error)
 	RecognizeUnlabeledFaces(ctx context.Context) ([]*models.ImageFace, error)
 	DetachImageFaces(ctx context.Context, imageFaceIDs []int) (*models.FaceGroup, error)
+	ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error)
+	CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error)
+	SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error)
 	FavoriteMedia(ctx context.Context, mediaID int, favorite bool) (*models.Media, error)
 	ScanAll(ctx context.Context) (*models.ScannerResult, error)
 	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
 	ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error)
-	ExportAllFaces(ctx context.Context) (*models.ScannerResult, error)
 	SetPeriodicScanInterval(ctx context.Context, interval int) (int, error)
 	SetScannerConcurrentWorkers(ctx context.Context, workers int) (int, error)
 	ShareAlbum(ctx context.Context, albumID int, expire *time.Time, password *string) (*models.ShareToken, error)
@@ -494,6 +503,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Coordinates.Longitude(childComplexity), true
+
+	case "DevCmdResult.message":
+		if e.complexity.DevCmdResult.Message == nil {
+			break
+		}
+
+		return e.complexity.DevCmdResult.Message(childComplexity), true
+	case "DevCmdResult.success":
+		if e.complexity.DevCmdResult.Success == nil {
+			break
+		}
+
+		return e.complexity.DevCmdResult.Success(childComplexity), true
 
 	case "FaceGroup.id":
 		if e.complexity.FaceGroup.ID == nil {
@@ -817,6 +839,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ChangeUserPreferences(childComplexity, args["language"].(*string)), true
+	case "Mutation.checkFaceGroup":
+		if e.complexity.Mutation.CheckFaceGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_checkFaceGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CheckFaceGroup(childComplexity, args["faceGroupID"].(int)), true
 	case "Mutation.combineFaceGroups":
 		if e.complexity.Mutation.CombineFaceGroups == nil {
 			break
@@ -978,6 +1011,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.SetAlbumCover(childComplexity, args["coverID"].(int)), true
+	case "Mutation.setFaceClassifyThreshold":
+		if e.complexity.Mutation.SetFaceClassifyThreshold == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setFaceClassifyThreshold_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetFaceClassifyThreshold(childComplexity, args["threshold"].(float64)), true
 	case "Mutation.setFaceGroupLabel":
 		if e.complexity.Mutation.SetFaceGroupLabel == nil {
 			break
@@ -1652,7 +1696,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "resolvers/album.graphql" "resolvers/faces.graphql" "resolvers/media.graphql" "resolvers/media_geo_json.graphql" "resolvers/notification.graphql" "resolvers/root.graphql" "resolvers/scanner.graphql" "resolvers/search.graphql" "resolvers/share_token.graphql" "resolvers/site_info.graphql" "resolvers/timeline.graphql" "resolvers/user.graphql"
+//go:embed "resolvers/album.graphql" "resolvers/faces.graphql" "resolvers/faces_dev_tools.graphql" "resolvers/media.graphql" "resolvers/media_geo_json.graphql" "resolvers/notification.graphql" "resolvers/root.graphql" "resolvers/scanner.graphql" "resolvers/search.graphql" "resolvers/share_token.graphql" "resolvers/site_info.graphql" "resolvers/timeline.graphql" "resolvers/user.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1666,6 +1710,7 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "resolvers/album.graphql", Input: sourceData("resolvers/album.graphql"), BuiltIn: false},
 	{Name: "resolvers/faces.graphql", Input: sourceData("resolvers/faces.graphql"), BuiltIn: false},
+	{Name: "resolvers/faces_dev_tools.graphql", Input: sourceData("resolvers/faces_dev_tools.graphql"), BuiltIn: false},
 	{Name: "resolvers/media.graphql", Input: sourceData("resolvers/media.graphql"), BuiltIn: false},
 	{Name: "resolvers/media_geo_json.graphql", Input: sourceData("resolvers/media_geo_json.graphql"), BuiltIn: false},
 	{Name: "resolvers/notification.graphql", Input: sourceData("resolvers/notification.graphql"), BuiltIn: false},
@@ -1755,6 +1800,17 @@ func (ec *executionContext) field_Mutation_changeUserPreferences_args(ctx contex
 		return nil, err
 	}
 	args["language"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_checkFaceGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "faceGroupID", ec.unmarshalNID2int)
+	if err != nil {
+		return nil, err
+	}
+	args["faceGroupID"] = arg0
 	return args, nil
 }
 
@@ -1938,6 +1994,17 @@ func (ec *executionContext) field_Mutation_setAlbumCover_args(ctx context.Contex
 		return nil, err
 	}
 	args["coverID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setFaceClassifyThreshold_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "threshold", ec.unmarshalNFloat2float64)
+	if err != nil {
+		return nil, err
+	}
+	args["threshold"] = arg0
 	return args, nil
 }
 
@@ -2950,6 +3017,64 @@ func (ec *executionContext) fieldContext_Coordinates_longitude(_ context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DevCmdResult_success(ctx context.Context, field graphql.CollectedField, obj *models.DevCmdResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DevCmdResult_success,
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DevCmdResult_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DevCmdResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DevCmdResult_message(ctx context.Context, field graphql.CollectedField, obj *models.DevCmdResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DevCmdResult_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_DevCmdResult_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DevCmdResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5069,6 +5194,168 @@ func (ec *executionContext) fieldContext_Mutation_detachImageFaces(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_exportAllFaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_exportAllFaces,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Mutation().ExportAllFaces(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_exportAllFaces(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_DevCmdResult_success(ctx, field)
+			case "message":
+				return ec.fieldContext_DevCmdResult_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DevCmdResult", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_checkFaceGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_checkFaceGroup,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CheckFaceGroup(ctx, fc.Args["faceGroupID"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_checkFaceGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_DevCmdResult_success(ctx, field)
+			case "message":
+				return ec.fieldContext_DevCmdResult_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DevCmdResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_checkFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setFaceClassifyThreshold(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setFaceClassifyThreshold,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetFaceClassifyThreshold(ctx, fc.Args["threshold"].(float64))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal float64
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setFaceClassifyThreshold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setFaceClassifyThreshold_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_favoriteMedia(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5333,58 +5620,6 @@ func (ec *executionContext) fieldContext_Mutation_scanMedia(ctx context.Context,
 	if fc.Args, err = ec.field_Mutation_scanMedia_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_exportAllFaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_exportAllFaces,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().ExportAllFaces(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.IsAdmin == nil {
-					var zeroVal *models.ScannerResult
-					return zeroVal, errors.New("directive isAdmin is not implemented")
-				}
-				return ec.directives.IsAdmin(ctx, nil, directive0)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_exportAllFaces(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "finished":
-				return ec.fieldContext_ScannerResult_finished(ctx, field)
-			case "success":
-				return ec.fieldContext_ScannerResult_success(ctx, field)
-			case "progress":
-				return ec.fieldContext_ScannerResult_progress(ctx, field)
-			case "message":
-				return ec.fieldContext_ScannerResult_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ScannerResult", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -11041,6 +11276,47 @@ func (ec *executionContext) _Coordinates(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var devCmdResultImplementors = []string{"DevCmdResult"}
+
+func (ec *executionContext) _DevCmdResult(ctx context.Context, sel ast.SelectionSet, obj *models.DevCmdResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, devCmdResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DevCmdResult")
+		case "success":
+			out.Values[i] = ec._DevCmdResult_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._DevCmdResult_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var faceGroupImplementors = []string{"FaceGroup"}
 
 func (ec *executionContext) _FaceGroup(ctx context.Context, sel ast.SelectionSet, obj *models.FaceGroup) graphql.Marshaler {
@@ -11964,6 +12240,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "exportAllFaces":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_exportAllFaces(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "checkFaceGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_checkFaceGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "setFaceClassifyThreshold":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setFaceClassifyThreshold(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "favoriteMedia":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_favoriteMedia(ctx, field)
@@ -11988,13 +12285,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "scanMedia":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_scanMedia(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "exportAllFaces":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_exportAllFaces(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -13621,6 +13911,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNDevCmdResult2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx context.Context, sel ast.SelectionSet, v models.DevCmdResult) graphql.Marshaler {
+	return ec._DevCmdResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx context.Context, sel ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DevCmdResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFaceGroup2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroup(ctx context.Context, sel ast.SelectionSet, v models.FaceGroup) graphql.Marshaler {

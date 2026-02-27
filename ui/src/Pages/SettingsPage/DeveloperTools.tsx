@@ -9,10 +9,19 @@ import {
   SectionTitle,
 } from './SettingsPage'
 import { exportFaces } from './__generated__/exportFaces'
+import { checkGroups } from './__generated__/checkGroups'
 
 const EXPORT_ALL_FACES = gql`
   mutation exportFaces {
     exportAllFaces {
+      success
+      message
+    }
+  }
+`
+const CHECK_FACE_GROUP = gql`
+  mutation checkGroups($groupId: ID!) {
+    checkFaceGroup(groupId: $groupId) {
       success
       message
     }
@@ -32,6 +41,23 @@ const ExportAllFacesButton = () => {
       disabled={called}
     >
       {t('settings.export_all_faces', 'Export All Faces')}
+    </Button>
+  )
+}
+
+const CheckFaceGroupButton = () => {
+  const { t } = useTranslation()
+  const [startCheck, { called }] = useMutation<checkGroups, checkGroupVariables>(CHECK_FACE_GROUP, "2")
+
+  return (
+    <Button
+      className="mb-4"
+      onClick={() => {
+        startCheck()
+      }}
+      disabled={called}
+    >
+      {t('settings.check_face_group', 'Check Face Group')}
     </Button>
   )
 }
@@ -60,8 +86,22 @@ const DeveloperTools = () => {
           )}
         </InputLabelDescription>
       </label>
-      <ExportAllFacesButton
-        id="dev_tools_export_all_faces_button"
+      <SectionTitle nospace>
+        {t('settings.developer_tools.title', 'Under Construction')}
+      </SectionTitle>
+      <label htmlFor="dev_tools_check_face_gruop_button">
+        <InputLabelTitle>
+          {t('settings.developer_tools.check_group.title', 'Check Face Group')}
+        </InputLabelTitle>
+        <InputLabelDescription>
+          {t(
+            'settings.developer_tools.check_group.description',
+            'Check face goup member consistancy'
+          )}
+        </InputLabelDescription>
+      </label>
+      <CheckFaceGroupButton
+        id="dev_tools_check_face_gruop_button"
       />
     </DeveloperToolsWrapper>
   )

@@ -176,7 +176,7 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 }
 
 func (fd *faceDetector) classifyDescriptor(descriptor face.Descriptor) int32 {
-	return int32(fd.rec.ClassifyThreshold(descriptor, 0.1))
+	return int32(fd.rec.ClassifyThreshold(descriptor, 0.15))
 }
 
 func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string) error {

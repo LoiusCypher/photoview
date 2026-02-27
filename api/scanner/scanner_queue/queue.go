@@ -34,6 +34,8 @@ func NewScannerJob(ctx scanner_task.TaskContext) ScannerJob {
 }
 
 func (job *ScannerJob) Run(db *gorm.DB) {
+	log.Printf("Run  ")
+	log.Printf("Run  ID %d", job.ctx.GetAlbum().ID )
 	err := scanner.ScanAlbum(job.ctx)
 	if err != nil {
 		scanner_utils.ScannerError(nil, "Failed to scan album: %v", err)
@@ -234,6 +236,7 @@ func AddMediaAlbumToQueue(media *models.Media) error {
 	log.Println( " AlbumPath", album.Path)
 
 	albumCache := scanner_cache.MakeAlbumCache()
+	log.Println( " AlbumCache", albumCache)
 
 	global_scanner_queue.mutex.Lock()
 	global_scanner_queue.addJob(&ScannerJob{

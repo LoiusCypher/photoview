@@ -10,6 +10,7 @@ type SiteInfo struct {
 	InitialSetup         bool `gorm:"not null"`
 	PeriodicScanInterval int  `gorm:"not null"`
 	ConcurrentWorkers    int  `gorm:"not null"`
+	ClassifyFaceThreshold float64 `gorm:"not null"`
 }
 
 func (SiteInfo) TableName() string {
@@ -26,6 +27,7 @@ func DefaultSiteInfo(db *gorm.DB) SiteInfo {
 		InitialSetup:         true,
 		PeriodicScanInterval: 0,
 		ConcurrentWorkers:    defaultConcurrentWorkers,
+		ClassifyFaceThreshold: 0.2,
 	}
 }
 
