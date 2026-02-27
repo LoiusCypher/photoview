@@ -14,6 +14,7 @@ import (
 	"github.com/loiuscypher/photoview/api/graphql/models"
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"gorm.io/gorm"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 )
 
 // ExportAllFaces is the resolver for the exportAllFaces field.
@@ -114,6 +115,13 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 // CheckFaceGroup is the resolver for the checkFaceGroup field.
 func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error) {
 	log.Printf("CheckFaceGroup %d\n", faceGroupID)
+	if face_detection.GlobalFaceDetector == nil {
+		errMessage := "No GlobalFaceDetector"
+		return &models.DevCmdResult{ Success: false, Message: &errartMessage, }, nil
+	}
+
+	face_detection.GlobalFaceDetector.CheckFaceGroup(int32(faceGroupID))
+
 	startMessage := "Check face group Done"
 	return &models.DevCmdResult{
 		Success: true,

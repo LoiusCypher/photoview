@@ -354,3 +354,38 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 
 	return updatedImageFaces, nil
 }
+
+func (fd *faceDetector) CheckFaceGroup(groupID int32) {
+	fd.mutex.Lock()
+	defer fd.mutex.Unlock()
+
+	descriptor := fd.faceDescriptors[0]
+	faceGroupID := fd.faceGroupIDs[0]
+	imageFaceID := fd.imageFaceIDs[0]
+	fd.faceDescriptor = fd.faceDescriptors[1:]
+	fd.faceGroupIDs = fd.faceGroupIDs[1:]
+	fd.imageFaceIDs = fd.imageFaceIDs[1:]
+	for i := range fd.faceGroupIDs {
+		if fd.faceGroupIDs[i] == groupID {
+			match := fd.classifyDescriptor(descriptor)
+			if match != faceGroupID {
+				log.Printf("Face %d group %d different\n", imageFaceID, faceGroupID, match)
+			} else {
+				log.Printf("Face %d group %d confirmed\n", imageFaceID, faceGroupID)
+			]
+			t_descriptor := fd.faceDescriptors[i]
+			t_faceGroupID := fd.faceGroupIDs[i]
+			t_imageFaceID := fd.imageFaceIDs[i]
+			fd.faceDescriptors[i] = descriptor
+			fd.faceGroupIDs[i] = faceGroupID
+			fd.imageFaceIDs[i] = imageFaceID
+			descriptor = t_descriptor
+			faceGroupID = t_faceGroupID
+			imageFaceID = t_imageFaceID
+		}
+	}
+	append(fd.faceDescriptors, descriptor)
+	append(fd.faceGroupIDs, faceGroupID)
+	append(fd.imageFaceIDs, imageFaceID)
+}
+
