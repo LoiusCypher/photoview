@@ -18,12 +18,12 @@ export const CLASSIFY_FACE_THRESHOLD_QUERY = gql`
 
 export const ClassifyFaceThresholdInput = () => {
   const { t } = useTranslation()
-  const threshold = useQuery<classifyFaceThresholdQuery>(CLASSIFY_FACE_THRESHOLD_QUERY, {
+  const threshold = useQuery<classifyFaceThresholdQuery>(CLASSIFY_FACE_THRESHOLD_QUERY) /* , {
     onCompleted(data) {
       const queryClassifyThreshold = data.siteInfo.classifyFaceThreshold
     },
   })
-
+*/
   return (
           <TextField
             id="classify_face_Threshold"

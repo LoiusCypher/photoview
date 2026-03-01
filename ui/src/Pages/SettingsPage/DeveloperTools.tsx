@@ -7,9 +7,8 @@ import {
   SectionTitle,
 } from './SettingsPage'
 import { CheckFaceGroupButton } from './Dev_CheckFaceGroups'
-import { ClassifyFaceThresholdInput } from './Dev_ClassifyFaceThreshold'
 import { ExportAllFacesButton } from './Dev_ExportFaces'
-import { ScanFacesOnOriginalFilesCheckbox } from './Dev_ScanOriginalFiles'
+import ScanFacesOnOriginalFilesCheckbox from './Dev_ScanOriginalFiles'
 
 const DeveloperToolsWrapper = styled.div`
   margin-bottom: 24px;
@@ -20,8 +19,7 @@ const DeveloperTools = () => {
 
   return (
     <DeveloperToolsWrapper>
-      <ClassifyFaceThresholdInput
-      />
+      <ScanFacesOnOriginalFilesCheckbox />
       <SectionTitle nospace>
         {t('settings.developer_tools.title', 'Under Construction')}
       </SectionTitle>

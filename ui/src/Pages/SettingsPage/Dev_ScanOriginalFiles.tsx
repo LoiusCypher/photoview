@@ -1,11 +1,10 @@
-import { useMutation, gql } from '@apollo/client'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, gql } from '@apollo/client'
-import { Checkbox } from '../../primitives/form/Checkbox'
+import Checkbox from '../../primitives/form/Checkbox'
 import { scanFacesOnOriginalFilesQuery } from './__generated__/scanFacesOnOriginalFilesQuery'
 
-export const SCAN_ON_ORGINAL_FILES_QUERY = gql`
+const SCAN_ON_ORGINAL_FILES_QUERY = gql`
   query scanFacesOnOriginalFilesQuery {
     siteInfo {
       scanFacesOnOriginalFiles
@@ -13,9 +12,9 @@ export const SCAN_ON_ORGINAL_FILES_QUERY = gql`
   }
 `
 
-export const ScanFacesOnOriginalFilesCheckbox = () => {
+const ScanFacesOnOriginalFilesCheckbox = () => {
   const { t } = useTranslation()
-  const scanOriginalFiles = useQuery<scanFacesOnOriginalFilesQuery>(SCAN_ON_ORGINAL_FILES_QUERY)
+  const { scanOriginalFiles } = useQuery<scanFacesOnOriginalFilesQuery>(SCAN_ON_ORGINAL_FILES_QUERY)
 
   return (
       <Checkbox
@@ -29,3 +28,4 @@ export const ScanFacesOnOriginalFilesCheckbox = () => {
   )
 }
 
+export default ScanFacesOnOriginalFilesCheckbox
