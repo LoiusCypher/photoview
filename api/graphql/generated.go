@@ -242,10 +242,12 @@ type ComplexityRoot struct {
 	}
 
 	SiteInfo struct {
-		ConcurrentWorkers    func(childComplexity int) int
-		FaceDetectionEnabled func(childComplexity int) int
-		InitialSetup         func(childComplexity int) int
-		PeriodicScanInterval func(childComplexity int) int
+		ClassifyFaceThreshold    func(childComplexity int) int
+		ConcurrentWorkers        func(childComplexity int) int
+		FaceDetectionEnabled     func(childComplexity int) int
+		InitialSetup             func(childComplexity int) int
+		PeriodicScanInterval     func(childComplexity int) int
+		ScanFacesOnOriginalFiles func(childComplexity int) int
 	}
 
 	Subscription struct {
@@ -1410,6 +1412,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.ShareToken.Token(childComplexity), true
 
+	case "SiteInfo.classifyFaceThreshold":
+		if e.complexity.SiteInfo.ClassifyFaceThreshold == nil {
+			break
+		}
+
+		return e.complexity.SiteInfo.ClassifyFaceThreshold(childComplexity), true
 	case "SiteInfo.concurrentWorkers":
 		if e.complexity.SiteInfo.ConcurrentWorkers == nil {
 			break
@@ -1434,6 +1442,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.SiteInfo.PeriodicScanInterval(childComplexity), true
+	case "SiteInfo.scanFacesOnOriginalFiles":
+		if e.complexity.SiteInfo.ScanFacesOnOriginalFiles == nil {
+			break
+		}
+
+		return e.complexity.SiteInfo.ScanFacesOnOriginalFiles(childComplexity), true
 
 	case "Subscription.notification":
 		if e.complexity.Subscription.Notification == nil {
@@ -7507,6 +7521,10 @@ func (ec *executionContext) fieldContext_Query_siteInfo(_ context.Context, field
 				return ec.fieldContext_SiteInfo_periodicScanInterval(ctx, field)
 			case "concurrentWorkers":
 				return ec.fieldContext_SiteInfo_concurrentWorkers(ctx, field)
+			case "scanFacesOnOriginalFiles":
+				return ec.fieldContext_SiteInfo_scanFacesOnOriginalFiles(ctx, field)
+			case "classifyFaceThreshold":
+				return ec.fieldContext_SiteInfo_classifyFaceThreshold(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SiteInfo", field.Name)
 		},
@@ -8545,6 +8563,90 @@ func (ec *executionContext) fieldContext_SiteInfo_concurrentWorkers(_ context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SiteInfo_scanFacesOnOriginalFiles(ctx context.Context, field graphql.CollectedField, obj *models.SiteInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SiteInfo_scanFacesOnOriginalFiles,
+		func(ctx context.Context) (any, error) {
+			return obj.ScanFacesOnOriginalFiles, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, obj, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SiteInfo_scanFacesOnOriginalFiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SiteInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SiteInfo_classifyFaceThreshold(ctx context.Context, field graphql.CollectedField, obj *models.SiteInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SiteInfo_classifyFaceThreshold,
+		func(ctx context.Context) (any, error) {
+			return obj.ClassifyFaceThreshold, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal float64
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, obj, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SiteInfo_classifyFaceThreshold(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SiteInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -13137,6 +13239,16 @@ func (ec *executionContext) _SiteInfo(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "concurrentWorkers":
 			out.Values[i] = ec._SiteInfo_concurrentWorkers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "scanFacesOnOriginalFiles":
+			out.Values[i] = ec._SiteInfo_scanFacesOnOriginalFiles(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "classifyFaceThreshold":
+			out.Values[i] = ec._SiteInfo_classifyFaceThreshold(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
