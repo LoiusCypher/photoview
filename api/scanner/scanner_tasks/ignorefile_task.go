@@ -22,9 +22,9 @@ func getAlbumIgnore(ctx scanner_task.TaskContext) *ignore.GitIgnore {
 
 func (t IgnorefileTask) BeforeScanAlbum(ctx scanner_task.TaskContext) (scanner_task.TaskContext, error) {
 	a := ctx.GetAlbum().Path
-	log.Printf("Path %s \n", a)
+	// log.Printf("Path %s \n", a)
 	c := ctx.GetCache()
-	log.Printf("Cache %d \n", c)
+	// log.Printf("Cache %d \n", c)
 	d := c.IsPathMedia("/photos/album5")
 	log.Printf("Is media %d \n", d)
 	e := ctx.Value("album_ignore_key")

@@ -95,75 +95,131 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 		return err
 	}
 
-	var orient int64
-	var thumbnailURL *models.MediaURL
+	var faces []face.Face
+	var thumbnailPath string
 	for _, url := range media.MediaURL {
-		if url.Purpose == models.PhotoHighRes {
-			thumbnailURL = &url
-			thumbnailURL.Media = media
-			log.Println("  HighRes URL found")
-			orient = 1
+		var thumbnailURL *models.MediaURL
+		thumbnailURL = &url
+		thumbnailURL.Media = media
+		if thumbnailURL == nil {
+			// return errors.New()
+			log.Println("thumbnail url is missing: skip entry")
+			continue
+		}
+
+		cachedPath, err := thumbnailURL.CachedPath()
+		if err != nil {
+			// return err
+			log.Printf("Error: Access cacched thumbnail path %s\n", err)
+			continue
+		}
+
+		if url.Purpose == models.MediaOriginal {
+			// var orient int64 = 1
+			// log.Printf("  Original URL found %s\n", cachedPath)
+			if media.Exif != nil {
+				if media.Exif.Orientation != nil {
+					log.Printf("   Orientation %d  %s\n", *media.Exif.Orientation, cachedPath)
+				}
+			}
+
+			mw := imagick.NewMagickWand()
+			defer mw.Destroy()
+
+			if err = mw.ReadImage(cachedPath); err != nil {
+				log.Printf("Err: ReadImage %s %s\n", err, cachedPath)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if err = mw.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if err = mw.SetImageFormat("RGB"); err != nil {
+				log.Printf("Err: SetImageFormat RGB %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			depth := mw.GetImageDepth()
+			color := mw.GetImageColorspace()
+			if color == 3 {
+				log.Printf("   GRAY ColorSpace %d %s\n", color, cachedPath)
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 1 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 2 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 3 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				mw = mw.CombineImages(23);
+				color = mw.GetImageColorspace()
+			}
+			if color != 23 {
+				log.Printf("   ColorSpace %d  Depth %d\n", color, depth)
+				// if err = mw.SetImageColorspace(COLORSPACE_SRGB); err != nil {
+				if err = mw.SetImageColorspace(23); err != nil {
+					log.Printf("Err: SetImageColorspace %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				// depthn := mw.GetImageDepth()
+				// colorn := mw.GetImageColorspace()
+				// log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
+			}
+			if err = mw.SetImageFormat("JPEG"); err != nil {
+				log.Printf("Err: SetImageFormat %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			var blob []byte
+			if blob, err = mw.GetImageBlob(); err != nil {
+				log.Printf("Err: GetImageBlob %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Lock()
+			if faces, err = fd.rec.Recognize(blob); err != nil {
+				fd.mutex.Unlock()
+				log.Printf("Err: Recognize %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Unlock()
+
+			thumbnailPath = cachedPath
 			break
 		}
-		if url.Purpose == models.MediaOriginal {
-			thumbnailURL = &url
-			thumbnailURL.Media = media
-			log.Println("  Original URL found")
-			log.Println("   Exif  ID", media.Exif.ID, " Orientation", *media.Exif.Orientation)
-			orient = *media.Exif.Orientation
-			// break
+
+		if url.Purpose == models.PhotoThumbnail {
+			log.Println("  Thumbnail URL found %s", cachedPath)
+
+			fd.mutex.Lock()
+			log.Printf("RecognizeFile %s\n", cachedPath)
+			faces, err = fd.rec.RecognizeFile(cachedPath)
+			fd.mutex.Unlock()
+
+			if err != nil {
+				return errors.Wrap(err, "error read faces")
+			}
+			thumbnailPath = cachedPath
+			continue
 		}
-		// if url.Purpose == models.PhotoThumbnail {
+
+		// if url.Purpose == models.PhotoHighRes {
 			// thumbnailURL = &url
 			// thumbnailURL.Media = media
 			// log.Println("  Thumbnail URL found")
 			// break
 		// }
-	}
-
-	if thumbnailURL == nil {
-		return errors.New("thumbnail url is missing")
-	}
-
-	thumbnailPath, err := thumbnailURL.CachedPath()
-	if err != nil {
-		return err
-	}
-
-	fd.mutex.Lock()
-	var faces []face.Face
-	if orient != 1 {
-		mw := imagick.NewMagickWand()
-		defer mw.Destroy()
-
-		if err = mw.ReadImage(thumbnailPath); err != nil {
-			log.Printf("Err: ReadImage %s\n", err)
-			return errors.Wrap(err, "error read faces")
-		}
-		if err = mw.AutoOrientImage(); err != nil {
-			log.Printf("Err: AutoOrientImage %s\n", err)
-			return errors.Wrap(err, "error read faces")
-		}
-		if err = mw.SetImageFormat("JPEG"); err != nil {
-			log.Printf("Err: SetImageFormat %s\n", err)
-			return errors.Wrap(err, "error read faces")
-		}
-		var blob []byte
-		if blob, err = mw.GetImageBlob(); err != nil {
-			log.Printf("Err: GetImageBlob %s\n", err)
-			return errors.Wrap(err, "error read faces")
-		}
-		if faces, err = fd.rec.Recognize(blob); err != nil {
-			log.Printf("Err: Recognize %s\n", err)
-			return errors.Wrap(err, "error read faces")
-		}
-	} else {
-		faces, err = fd.rec.RecognizeFile(thumbnailPath)
-	}
-	fd.mutex.Unlock()
-
-	if err != nil {
-		return errors.Wrap(err, "error read faces")
 	}
 
 	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
@@ -176,7 +232,7 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 }
 
 func (fd *faceDetector) classifyDescriptor(descriptor face.Descriptor) int32 {
-	return int32(fd.rec.ClassifyThreshold(descriptor, 0.15))
+	return int32(fd.rec.ClassifyThreshold(descriptor, 0.2))
 }
 
 func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string) error {
@@ -201,13 +257,13 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
 		},
 	}
-	log.Printf("  Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
+	// log.Printf("    Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
 
 	var faceGroup models.FaceGroup
 
 	// If no match add it new to samples
 	if match < 0 {
-		log.Println("No match, assigning new face")
+		// log.Println("     No match, assigning new face")
 
 		faceGroup = models.FaceGroup{
 			ImageFaces: []models.ImageFace{imageFace},
@@ -218,7 +274,7 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 		}
 
 	} else {
-		log.Println("Found match")
+		// log.Println("     Found match")
 
 		if err := db.First(&faceGroup, int(match)).Error; err != nil {
 			return err
@@ -371,7 +427,7 @@ func (fd *faceDetector) CheckFaceGroup(groupID int32) {
 		// if fd.faceGroupIDs[i] == groupID {
 		if true {
 			// match := fd.classifyDescriptor(descriptor)
-			match := int32(fd.rec.ClassifyThreshold(descriptor, 0.2)
+			match := int32(fd.rec.ClassifyThreshold(descriptor, -1))
 			if match != faceGroupID {
 				log.Printf("Face %d group %d different %d\n", imageFaceID, faceGroupID, match)
 			} else {

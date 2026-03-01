@@ -1,5 +1,4 @@
 import { useMutation, gql } from '@apollo/client'
-import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { Button } from '../../primitives/form/Input'
@@ -8,17 +7,10 @@ import {
   InputLabelTitle,
   SectionTitle,
 } from './SettingsPage'
-import { exportFaces } from './__generated__/exportFaces'
 import { checkGroups, checkGroupsVariables } from './__generated__/checkGroups'
+import { classifyFaceThresholdQuery } from './__generated__/classifyFaceThresholdQuery'
+import { ExportAllFacesButton } from './Dev_ExportFaces'
 
-const EXPORT_ALL_FACES = gql`
-  mutation exportFaces {
-    exportAllFaces {
-      success
-      message
-    }
-  }
-`
 const CHECK_FACE_GROUP = gql`
   mutation checkGroups($faceGroupID: ID!) {
     checkFaceGroup(faceGroupID: $faceGroupID) {
@@ -28,22 +20,13 @@ const CHECK_FACE_GROUP = gql`
   }
 `
 
-const ExportAllFacesButton = () => {
-  const { t } = useTranslation()
-  const [startExport, { called }] = useMutation<exportFaces>(EXPORT_ALL_FACES)
-
-  return (
-    <Button
-      className="mb-4"
-      onClick={() => {
-        startExport()
-      }}
-      disabled={called}
-    >
-      {t('settings.export_all_faces', 'Export All Faces')}
-    </Button>
-  )
-}
+export const CLASSIFY_FACE_THRESHOLD_QUERY = gql`
+  query classifyFaceThresholdQuery {
+    siteInfo {
+      classifyFaceThreshold
+    }
+  }
+`
 
 const CheckFaceGroupButton = () => {
   const { t } = useTranslation()
