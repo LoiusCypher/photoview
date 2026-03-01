@@ -13,7 +13,7 @@ export const SCAN_ON_ORGINAL_FILES_QUERY = gql`
   }
 `
 
-export const scanFacesOnOriginalFilesCheckbox = () => {
+export const ScanFacesOnOriginalFilesCheckbox = () => {
   const { t } = useTranslation()
   const scanOriginalFiles = useQuery<scanFacesOnOriginalFilesQuery>(SCAN_ON_ORGINAL_FILES_QUERY)
 
