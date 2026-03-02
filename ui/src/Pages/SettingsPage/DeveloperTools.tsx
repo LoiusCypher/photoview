@@ -8,7 +8,6 @@ import {
 } from './SettingsPage'
 import { CheckFaceGroupButton } from './Dev_CheckFaceGroups'
 import { ExportAllFacesButton } from './Dev_ExportFaces'
-import ScanFacesOnOriginalFilesCheckbox from './Dev_ScanOriginalFiles'
 
 const DeveloperToolsWrapper = styled.div`
   margin-bottom: 24px;
@@ -19,7 +18,6 @@ const DeveloperTools = () => {
 
   return (
     <DeveloperToolsWrapper>
-      <ScanFacesOnOriginalFilesCheckbox />
       <SectionTitle nospace>
         {t('settings.developer_tools.title', 'Under Construction')}
       </SectionTitle>

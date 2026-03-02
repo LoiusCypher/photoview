@@ -411,7 +411,25 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 	return updatedImageFaces, nil
 }
 
-func (fd *faceDetector) CheckFaceGroup(groupID int32) {
+func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
+
+	var groups []*models.FaceGroup
+	if err := db.Where("label IS NOT NULL").Find(&groups).Error; err != nil {
+		log.Printf("Error reading Facegroups")
+		return
+	}
+	log.Printf("Group label count %d\n", len(groups))
+
+	groupLabels := make(map[int32]string)
+	for _, group := range groups {
+		if group.Label != nil {
+			groupLabels[int32(group.ID)] = *group.Label
+			log.Printf("Group %d %s\n", group.ID, groupLabels[int32(group.ID)])
+		} else {
+			log.Printf("Group %d nil\n", group.ID)
+		}
+	}
+
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
@@ -426,12 +444,16 @@ func (fd *faceDetector) CheckFaceGroup(groupID int32) {
 	for i := range fd.faceGroupIDs {
 		// if fd.faceGroupIDs[i] == groupID {
 		if true {
-			// match := fd.classifyDescriptor(descriptor)
-			match := int32(fd.rec.ClassifyThreshold(descriptor, -1))
+			fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
+			match := int32(fd.rec.Classify(descriptor))
 			if match != faceGroupID {
-				log.Printf("Face %d group %d different %d\n", imageFaceID, faceGroupID, match)
-			} else {
-				log.Printf("Face %d group %d confirmed\n", imageFaceID, faceGroupID)
+				if newLabel, ok := groupLabels[match]; ok {
+					log.Printf("Face %d group %d '%s' different %d '%s'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID], match, newLabel)
+				// } else {
+					// log.Printf("Face %d group %d '%s' different %d'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID], match)
+				}
+			// } else {
+				// log.Printf("Face %d group %d confirmed '%s'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID])
 			}
 			t_descriptor := fd.faceDescriptors[i]
 			t_faceGroupID := fd.faceGroupIDs[i]
@@ -447,5 +469,6 @@ func (fd *faceDetector) CheckFaceGroup(groupID int32) {
 	fd.faceDescriptors = append(fd.faceDescriptors, descriptor)
 	fd.faceGroupIDs = append(fd.faceGroupIDs, faceGroupID)
 	fd.imageFaceIDs = append(fd.imageFaceIDs, imageFaceID)
+	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
 }
 

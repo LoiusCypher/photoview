@@ -33,8 +33,8 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 	imagick.Initialize()
 	defer imagick.Terminate()
 
-	for _, face := range allImageFaces {
-		log.Printf("Face ID: %d  FaceGroupID: %d\n", face.ID, face.FaceGroupID)
+	for i, face := range allImageFaces {
+		log.Printf("Index %d Face ID: %d  FaceGroupID: %d\n", i, face.ID, face.FaceGroupID)
 		if err := face.FillMedia(db); err != nil {
 			log.Printf("Err: FillMedia %s\n", err)
 			continue
@@ -115,12 +115,8 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 // CheckFaceGroup is the resolver for the checkFaceGroup field.
 func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error) {
 	log.Printf("CheckFaceGroup %d\n", faceGroupID)
-	if face_detection.GlobalFaceDetector == nil {
-		errMessage := "No GlobalFaceDetector"
-		return &models.DevCmdResult{Success: false, Message: &errMessage}, nil
-	}
 
-	face_detection.GlobalFaceDetector.CheckFaceGroup(int32(faceGroupID))
+	face_detection.GlobalFaceDetector.CheckFaceGroup( r.DB(ctx), int32(faceGroupID))
 
 	startMessage := "Check face group Done"
 	return &models.DevCmdResult{
