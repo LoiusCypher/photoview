@@ -116,7 +116,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error) {
 	log.Printf("CheckFaceGroup %d\n", faceGroupID)
 
-	face_detection.GlobalFaceDetector.CheckFaceGroup( r.DB(ctx), int32(faceGroupID))
+	face_detection.GlobalFaceDetector.CheckFaceGroup(r.DB(ctx), int32(faceGroupID))
 
 	startMessage := "Check face group Done"
 	return &models.DevCmdResult{

@@ -103,6 +103,7 @@ export const SIDEBAR_MEDIA_QUERY = gql`
           label
           imageFaceCount
         }
+        confirmed
         media {
           id
           title

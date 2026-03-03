@@ -25,6 +25,8 @@ type ImageFace {
   rectangle: FaceRectangle!
   "The `FaceGroup` that contains this `ImageFace`"
   faceGroup: FaceGroup!
+  "The `FaceGroup` was confirmed for this `ImageFace`"
+  confirmed: Boolean!
 }
 
 extend type Query {
