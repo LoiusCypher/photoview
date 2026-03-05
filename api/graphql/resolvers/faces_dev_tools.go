@@ -21,7 +21,7 @@ import (
 func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error) {
 	db := r.DB(ctx)
 	var allImageFaces []*models.ImageFace
-	result := db.Find(&allImageFaces).Order("MediaID asc, ID")
+	result := db.Find(&allImageFaces).Order("Confirmed asc, FaceGroupID asc, MediaID asc, ID")
 	log.Printf("Face Count: %d\n", result.RowsAffected)
 
 	if result.Error != nil {
@@ -37,7 +37,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 			log.Printf("Err: FillMedia %s\n", err)
 			continue
 		}
-		log.Printf(" Media ID: %d  Path: %s  URL Count: %d  Rectangle: %f %f %f %f\n", face.Media.ID, face.Media.Path, len(face.Media.MediaURL), face.Rectangle.MinX, face.Rectangle.MaxX, face.Rectangle.MinY, face.Rectangle.MaxY)
+		log.Printf(" Media: %d %s  URL Count: %d confirmed: %5t Rectangle: %f %f %f %f\n", face.Media.ID, face.Media.Path, len(face.Media.MediaURL), face.Confirmed, face.Rectangle.MinX, face.Rectangle.MaxX, face.Rectangle.MinY, face.Rectangle.MaxY)
 
 		mw := imagick.NewMagickWand()
 		defer mw.Destroy()
@@ -70,7 +70,11 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 			continue
 		}
 		r_name := "/home/photoview/media-cache/portraits"
-		d_name := fmt.Sprintf("%s/%08d", r_name, face.FaceGroupID)
+		var confirmSuffix = "-confirmed"
+		if !face.Confirmed {
+			confirmSuffix = "-unsure"
+		}
+		d_name := fmt.Sprintf("%s/%08d%s", r_name, face.FaceGroupID, confirmSuffix)
 		if err := os.MkdirAll(d_name, 0775); err != nil {
 
 			log.Printf("Err: MkdirAll %s\n", err)
@@ -102,6 +106,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 			}
 		*/
 	}
+	log.Printf("Export done. Count: %d\n", result.RowsAffected)
 
 	startMessage := "Export faces Done"
 	return &models.DevCmdResult{

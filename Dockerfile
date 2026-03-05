@@ -16,6 +16,7 @@ RUN npm install --global npm@10.8.2 \
         npm ci --omit=dev --no-audit --no-fund; \
     else \
         echo "Installing all dependencies..."; \
+        npm install --no-audit --no-fund; \
         npm ci --no-audit --no-fund; \
     fi
 
