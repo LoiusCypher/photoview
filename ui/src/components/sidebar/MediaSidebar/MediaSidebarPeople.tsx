@@ -21,6 +21,7 @@ import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
 import styled from 'styled-components'
 import { scanMediaAction, scanMediaVariables } from './__generated__/scanMediaAction'
 import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
+import { faceGroupCofirmationToggle, toggleFaceGroupCofirmationVariables } from './__generated__/faceGroupCofirmationToggle'
 
 const SCAN_MEDIA_MUTATION = gql`
   mutation scanMediaAction( $mediaId: ID!) {
@@ -28,6 +29,12 @@ const SCAN_MEDIA_MUTATION = gql`
       success
       message
     }
+  }
+`
+
+const TOGGLE_FACEGROUP_CONFIRMATION_MUTATION = gql`
+  mutation faceGroupCofirmationToggle( $imageFaceId: ID!) {
+    toggleConfirmFaceGroup( imageFaceId: $imageFaceId)
   }
 `
 
@@ -128,6 +135,8 @@ const PersonMoreMenu = ({
     })
   }
 
+  const [ confirmGroupToggle, newConfirmState ] = useMutation<faceGroupCofirmationToggle, toggleConfirmFaceGroupVariables>(TOGGLE_FACEGROUP_CONFIRMATION_MUTATION)
+
   return (
     <>
       <Menu
@@ -162,6 +171,10 @@ const PersonMoreMenu = ({
             <PersonMoreMenuItem
               onClick={() => setMoveModalOpen(true)}
               label={t('sidebar.people.action_label.move_face', 'Move face')}
+            />
+            <PersonMoreMenuItem
+              onClick={() => { confirmGroupToggle({ variables: { imageFaceId: face.id } }); }}
+              label={t('sidebar.people.action_label.confirm_group', 'Confirm identification')}
             />
           </ArrowPopoverPanel>
         </Menu.Items>
@@ -228,9 +241,7 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
         )}
       </InputLabelDescription>
       <Button
-        onClick={() => {
-          startMediaScanner( { variables: { mediaId: media.id } });
-        }}
+        onClick={() => { startMediaScanner( { variables: { mediaId: media.id } }); }}
         disabled={calledMedia}
       >
         {t('sidebar.people.rescan.thumbnail', 'Rescan Thumbnail')}

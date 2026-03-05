@@ -19,8 +19,6 @@ import (
 
 // ExportAllFaces is the resolver for the exportAllFaces field.
 func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error) {
-	log.Printf("ExportAllFaces\n")
-
 	db := r.DB(ctx)
 	var allImageFaces []*models.ImageFace
 	result := db.Find(&allImageFaces).Order("MediaID asc, ID")
@@ -114,8 +112,6 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 
 // CheckFaceGroup is the resolver for the checkFaceGroup field.
 func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error) {
-	log.Printf("CheckFaceGroup %d\n", faceGroupID)
-
 	face_detection.GlobalFaceDetector.CheckFaceGroup(r.DB(ctx), int32(faceGroupID))
 
 	startMessage := "Check face group Done"
@@ -145,4 +141,30 @@ func (r *mutationResolver) SetFaceClassifyThreshold(ctx context.Context, thresho
 	// classify_face_threshold.ChangeClassifyFaceThreshold(siteInfo.ClassifyFaceThreshold)
 
 	return siteInfo.ClassifyFaceThreshold, nil
+}
+
+// ToggleConfirmFaceGroup is the resolver for the toggleConfirmFaceGroup field.
+func (r *mutationResolver) ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error) {
+	db := r.DB(ctx)
+
+	if err := db.
+		Where("id = ?", imageFaceID).
+		Model(&models.ImageFace{}).
+		UpdateColumn("confirmed", gorm.Expr("NOT confirmed")).
+		Error; err != nil {
+
+		return false, err
+	}
+
+	var confirmed bool
+	if err := db.
+		Where("id = ?", imageFaceID).
+		Model(&models.ImageFace{}).
+		Pluck("confirmed", &confirmed).
+		Error; err != nil {
+
+		return false, err
+	}
+
+	return confirmed, nil
 }

@@ -13,4 +13,7 @@ extend type Mutation {
 
   "Set threshold for face classification"
   setFaceClassifyThreshold(threshold: Float!): Float! @isAdmin
+
+  "Toggle Faces FaceGroup Confirmation flag "
+  toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
 }

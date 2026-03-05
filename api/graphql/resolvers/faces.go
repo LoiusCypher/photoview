@@ -429,4 +429,3 @@ func (r *Resolver) ImageFace() api.ImageFaceResolver { return &imageFaceResolver
 
 type faceGroupResolver struct{ *Resolver }
 type imageFaceResolver struct{ *Resolver }
-

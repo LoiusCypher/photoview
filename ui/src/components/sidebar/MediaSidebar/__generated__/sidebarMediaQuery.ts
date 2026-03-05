@@ -210,6 +210,10 @@ export interface sidebarMediaQuery_media_faces {
    */
   faceGroup: sidebarMediaQuery_media_faces_faceGroup;
   /**
+   * The `FaceGroup` was confirmed for this `ImageFace`
+   */
+  confirmed: boolean;
+  /**
    * A reference to the image the face appears on
    */
   media: sidebarMediaQuery_media_faces_media;

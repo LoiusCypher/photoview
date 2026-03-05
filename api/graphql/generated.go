@@ -183,6 +183,7 @@ type ComplexityRoot struct {
 		SetScannerConcurrentWorkers func(childComplexity int, workers int) int
 		ShareAlbum                  func(childComplexity int, albumID int, expire *time.Time, password *string) int
 		ShareMedia                  func(childComplexity int, mediaID int, expire *time.Time, password *string) int
+		ToggleConfirmFaceGroup      func(childComplexity int, imageFaceID int) int
 		UpdateUser                  func(childComplexity int, id int, username *string, password *string, admin *bool) int
 		UserAddRootPath             func(childComplexity int, id int, rootPath string) int
 		UserRemoveRootAlbum         func(childComplexity int, userID int, albumID int) int
@@ -333,6 +334,7 @@ type MutationResolver interface {
 	ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error)
 	CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error)
 	SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error)
+	ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error)
 	FavoriteMedia(ctx context.Context, mediaID int, favorite bool) (*models.Media, error)
 	ScanAll(ctx context.Context) (*models.ScannerResult, error)
 	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
@@ -1086,6 +1088,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ShareMedia(childComplexity, args["mediaId"].(int), args["expire"].(*time.Time), args["password"].(*string)), true
+	case "Mutation.toggleConfirmFaceGroup":
+		if e.complexity.Mutation.ToggleConfirmFaceGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_toggleConfirmFaceGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ToggleConfirmFaceGroup(childComplexity, args["imageFaceId"].(int)), true
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
 			break
@@ -2106,6 +2119,17 @@ func (ec *executionContext) field_Mutation_shareMedia_args(ctx context.Context, 
 		return nil, err
 	}
 	args["password"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_toggleConfirmFaceGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "imageFaceId", ec.unmarshalNID2int)
+	if err != nil {
+		return nil, err
+	}
+	args["imageFaceId"] = arg0
 	return args, nil
 }
 
@@ -5406,6 +5430,60 @@ func (ec *executionContext) fieldContext_Mutation_setFaceClassifyThreshold(ctx c
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_setFaceClassifyThreshold_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_toggleConfirmFaceGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_toggleConfirmFaceGroup,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ToggleConfirmFaceGroup(ctx, fc.Args["imageFaceId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.IsAdmin == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_toggleConfirmFaceGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_toggleConfirmFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12406,6 +12484,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "setFaceClassifyThreshold":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_setFaceClassifyThreshold(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "toggleConfirmFaceGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_toggleConfirmFaceGroup(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

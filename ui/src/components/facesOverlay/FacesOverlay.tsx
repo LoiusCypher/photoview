@@ -14,7 +14,7 @@ interface FaceBoxStyleProps {
 }
 
 const FaceBoxStyle = styled(Link)`
-  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.3), 0 0 0 1px rgb(255, 255, ${({ $confirmed }: FaceBoxStyleProps) => $confirmed ? 128 : 0} );
+  box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.3), 0 0 0 1px rgb(${({ $confirmed }: FaceBoxStyleProps) => $confirmed ? 0 : 256}, 255, ${({ $confirmed }: FaceBoxStyleProps) => $confirmed ? 256 : 0} );
   border-radius: 50%;
   position: absolute;
   top: ${({ $minY }: FaceBoxStyleProps) => $minY * 100}%;
@@ -35,6 +35,7 @@ const FaceBox = ({ face /*media*/ }: FaceBoxProps) => {
       $maxX={face.rectangle.maxX}
       $minY={face.rectangle.minY}
       $maxY={face.rectangle.maxY}
+      $confirmed={face.confirmed}
     ></FaceBoxStyle>
   )
 }
