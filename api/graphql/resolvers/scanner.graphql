@@ -12,6 +12,9 @@ extend type Mutation {
   "Scan a single user for new media"
   scanUser(userId: ID!): ScannerResult! @isAdmin
 
+  "(Re-)Scan a single album for faces"
+  scanAlbum(albumId: ID!): ScannerResult! @isAdmin
+
   "(Re-)Scan a single media file for faces"
   scanMedia(mediaId: ID!): ScannerResult! @isAdmin
 

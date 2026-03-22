@@ -52,6 +52,24 @@ func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.Sc
 	}, nil
 }
 
+// ScanAlbum is the resolver for the scanAlbum field.
+func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error) {
+	log.Printf("Album Id: %d\n", albumID)
+	var album models.Album
+	if err := r.DB(ctx).First(&album, albumID).Error; err != nil {
+		return nil, fmt.Errorf("get album from database: %w", err)
+	}
+
+	scanner_queue.AddAlbumToQueue(&album)
+
+	startMessage := "Album Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
 // ScanMedia is the resolver for the scanMedia field.
 func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
 	log.Printf("Media Id: %d\n", mediaID)

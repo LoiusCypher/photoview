@@ -5,6 +5,7 @@ package face_detection
 import (
 	"log"
 	"sync"
+	"slices"
 
 	"github.com/Kagami/go-face"
 	"github.com/loiuscypher/photoview/api/graphql/models"
@@ -411,64 +412,145 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 	return updatedImageFaces, nil
 }
 
-func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
-
-	var groups []*models.FaceGroup
-	if err := db.Where("label IS NOT NULL").Find(&groups).Error; err != nil {
-		log.Printf("Error reading Facegroups")
-		return
-	}
-	log.Printf("Group label count %d\n", len(groups))
-
-	groupLabels := make(map[int32]string)
-	for _, group := range groups {
-		if group.Label != nil {
-			groupLabels[int32(group.ID)] = *group.Label
-			log.Printf("Group %d %s\n", group.ID, groupLabels[int32(group.ID)])
-		} else {
-			log.Printf("Group %d nil\n", group.ID)
-		}
-	}
+func (fd *faceDetector) FindFaceGroupCandidates( faceGroup int, checkLng int, threshold float32) {
 
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
-	log.Printf("CheckFaceGroup %d\n", groupID)
+	k := len(fd.faceDescriptors) - checkLng
+	log.Printf("FindFaceGroupCandidates Id %d Lng %d start %d chkLng %d\n", faceGroup, len(fd.faceDescriptors), k, checkLng)
 
-	descriptor := fd.faceDescriptors[0]
-	faceGroupID := fd.faceGroupIDs[0]
-	imageFaceID := fd.imageFaceIDs[0]
-	fd.faceDescriptors = fd.faceDescriptors[1:]
-	fd.faceGroupIDs = fd.faceGroupIDs[1:]
-	fd.imageFaceIDs = fd.imageFaceIDs[1:]
-	for i := range fd.faceGroupIDs {
-		// if fd.faceGroupIDs[i] == groupID {
-		if true {
-			fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
-			match := int32(fd.rec.Classify(descriptor))
-			if match != faceGroupID {
-				if newLabel, ok := groupLabels[match]; ok {
-					log.Printf("Face %d group %d '%s' different %d '%s'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID], match, newLabel)
-				// } else {
-					// log.Printf("Face %d group %d '%s' different %d'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID], match)
-				}
-			// } else {
-				// log.Printf("Face %d group %d confirmed '%s'\n", imageFaceID, faceGroupID, groupLabels[faceGroupID])
+	descriptor := fd.faceDescriptors[k]
+	faceGroupID := fd.faceGroupIDs[k]
+	imageFaceID := fd.imageFaceIDs[k]
+	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k)
+	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k)
+	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k)
+	for j := range checkLng {
+		i := j + k
+		// log.Printf("FindFaceGroupCandidates index %d\n", i)
+		fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
+		match := fd.rec.ClassifyThreshold( descriptor, threshold)
+		if match == faceGroup {
+			log.Printf("Face %d matches desired face group %d \n", imageFaceID, match)
+		} else {
+			if int32(match) == faceGroupID {
+				log.Printf("Face %d confirms former group %d \n", imageFaceID, match)
+			} else {
+				log.Printf("Face %d matches completely different group %d(%d) \n", imageFaceID, match, faceGroupID)
 			}
-			t_descriptor := fd.faceDescriptors[i]
-			t_faceGroupID := fd.faceGroupIDs[i]
-			t_imageFaceID := fd.imageFaceIDs[i]
-			fd.faceDescriptors[i] = descriptor
-			fd.faceGroupIDs[i] = faceGroupID
-			fd.imageFaceIDs[i] = imageFaceID
-			descriptor = t_descriptor
-			faceGroupID = t_faceGroupID
-			imageFaceID = t_imageFaceID
 		}
+		t_descriptor := fd.faceDescriptors[i]
+		t_faceGroupID := fd.faceGroupIDs[i]
+		t_imageFaceID := fd.imageFaceIDs[i]
+		fd.faceDescriptors[i] = descriptor
+		fd.faceGroupIDs[i] = faceGroupID
+		fd.imageFaceIDs[i] = imageFaceID
+		descriptor = t_descriptor
+		faceGroupID = t_faceGroupID
+		imageFaceID = t_imageFaceID
 	}
 	fd.faceDescriptors = append(fd.faceDescriptors, descriptor)
 	fd.faceGroupIDs = append(fd.faceGroupIDs, faceGroupID)
 	fd.imageFaceIDs = append(fd.imageFaceIDs, imageFaceID)
 	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
+}
+
+func (fd *faceDetector) ConfirmedFaceGroups(db *gorm.DB) ( []int, error ) {
+	var groupIDs []int
+	if err := db.
+		Model(models.ImageFace{}).
+		// Debug().
+		Where("confirmed = TRUE").
+		Group("face_group_id").
+		Order("COUNT(face_group_id)").
+		Pluck("face_group_id",&groupIDs).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+
+	// for _, groupId := range groupIDs {
+		// log.Printf("Group ID %d with confirmed faces\n", groupId)
+	// }
+	return groupIDs, nil
+}
+
+func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId int) ( []int, error ) {
+
+	var faceIDs []int
+	if err := db.
+		Model(models.ImageFace{}).
+		// Debug().
+		Where("face_group_id = ?", groupId).
+		Where("confirmed = ?", confirmed).
+		Pluck("ID",&faceIDs).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+
+	var faceGroup models.FaceGroup
+	if err := db.
+		// Debug().
+		Model(models.FaceGroup{}).
+		Where("id = ?", groupId).
+		First(&faceGroup).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+	// log.Println("Face ", imgFace)
+	// log.Println("FaceGroup* ", *imgFace.FaceGroup)
+	// log.Println("FaceGroup ", imgFace.FaceGroup)
+	log.Printf("FaceGroup '%s'\n", *faceGroup.Label)
+	return faceIDs, nil
+}
+
+func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
+	grps, _ := fd.ConfirmedFaceGroups(db)
+	log.Printf("Groups with confirmed faces %d\n", len(grps))
+	for _, grpID := range grps {
+		log.Printf("Group ID %d\n", grpID)
+		confFaceIDs, _ := fd.FaceGroupFaceIDs( db, true, grpID)
+		log.Printf("Group %d with %d confirmed faces\n", grpID, len(confFaceIDs))
+		// for _, faceID := range confFaceIDs {
+			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// }
+		faceIDs, _ := fd.FaceGroupFaceIDs( db, false, grpID)
+		log.Printf("Group %d with %d unconfirmed faces\n", grpID, len(faceIDs))
+		// for _, faceID := range faceIDs {
+			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// }
+		fd.nextFaceForGroup(db, grpID, faceIDs, 0.100)
+	}
+}
+
+func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int, threshold float32) {
+
+	log.Printf("nextFaceForGroup %d %d\n", groupID, len(faceIDs))
+
+	saveFaceDescriptors := fd.faceDescriptors
+	saveFaceGroupIDs := fd.faceGroupIDs
+	saveImageFaceIDs := fd.imageFaceIDs
+
+	for i, faceID := range faceIDs {
+		idx := slices.IndexFunc(fd.imageFaceIDs, func(c int) bool { return c == faceID })
+		// log.Printf("Index %d\n", idx)
+		if idx < 0 {
+			log.Printf("Error slicing Facegroups with idx %d(%d) ID %d", i, len(faceIDs), faceID)
+			return
+		}
+		fd.faceDescriptors = append(fd.faceDescriptors, fd.faceDescriptors[idx])
+		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx)
+		fd.faceGroupIDs = append(fd.faceGroupIDs, 0)
+		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx)
+		fd.imageFaceIDs = append(fd.imageFaceIDs, faceID)
+		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx)
+	}
+	fd.FindFaceGroupCandidates( groupID, len(faceIDs), threshold)
+	fd.faceDescriptors = saveFaceDescriptors
+	fd.faceGroupIDs = saveFaceGroupIDs
+	fd.imageFaceIDs = saveImageFaceIDs
 }
 

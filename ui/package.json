@@ -88,7 +88,7 @@
     "vitest": "^0.17.1"
   },
   "overrides": {
-    "graphql": "^16.13.1"
+    "graphql": "^15.10.1"
   },
   "prettier": {
     "trailingComma": "es5",

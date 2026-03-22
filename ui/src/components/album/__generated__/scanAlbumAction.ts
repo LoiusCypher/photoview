@@ -4,22 +4,22 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: checkGroups
+// GraphQL mutation operation: scanAlbumAction
 // ====================================================
 
-export interface checkGroups_checkFaceGroup {
-  __typename: 'DevCmdResult'
+export interface scanAlbumAction_scanAlbum {
+  __typename: 'ScannerResult'
   success: boolean
   message: string | null
 }
 
-export interface checkGroups {
+export interface scanAlbumAction {
   /**
-   * Check FaceGroup consistency
+   * (Re-)Scan a single album for faces
    */
-  checkFaceGroup: checkGroups_checkFaceGroup
+  scanAlbum: scanAlbumAction_scanAlbum
 }
 
-export interface checkGroupsVariables {
-  faceGroupID: string
+export interface scanAlbumActionVariables {
+  albumId: string
 }

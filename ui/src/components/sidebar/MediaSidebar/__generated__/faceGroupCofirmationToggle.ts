@@ -9,11 +9,11 @@
 
 export interface faceGroupCofirmationToggle {
   /**
-   * Toggle Faces FaceGroup Confirmation flag 
+   * Toggle Faces FaceGroup Confirmation flag
    */
-  toggleConfirmFaceGroup: boolean;
+  toggleConfirmFaceGroup: boolean
 }
 
 export interface faceGroupCofirmationToggleVariables {
-  imageFaceId: string;
+  imageFaceId: string
 }

@@ -8,13 +8,13 @@
 // ====================================================
 
 export interface scanFacesOnOriginalFilesQuery_siteInfo {
-  __typename: "SiteInfo";
+  __typename: 'SiteInfo'
   /**
    * If set original files are scanned for  faces insted of only thumbnails
    */
-  scanFacesOnOriginalFiles: boolean;
+  scanFacesOnOriginalFiles: boolean
 }
 
 export interface scanFacesOnOriginalFilesQuery {
-  siteInfo: scanFacesOnOriginalFilesQuery_siteInfo;
+  siteInfo: scanFacesOnOriginalFilesQuery_siteInfo
 }

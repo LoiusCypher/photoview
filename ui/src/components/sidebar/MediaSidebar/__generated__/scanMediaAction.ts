@@ -8,18 +8,18 @@
 // ====================================================
 
 export interface scanMediaAction_scanMedia {
-  __typename: "ScannerResult";
-  success: boolean;
-  message: string | null;
+  __typename: 'ScannerResult'
+  success: boolean
+  message: string | null
 }
 
 export interface scanMediaAction {
   /**
    * (Re-)Scan a single media file for faces
    */
-  scanMedia: scanMediaAction_scanMedia;
+  scanMedia: scanMediaAction_scanMedia
 }
 
 export interface scanMediaActionVariables {
-  mediaId: string;
+  mediaId: string
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"os"
 
 	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/loiuscypher/photoview/api/graphql/notification"
@@ -15,6 +16,7 @@ import (
 	"github.com/loiuscypher/photoview/api/scanner/scanner_utils"
 	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
+	ignore "github.com/sabhiram/go-gitignore"
 	"gorm.io/gorm"
 )
 
@@ -34,8 +36,6 @@ func NewScannerJob(ctx scanner_task.TaskContext) ScannerJob {
 }
 
 func (job *ScannerJob) Run(db *gorm.DB) {
-	log.Printf("Run  ")
-	log.Printf("Run  ID %d", job.ctx.GetAlbum().ID )
 	err := scanner.ScanAlbum(job.ctx)
 	if err != nil {
 		scanner_utils.ScannerError(nil, "Failed to scan album: %v", err)
@@ -220,7 +220,49 @@ func AddAllToQueue() error {
 	return nil
 }
 
-// AddMediaToQueue finds containing album for given media and adds it to the scanner queue.
+// AddAlbumToQueue adds album to the scanner queue.
+// Function does not block.
+func AddAlbumToQueue(album *models.Album) error {
+
+	// Check if user album directory exists on the file system
+	if _, err := os.Stat(album.Path); err != nil {
+		return err
+	}
+
+	albumPath := album.Path
+	albumIgnore := make([]string, 0)
+
+	// Skip this dir if in ignore list
+	ignorePaths := ignore.CompileIgnoreLines(albumIgnore...)
+	if ignorePaths.MatchesPath(albumPath + "/") {
+		log.Printf("Skip, directroy %s is in ignore file", albumPath)
+		return nil
+	}
+
+	// Update ignore dir list
+	photoviewIgnore, err := scanner.GetPhotoviewIgnore(albumPath)
+	if err != nil {
+		log.Printf("Failed to get ignore file, err = %s", err)
+	} else {
+		albumIgnore = append(albumIgnore, photoviewIgnore...)
+	}
+
+	albumCache := scanner_cache.MakeAlbumCache()
+
+	// Update album ignore
+	albumCache.InsertAlbumIgnore(albumPath, albumIgnore)
+
+	global_scanner_queue.mutex.Lock()
+	global_scanner_queue.addJob(&ScannerJob{
+		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, album, albumCache),
+	})
+	global_scanner_queue.mutex.Unlock()
+
+	return nil
+}
+
+
+// AddMediaAlbumToQueue finds containing album for given media and adds it to the scanner queue.
 // Function does not block.
 func AddMediaAlbumToQueue(media *models.Media) error {
 	var album models.Album
@@ -228,23 +270,12 @@ func AddMediaAlbumToQueue(media *models.Media) error {
 	if media == nil {
 		return nil
 	}
-	log.Println( " AddMediaAlbumToQueue", media.ID, media.AlbumID)
 
 	if err := global_scanner_queue.db.First(&album, media.AlbumID).Error; err != nil {
 		return err
 	}
-	log.Println( " AlbumPath", album.Path)
 
-	albumCache := scanner_cache.MakeAlbumCache()
-	log.Println( " AlbumCache", albumCache)
-
-	global_scanner_queue.mutex.Lock()
-	global_scanner_queue.addJob(&ScannerJob{
-		ctx: scanner_task.NewTaskContext(context.Background(), global_scanner_queue.db, &album, albumCache),
-	})
-	global_scanner_queue.mutex.Unlock()
-
-	return nil
+	return AddAlbumToQueue(&album)
 }
 
 // AddUserToQueue finds all root albums owned by the given user and adds them to the scanner queue.

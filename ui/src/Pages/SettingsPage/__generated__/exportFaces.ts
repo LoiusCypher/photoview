@@ -8,14 +8,14 @@
 // ====================================================
 
 export interface exportFaces_exportAllFaces {
-  __typename: "DevCmdResult";
-  success: boolean;
-  message: string | null;
+  __typename: 'DevCmdResult'
+  success: boolean
+  message: string | null
 }
 
 export interface exportFaces {
   /**
    * Save all known portraits to dedicated folder
    */
-  exportAllFaces: exportFaces_exportAllFaces;
+  exportAllFaces: exportFaces_exportAllFaces
 }

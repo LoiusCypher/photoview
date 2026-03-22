@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func getPhotoviewIgnore(ignorePath string) ([]string, error) {
+func GetPhotoviewIgnore(ignorePath string) ([]string, error) {
 	var photoviewIgnore []string
 
 	// Open .photoviewignore file, if exists
@@ -114,7 +114,7 @@ func FindAlbumsForUser(db *gorm.DB, user *models.User, albumCache *scanner_cache
 		}
 
 		// Update ignore dir list
-		photoviewIgnore, err := getPhotoviewIgnore(albumPath)
+		photoviewIgnore, err := GetPhotoviewIgnore(albumPath)
 		if err != nil {
 			log.Printf("Failed to get ignore file, err = %s", err)
 		} else {
@@ -244,7 +244,7 @@ func directoryContainsPhotos(rootPath string, cache *scanner_cache.AlbumScannerC
 		scannedDirectories = append(scannedDirectories, dirPath)
 
 		// Update ignore dir list
-		photoviewIgnore, err := getPhotoviewIgnore(dirPath)
+		photoviewIgnore, err := GetPhotoviewIgnore(dirPath)
 		if err != nil {
 			log.Printf("Failed to get ignore file, err = %s", err)
 		} else {
