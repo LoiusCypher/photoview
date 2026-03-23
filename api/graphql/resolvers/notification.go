@@ -8,10 +8,10 @@ package resolvers
 import (
 	"context"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/notification"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/notification"
 )
 
 // Notification is the resolver for the notification field.

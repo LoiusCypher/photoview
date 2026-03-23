@@ -10,8 +10,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/utils"
 )
 
 // MyMediaGeoJSON is the resolver for the myMediaGeoJson field.

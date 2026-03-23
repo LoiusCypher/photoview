@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/notification"
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/notification"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/utils"
 )
 
 func ScannerError(ctx context.Context, format string, args ...any) {

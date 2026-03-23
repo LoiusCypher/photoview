@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 	"gorm.io/gorm"
 )
 

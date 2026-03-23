@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/photoview/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/database/drivers"
 	"gorm.io/gorm"
 )
 

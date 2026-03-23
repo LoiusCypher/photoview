@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/database/migrations"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/database/migrations"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/utils"
 
 	"github.com/go-sql-driver/mysql"
 	gorm_mysql "gorm.io/driver/mysql"

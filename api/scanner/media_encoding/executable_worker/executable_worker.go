@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/log"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 

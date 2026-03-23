@@ -5,6 +5,7 @@ import MediaGallery, {
 } from '../photoGallery/MediaGallery'
 import AlbumBoxes from './AlbumBoxes'
 import AlbumFilter from '../album/AlbumFilter'
+import AlbumRescan from '../album/AlbumRescan'
 import {
   mediaGalleryReducer,
   urlPresentModeSetupHook,
@@ -107,6 +108,11 @@ const AlbumGallery = React.forwardRef(
             setOnlyFavorites={setOnlyFavorites}
             setOrdering={setOrdering}
             ordering={ordering}
+          />
+        )}
+        {album && (
+          <AlbumRescan
+            albumId={album.id}
           />
         )}
         <AlbumTitle album={album} disableLink />

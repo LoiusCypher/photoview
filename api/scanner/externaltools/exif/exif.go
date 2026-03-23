@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
 )
 
 var globalExifParser *ExifParser

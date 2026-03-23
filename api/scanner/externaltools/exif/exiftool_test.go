@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/stretchr/testify/assert"
 )
 

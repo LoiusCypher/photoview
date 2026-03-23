@@ -1,7 +1,7 @@
 package models
 
 import (
-	db_drivers "github.com/photoview/photoview/api/database/drivers"
+	db_drivers "github.com/loiuscypher/photoview/api/database/drivers"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
@@ -10,6 +10,8 @@ type SiteInfo struct {
 	InitialSetup         bool `gorm:"not null"`
 	PeriodicScanInterval int  `gorm:"not null"`
 	ConcurrentWorkers    int  `gorm:"not null"`
+	ScanFacesOnOriginalFiles bool `gorm:"not null"`
+	ClassifyFaceThreshold float64 `gorm:"not null"`
 }
 
 func (SiteInfo) TableName() string {
@@ -26,6 +28,8 @@ func DefaultSiteInfo(db *gorm.DB) SiteInfo {
 		InitialSetup:         true,
 		PeriodicScanInterval: 0,
 		ConcurrentWorkers:    defaultConcurrentWorkers,
+		ScanFacesOnOriginalFiles: false,
+		ClassifyFaceThreshold: 0.2,
 	}
 }
 

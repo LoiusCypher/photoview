@@ -5,13 +5,15 @@ package face_detection
 import (
 	"log"
 	"sync"
+	"slices"
 
 	"github.com/Kagami/go-face"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/media_encoding"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 type faceDetector struct {
@@ -94,21 +96,126 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 		return err
 	}
 
-	var thumbnailURL *models.MediaURL
+	var faces []face.Face
+	var thumbnailPath string
 	for _, url := range media.MediaURL {
-		if url.Purpose == models.PhotoHighRes {
-			thumbnailURL = &url
-			thumbnailURL.Media = media
-			log.Println("  HighRes URL found")
+		var thumbnailURL *models.MediaURL
+		thumbnailURL = &url
+		thumbnailURL.Media = media
+		if thumbnailURL == nil {
+			// return errors.New()
+			log.Println("thumbnail url is missing: skip entry")
+			continue
+		}
+
+		cachedPath, err := thumbnailURL.CachedPath()
+		if err != nil {
+			// return err
+			log.Printf("Error: Access cacched thumbnail path %s\n", err)
+			continue
+		}
+
+		if url.Purpose == models.MediaOriginal {
+			// var orient int64 = 1
+			// log.Printf("  Original URL found %s\n", cachedPath)
+			if media.Exif != nil {
+				if media.Exif.Orientation != nil {
+					log.Printf("   Orientation %d  %s\n", *media.Exif.Orientation, cachedPath)
+				}
+			}
+
+			mw := imagick.NewMagickWand()
+			defer mw.Destroy()
+
+			if err = mw.ReadImage(cachedPath); err != nil {
+				log.Printf("Err: ReadImage %s %s\n", err, cachedPath)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if err = mw.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if err = mw.SetImageFormat("RGB"); err != nil {
+				log.Printf("Err: SetImageFormat RGB %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			depth := mw.GetImageDepth()
+			color := mw.GetImageColorspace()
+			if color == 3 {
+				log.Printf("   GRAY ColorSpace %d %s\n", color, cachedPath)
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 1 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 2 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				if err = mw.AddImage(mw.Clone()); err != nil {
+					log.Printf("Err: AddImage 3 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				mw = mw.CombineImages(23);
+				color = mw.GetImageColorspace()
+			}
+			if color != 23 {
+				log.Printf("   ColorSpace %d  Depth %d\n", color, depth)
+				// if err = mw.SetImageColorspace(COLORSPACE_SRGB); err != nil {
+				if err = mw.SetImageColorspace(23); err != nil {
+					log.Printf("Err: SetImageColorspace %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				// depthn := mw.GetImageDepth()
+				// colorn := mw.GetImageColorspace()
+				// log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
+			}
+			if err = mw.SetImageFormat("JPEG"); err != nil {
+				log.Printf("Err: SetImageFormat %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			var blob []byte
+			if blob, err = mw.GetImageBlob(); err != nil {
+				log.Printf("Err: GetImageBlob %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Lock()
+			if faces, err = fd.rec.Recognize(blob); err != nil {
+				fd.mutex.Unlock()
+				log.Printf("Err: Recognize %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Unlock()
+
+			thumbnailPath = cachedPath
 			break
 		}
-		if url.Purpose == models.MediaOriginal {
-			thumbnailURL = &url
-			thumbnailURL.Media = media
-			log.Println("  Original URL found")
-			// break
+
+		if url.Purpose == models.PhotoThumbnail {
+			log.Println("  Thumbnail URL found %s", cachedPath)
+
+			fd.mutex.Lock()
+			log.Printf("RecognizeFile %s\n", cachedPath)
+			faces, err = fd.rec.RecognizeFile(cachedPath)
+			fd.mutex.Unlock()
+
+			if err != nil {
+				return errors.Wrap(err, "error read faces")
+			}
+			thumbnailPath = cachedPath
+			continue
 		}
-		// if url.Purpose == models.PhotoThumbnail {
+
+		// if url.Purpose == models.PhotoHighRes {
 			// thumbnailURL = &url
 			// thumbnailURL.Media = media
 			// log.Println("  Thumbnail URL found")
@@ -116,24 +223,9 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 		// }
 	}
 
-	if thumbnailURL == nil {
-		return errors.New("thumbnail url is missing")
-	}
-
-	thumbnailPath, err := thumbnailURL.CachedPath()
-	if err != nil {
-		return err
-	}
-
-	fd.mutex.Lock()
-	faces, err := fd.rec.RecognizeFile(thumbnailPath)
-	fd.mutex.Unlock()
-
-	if err != nil {
-		return errors.Wrap(err, "error read faces")
-	}
-
+	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
 	for _, face := range faces {
+		// log.Println("  Faces found for: ", face)
 		fd.classifyFace(db, &face, media, thumbnailPath)
 	}
 
@@ -166,12 +258,13 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
 		},
 	}
+	// log.Printf("    Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
 
 	var faceGroup models.FaceGroup
 
 	// If no match add it new to samples
 	if match < 0 {
-		log.Println("No match, assigning new face")
+		// log.Println("     No match, assigning new face")
 
 		faceGroup = models.FaceGroup{
 			ImageFaces: []models.ImageFace{imageFace},
@@ -182,7 +275,7 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 		}
 
 	} else {
-		log.Println("Found match")
+		// log.Println("     Found match")
 
 		if err := db.First(&faceGroup, int(match)).Error; err != nil {
 			return err
@@ -318,3 +411,146 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 
 	return updatedImageFaces, nil
 }
+
+func (fd *faceDetector) FindFaceGroupCandidates( faceGroup int, checkLng int, threshold float32) {
+
+	fd.mutex.Lock()
+	defer fd.mutex.Unlock()
+
+	k := len(fd.faceDescriptors) - checkLng
+	log.Printf("FindFaceGroupCandidates Id %d Lng %d start %d chkLng %d\n", faceGroup, len(fd.faceDescriptors), k, checkLng)
+
+	descriptor := fd.faceDescriptors[k]
+	faceGroupID := fd.faceGroupIDs[k]
+	imageFaceID := fd.imageFaceIDs[k]
+	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k)
+	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k)
+	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k)
+	for j := range checkLng {
+		i := j + k
+		// log.Printf("FindFaceGroupCandidates index %d\n", i)
+		fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
+		match := fd.rec.ClassifyThreshold( descriptor, threshold)
+		if match == faceGroup {
+			log.Printf("Face %d matches desired face group %d \n", imageFaceID, match)
+		} else {
+			if int32(match) == faceGroupID {
+				log.Printf("Face %d confirms former group %d \n", imageFaceID, match)
+			} else {
+				log.Printf("Face %d matches completely different group %d(%d) \n", imageFaceID, match, faceGroupID)
+			}
+		}
+		t_descriptor := fd.faceDescriptors[i]
+		t_faceGroupID := fd.faceGroupIDs[i]
+		t_imageFaceID := fd.imageFaceIDs[i]
+		fd.faceDescriptors[i] = descriptor
+		fd.faceGroupIDs[i] = faceGroupID
+		fd.imageFaceIDs[i] = imageFaceID
+		descriptor = t_descriptor
+		faceGroupID = t_faceGroupID
+		imageFaceID = t_imageFaceID
+	}
+	fd.faceDescriptors = append(fd.faceDescriptors, descriptor)
+	fd.faceGroupIDs = append(fd.faceGroupIDs, faceGroupID)
+	fd.imageFaceIDs = append(fd.imageFaceIDs, imageFaceID)
+	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
+}
+
+func (fd *faceDetector) ConfirmedFaceGroups(db *gorm.DB) ( []int, error ) {
+	var groupIDs []int
+	if err := db.
+		Model(models.ImageFace{}).
+		// Debug().
+		Where("confirmed = TRUE").
+		Group("face_group_id").
+		Order("COUNT(face_group_id)").
+		Pluck("face_group_id",&groupIDs).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+
+	// for _, groupId := range groupIDs {
+		// log.Printf("Group ID %d with confirmed faces\n", groupId)
+	// }
+	return groupIDs, nil
+}
+
+func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId int) ( []int, error ) {
+
+	var faceIDs []int
+	if err := db.
+		Model(models.ImageFace{}).
+		// Debug().
+		Where("face_group_id = ?", groupId).
+		Where("confirmed = ?", confirmed).
+		Pluck("ID",&faceIDs).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+
+	var faceGroup models.FaceGroup
+	if err := db.
+		// Debug().
+		Model(models.FaceGroup{}).
+		Where("id = ?", groupId).
+		First(&faceGroup).
+		Error; err != nil {
+
+		return make([]int,0), err
+	}
+	// log.Println("Face ", imgFace)
+	// log.Println("FaceGroup* ", *imgFace.FaceGroup)
+	// log.Println("FaceGroup ", imgFace.FaceGroup)
+	log.Printf("FaceGroup '%s'\n", *faceGroup.Label)
+	return faceIDs, nil
+}
+
+func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
+	grps, _ := fd.ConfirmedFaceGroups(db)
+	log.Printf("Groups with confirmed faces %d\n", len(grps))
+	for _, grpID := range grps {
+		log.Printf("Group ID %d\n", grpID)
+		confFaceIDs, _ := fd.FaceGroupFaceIDs( db, true, grpID)
+		log.Printf("Group %d with %d confirmed faces\n", grpID, len(confFaceIDs))
+		// for _, faceID := range confFaceIDs {
+			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// }
+		faceIDs, _ := fd.FaceGroupFaceIDs( db, false, grpID)
+		log.Printf("Group %d with %d unconfirmed faces\n", grpID, len(faceIDs))
+		// for _, faceID := range faceIDs {
+			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// }
+		fd.nextFaceForGroup(db, grpID, faceIDs, 0.100)
+	}
+}
+
+func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int, threshold float32) {
+
+	log.Printf("nextFaceForGroup %d %d\n", groupID, len(faceIDs))
+
+	saveFaceDescriptors := fd.faceDescriptors
+	saveFaceGroupIDs := fd.faceGroupIDs
+	saveImageFaceIDs := fd.imageFaceIDs
+
+	for i, faceID := range faceIDs {
+		idx := slices.IndexFunc(fd.imageFaceIDs, func(c int) bool { return c == faceID })
+		// log.Printf("Index %d\n", idx)
+		if idx < 0 {
+			log.Printf("Error slicing Facegroups with idx %d(%d) ID %d", i, len(faceIDs), faceID)
+			return
+		}
+		fd.faceDescriptors = append(fd.faceDescriptors, fd.faceDescriptors[idx])
+		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx)
+		fd.faceGroupIDs = append(fd.faceGroupIDs, 0)
+		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx)
+		fd.imageFaceIDs = append(fd.imageFaceIDs, faceID)
+		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx)
+	}
+	fd.FindFaceGroupCandidates( groupID, len(faceIDs), threshold)
+	fd.faceDescriptors = saveFaceDescriptors
+	fd.faceGroupIDs = saveFaceGroupIDs
+	fd.imageFaceIDs = saveImageFaceIDs
+}
+

@@ -8,6 +8,10 @@ type SiteInfo {
   periodicScanInterval: Int! @isAdmin
   "How many max concurrent scanner jobs that should run at once"
   concurrentWorkers: Int! @isAdmin
+  "If set original files are scanned for  faces insted of only thumbnails"
+  scanFacesOnOriginalFiles: Boolean! @isAdmin
+  "Threshold for descriptor distance faces do not belong to same person"
+  classifyFaceThreshold: Float! @isAdmin
 }
 
 extend type Query {

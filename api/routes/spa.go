@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/log"
 )
 
 // SpaHandler implements the http.Handler interface, so we can use it

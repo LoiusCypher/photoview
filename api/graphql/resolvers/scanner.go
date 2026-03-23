@@ -9,12 +9,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/periodic_scanner"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/periodic_scanner"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"gorm.io/gorm"
 )
 
@@ -44,6 +45,42 @@ func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.Sc
 	scanner_queue.AddUserToQueue(&user)
 
 	startMessage := "Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanAlbum is the resolver for the scanAlbum field.
+func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error) {
+	log.Printf("Album Id: %d\n", albumID)
+	var album models.Album
+	if err := r.DB(ctx).First(&album, albumID).Error; err != nil {
+		return nil, fmt.Errorf("get album from database: %w", err)
+	}
+
+	scanner_queue.AddAlbumToQueue(&album)
+
+	startMessage := "Album Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanMedia is the resolver for the scanMedia field.
+func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+	log.Printf("Media Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	scanner_queue.AddMediaAlbumToQueue(&media)
+
+	startMessage := "Media Scanner started"
 	return &models.ScannerResult{
 		Finished: false,
 		Success:  true,
