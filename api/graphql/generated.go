@@ -328,9 +328,9 @@ type MutationResolver interface {
 	ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error)
 	FavoriteMedia(ctx context.Context, mediaID int, favorite bool) (*models.Media, error)
 	ScanAll(ctx context.Context) (*models.ScannerResult, error)
-	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
 	ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error)
 	ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error)
+	ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error)
 	SetPeriodicScanInterval(ctx context.Context, interval int) (int, error)
 	SetScannerConcurrentWorkers(ctx context.Context, workers int) (int, error)
 	ShareAlbum(ctx context.Context, albumID int, expire *time.Time, password *string) (*models.ShareToken, error)
@@ -5646,70 +5646,6 @@ func (ec *executionContext) fieldContext_Mutation_scanAll(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_scanUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_scanUser,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ScanUser(ctx, fc.Args["userId"].(int))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.IsAdmin == nil {
-					var zeroVal *models.ScannerResult
-					return zeroVal, errors.New("directive isAdmin is not implemented")
-				}
-				return ec.Directives.IsAdmin(ctx, nil, directive0)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_scanUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "finished":
-				return ec.fieldContext_ScannerResult_finished(ctx, field)
-			case "success":
-				return ec.fieldContext_ScannerResult_success(ctx, field)
-			case "progress":
-				return ec.fieldContext_ScannerResult_progress(ctx, field)
-			case "message":
-				return ec.fieldContext_ScannerResult_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ScannerResult", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_scanUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_scanAlbum(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5832,6 +5768,70 @@ func (ec *executionContext) fieldContext_Mutation_scanMedia(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_scanMedia_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_scanUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_scanUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ScanUser(ctx, fc.Args["userId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.ScannerResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_scanUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "finished":
+				return ec.fieldContext_ScannerResult_finished(ctx, field)
+			case "success":
+				return ec.fieldContext_ScannerResult_success(ctx, field)
+			case "progress":
+				return ec.fieldContext_ScannerResult_progress(ctx, field)
+			case "message":
+				return ec.fieldContext_ScannerResult_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ScannerResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_scanUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12668,13 +12668,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "scanUser":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_scanUser(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "scanAlbum":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_scanAlbum(ctx, field)
@@ -12685,6 +12678,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "scanMedia":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_scanMedia(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "scanUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_scanUser(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

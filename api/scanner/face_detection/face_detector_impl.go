@@ -17,11 +17,12 @@ import (
 )
 
 type faceDetector struct {
-	mutex           sync.Mutex
-	rec             *face.Recognizer
-	faceDescriptors []face.Descriptor
-	faceGroupIDs    []int32
-	imageFaceIDs    []int
+	mutex             sync.Mutex
+	rec               *face.Recognizer
+	faceDescriptors   []face.Descriptor
+	faceGroupIDs      []int32
+	imageFaceIDs      []int
+	classifyThreshold float32
 }
 
 func InitializeFaceDetector(db *gorm.DB) error {
@@ -42,12 +43,21 @@ func InitializeFaceDetector(db *gorm.DB) error {
 		return errors.Wrap(err, "get face detection samples from database")
 	}
 
-	GlobalFaceDetector = &faceDetector{
-		rec:             rec,
-		faceDescriptors: faceDescriptors,
-		faceGroupIDs:    faceGroupIDs,
-		imageFaceIDs:    imageFaceIDs,
+	var classifyThreshold float32
+	site_info, err := models.GetSiteInfo(db)
+	if err != nil {
+		return errors.Wrap(err, "get classify face threshold from database")
 	}
+	classifyThreshold = float32(site_info.ClassifyFaceThreshold)
+
+	GlobalFaceDetector = &faceDetector{
+		rec:               rec,
+		faceDescriptors:   faceDescriptors,
+		faceGroupIDs:      faceGroupIDs,
+		imageFaceIDs:      imageFaceIDs,
+		classifyThreshold: classifyThreshold,
+	}
+	log.Println("InitializeFaceDetector: threshold, ", classifyThreshold)
 
 	return nil
 }
@@ -88,6 +98,12 @@ func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	fd.imageFaceIDs = imageFaceIDs
 
 	return nil
+}
+
+// ChangeClassifyFaceThreshold 
+func (fd *faceDetector) ChangeClassifyFaceThreshold(classifyThreshold float32) {
+	fd.classifyThreshold = classifyThreshold
+	log.Println("ChangeClassifyFaceThreshold: threshold, ", classifyThreshold)
 }
 
 // DetectFaces finds the faces in the given image and saves them to the database
@@ -232,15 +248,11 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 	return nil
 }
 
-func (fd *faceDetector) classifyDescriptor(descriptor face.Descriptor) int32 {
-	return int32(fd.rec.ClassifyThreshold(descriptor, 0.2))
-}
-
 func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string) error {
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
-	match := fd.classifyDescriptor(face.Descriptor)
+	match := int32(fd.rec.ClassifyThreshold(face.Descriptor, fd.classifyThreshold))
 
 	dimension, err := media_encoding.GetPhotoDimensions(imagePath)
 	if err != nil {
@@ -383,7 +395,7 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 		faceGroupID := unrecognizedFaceGroupIDs[i]
 		imageFaceID := unrecognizedImageFaceIDs[i]
 
-		match := fd.classifyDescriptor(descriptor)
+		match := int32(fd.rec.ClassifyThreshold(descriptor, fd.classifyThreshold))
 
 		if match < 0 {
 			// still no match, we can readd it to the list
@@ -412,13 +424,13 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 	return updatedImageFaces, nil
 }
 
-func (fd *faceDetector) FindFaceGroupCandidates( faceGroup int, checkLng int, threshold float32) {
+func (fd *faceDetector) findFaceGroupCandidates( faceGroup int, checkLng int) {
 
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
 	k := len(fd.faceDescriptors) - checkLng
-	log.Printf("FindFaceGroupCandidates Id %d Lng %d start %d chkLng %d\n", faceGroup, len(fd.faceDescriptors), k, checkLng)
+	log.Printf("findFaceGroupCandidates Id %d Lng %d start %d chkLng %d\n", faceGroup, len(fd.faceDescriptors), k, checkLng)
 
 	descriptor := fd.faceDescriptors[k]
 	faceGroupID := fd.faceGroupIDs[k]
@@ -428,9 +440,9 @@ func (fd *faceDetector) FindFaceGroupCandidates( faceGroup int, checkLng int, th
 	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k)
 	for j := range checkLng {
 		i := j + k
-		// log.Printf("FindFaceGroupCandidates index %d\n", i)
+		// log.Printf("findFaceGroupCandidates index %d\n", i)
 		fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
-		match := fd.rec.ClassifyThreshold( descriptor, threshold)
+		match := fd.rec.ClassifyThreshold( descriptor, fd.classifyThreshold)
 		if match == faceGroup {
 			log.Printf("Face %d matches desired face group %d \n", imageFaceID, match)
 		} else {
@@ -522,11 +534,11 @@ func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
 		// for _, faceID := range faceIDs {
 			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
 		// }
-		fd.nextFaceForGroup(db, grpID, faceIDs, 0.100)
+		fd.nextFaceForGroup(db, grpID, faceIDs)
 	}
 }
 
-func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int, threshold float32) {
+func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int) {
 
 	log.Printf("nextFaceForGroup %d %d\n", groupID, len(faceIDs))
 
@@ -548,7 +560,7 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 		fd.imageFaceIDs = append(fd.imageFaceIDs, faceID)
 		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx)
 	}
-	fd.FindFaceGroupCandidates( groupID, len(faceIDs), threshold)
+	fd.findFaceGroupCandidates( groupID, len(faceIDs))
 	fd.faceDescriptors = saveFaceDescriptors
 	fd.faceGroupIDs = saveFaceGroupIDs
 	fd.imageFaceIDs = saveImageFaceIDs

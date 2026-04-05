@@ -35,23 +35,6 @@ func (r *mutationResolver) ScanAll(ctx context.Context) (*models.ScannerResult, 
 	}, nil
 }
 
-// ScanUser is the resolver for the scanUser field.
-func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error) {
-	var user models.User
-	if err := r.DB(ctx).First(&user, userID).Error; err != nil {
-		return nil, fmt.Errorf("get user from database: %w", err)
-	}
-
-	scanner_queue.AddUserToQueue(&user)
-
-	startMessage := "Scanner started"
-	return &models.ScannerResult{
-		Finished: false,
-		Success:  true,
-		Message:  &startMessage,
-	}, nil
-}
-
 // ScanAlbum is the resolver for the scanAlbum field.
 func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error) {
 	log.Printf("Album Id: %d\n", albumID)
@@ -81,6 +64,23 @@ func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.
 	scanner_queue.AddMediaAlbumToQueue(&media)
 
 	startMessage := "Media Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanUser is the resolver for the scanUser field.
+func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error) {
+	var user models.User
+	if err := r.DB(ctx).First(&user, userID).Error; err != nil {
+		return nil, fmt.Errorf("get user from database: %w", err)
+	}
+
+	scanner_queue.AddUserToQueue(&user)
+
+	startMessage := "Scanner started"
 	return &models.ScannerResult{
 		Finished: false,
 		Success:  true,

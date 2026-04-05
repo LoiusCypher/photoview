@@ -128,6 +128,7 @@ func (r *mutationResolver) CheckFaceGroup(ctx context.Context, faceGroupID int) 
 
 // SetFaceClassifyThreshold is the resolver for the setFaceClassifyThreshold field.
 func (r *mutationResolver) SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error) {
+	log.Printf("SetFaceClassifyThreshold: %f\n", threshold)
 	db := r.DB(ctx)
 	if err := db.
 		Session(&gorm.Session{AllowGlobalUpdate: true}).
@@ -143,7 +144,7 @@ func (r *mutationResolver) SetFaceClassifyThreshold(ctx context.Context, thresho
 		return 0, err
 	}
 
-	// classify_face_threshold.ChangeClassifyFaceThreshold(siteInfo.ClassifyFaceThreshold)
+	face_detection.GlobalFaceDetector.ChangeClassifyFaceThreshold(float32(siteInfo.ClassifyFaceThreshold))
 
 	return siteInfo.ClassifyFaceThreshold, nil
 }

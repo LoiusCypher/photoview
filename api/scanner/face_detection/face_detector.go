@@ -7,12 +7,13 @@ import (
 )
 
 type FaceDetector interface {
-	ReloadFacesFromDatabase(db *gorm.DB) error
+	ChangeClassifyFaceThreshold(threshold float32)
+	CheckFaceGroup(db *gorm.DB, groupID int32)
 	DetectFaces(db *gorm.DB, media *models.Media) error
 	MergeCategories(sourceID int32, destID int32)
 	MergeImageFaces(imageFaceIDs []int, destFaceGroupID int32)
 	RecognizeUnlabeledFaces(db *gorm.DB, user *models.User) ([]*models.ImageFace, error)
-	CheckFaceGroup(db *gorm.DB, groupID int32)
+	ReloadFacesFromDatabase(db *gorm.DB) error
 }
 
 var GlobalFaceDetector FaceDetector = nil
