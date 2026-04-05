@@ -85,8 +85,8 @@ export const ScannerClassifyThreshold = () => {
         id="scanner_classify_threshold_field"
         value={threshold}
         onChange={event => {
-          var thresh = parseFloat(event.target.value)
-          if (thresh != NaN) {
+          if (!isNaN(parseFloat(event.target.value))) {
+            var thresh = parseFloat(event.target.value)
             setThreshold(thresh);
             if (event.target !== document.activeElement) {
               updateClassifyThreshold(thresh)
@@ -99,13 +99,6 @@ export const ScannerClassifyThreshold = () => {
         }
       />
       }
-      <div>
-        <span className="sr-only">Loading...</span>
-        <svg aria-hidden="true" className="w-8 h-8 text-neutral-tertiary animate-rotate" viewBox="0 0 100 101" xmlns="http://www.w3.org/2000/svg">
-          <circle className="animate-dash" cx="50" cy="50" r="45">
-          </circle>
-        </svg>
-      </div>
     </div>
   )
 }
