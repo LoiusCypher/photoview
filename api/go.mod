@@ -3,9 +3,8 @@ module github.com/loiuscypher/photoview/api
 go 1.26.0
 
 require (
-	github.com/99designs/gqlgen v0.17.88
+	github.com/99designs/gqlgen v0.17.89
 	github.com/Kagami/go-face v0.0.0-20210630145111-0c14797b4d0e
-	github.com/barasher/go-exiftool v1.10.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/go-cmp v0.7.0
@@ -14,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/otiai10/copy v1.14.1
-	github.com/photoview/photoview/api v0.0.0-20260319123101-7bfaadb1058e
+	github.com/photoview/photoview/api v0.0.0-20260401150619-3665a66b3bfc
 	github.com/pkg/errors v0.9.1
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/stretchr/testify v1.11.1
