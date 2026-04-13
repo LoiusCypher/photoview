@@ -67,13 +67,13 @@ export const ScannerClassifyThreshold = () => {
         </InputLabelDescription>
       </label>
       { (classifyThresholdQuery.loading || setThresholdMutationData.loading) &&
-      <div>
+      <>
         <span className="sr-only">Loading...</span>
-        <svg aria-hidden="true" className="w-8 h-8 text-neutral-tertiary animate-rotate" viewBox="-2 0 100 101" xmlns="http://www.w3.org/2000/svg">
+        <svg aria-hidden="true" className="inline-block w-8 h-8 text-neutral-tertiary animate-rotate" viewBox="-2 0 100 101" xmlns="http://www.w3.org/2000/svg">
           <circle className="animate-dash" cx="50" cy="50" r="45">
           </circle>
         </svg>
-      </div>
+      </>
       }
       { (classifyThresholdQuery.loading || setThresholdMutationData.loading) ||
       <TextField

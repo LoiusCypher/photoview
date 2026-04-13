@@ -9,6 +9,7 @@
 
 export interface scanAllMutation_scanAll {
   __typename: 'ScannerResult'
+  finished: boolean
   success: boolean
   message: string | null
 }

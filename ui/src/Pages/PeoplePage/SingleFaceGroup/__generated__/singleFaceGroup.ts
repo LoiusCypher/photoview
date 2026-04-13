@@ -69,6 +69,10 @@ export interface singleFaceGroup_faceGroup_imageFaces {
    */
   rectangle: singleFaceGroup_faceGroup_imageFaces_rectangle
   /**
+   * The `FaceGroup` was confirmed for this `ImageFace`
+   */
+  confirmed: boolean
+  /**
    * A reference to the image the face appears on
    */
   media: singleFaceGroup_faceGroup_imageFaces_media

@@ -19,6 +19,7 @@ import MergeFaceGroupsModal, {
 } from './MergeFaceGroupsModal'
 import MoveImageFacesModal from './MoveImageFacesModal'
 import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import FaceGroupSplit from './FaceGroupSplit'
 
 type FaceGroupTitleProps = {
   faceGroup?: singleFaceGroup_faceGroup
@@ -131,6 +132,9 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           open={detachModalOpen}
           setOpen={setDetachModalOpen}
           faceGroup={faceGroup}
+        />
+        <FaceGroupSplit
+          groupID={faceGroup.id}
         />
       </>
     )
