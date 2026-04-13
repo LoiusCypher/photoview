@@ -14,6 +14,7 @@ type FaceDetector interface {
 	MergeImageFaces(imageFaceIDs []int, destFaceGroupID int32)
 	RecognizeUnlabeledFaces(db *gorm.DB, user *models.User) ([]*models.ImageFace, error)
 	ReloadFacesFromDatabase(db *gorm.DB) error
+	SplitFaceGroup(db *gorm.DB, groupID int32)
 }
 
 var GlobalFaceDetector FaceDetector = nil

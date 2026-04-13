@@ -27,6 +27,8 @@ type ImageFace {
   faceGroup: FaceGroup!
   "The `FaceGroup` was confirmed for this `ImageFace`"
   confirmed: Boolean!
+  "Helper for group ordering"
+  subgroup: Int!
 }
 
 extend type Query {

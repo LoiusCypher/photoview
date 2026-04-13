@@ -149,6 +149,18 @@ func (r *mutationResolver) SetFaceClassifyThreshold(ctx context.Context, thresho
 	return siteInfo.ClassifyFaceThreshold, nil
 }
 
+// SplitFaceGroup
+func (r *mutationResolver) SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error) {
+	log.Printf("SplitFaceGroup: %d\n", groupID)
+	face_detection.GlobalFaceDetector.SplitFaceGroup(r.DB(ctx), int32(groupID))
+
+	startMessage := "Split face group Done"
+	return &models.DevCmdResult{
+		Success: true,
+		Message: &startMessage,
+	}, nil
+}
+
 // ToggleConfirmFaceGroup is the resolver for the toggleConfirmFaceGroup field.
 func (r *mutationResolver) ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error) {
 	db := r.DB(ctx)

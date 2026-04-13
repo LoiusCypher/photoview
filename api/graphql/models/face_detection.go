@@ -28,6 +28,7 @@ type ImageFace struct {
 	Descriptor  FaceDescriptor `gorm:"not null"`
 	Rectangle   FaceRectangle  `gorm:"not null"`
 	Confirmed   bool           `gorm:"not null"`
+	Subgroup    int            `gorm:"not null"`
 }
 
 func (f *ImageFace) FillMedia(db *gorm.DB) error {

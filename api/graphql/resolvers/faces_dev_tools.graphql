@@ -14,6 +14,9 @@ extend type Mutation {
   "Set threshold for face classification"
   setFaceClassifyThreshold(threshold: Float!): Float! @isAdmin
 
+  "See if group contains several persons"
+  splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
   "Toggle Faces FaceGroup Confirmation flag "
   toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
 }

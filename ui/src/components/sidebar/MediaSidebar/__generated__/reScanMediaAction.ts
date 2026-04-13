@@ -4,22 +4,22 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: scanMediaAction
+// GraphQL mutation operation: reScanMediaAction
 // ====================================================
 
-export interface scanMediaAction_scanMedia {
+export interface reScanMediaAction_reScanMedia {
   __typename: 'ScannerResult'
   success: boolean
   message: string | null
 }
 
-export interface scanMediaAction {
+export interface reScanMediaAction {
   /**
-   * Scan a single media file for faces
+   * ReScan a single media file for faces
    */
-  scanMedia: scanMediaAction_scanMedia
+  reScanMedia: reScanMediaAction_reScanMedia
 }
 
-export interface scanMediaActionVariables {
+export interface reScanMediaActionVariables {
   mediaId: string
 }

@@ -4,8 +4,10 @@ package face_detection
 
 import (
 	"log"
-	"sync"
+	"math"
 	"slices"
+	"sort"
+	"sync"
 
 	"github.com/Kagami/go-face"
 	"github.com/loiuscypher/photoview/api/graphql/models"
@@ -106,11 +108,23 @@ func (fd *faceDetector) ChangeClassifyFaceThreshold(classifyThreshold float32) {
 	log.Println("ChangeClassifyFaceThreshold: threshold, ", classifyThreshold)
 }
 
+// ReDetectFaces finds the faces in the given image and saves them to the database
+func (fd *faceDetector) ReDetectFaces(db *gorm.DB, media *models.Media) error {
+	if err := db.Model(media).Preload("MediaURL").First(&media).Error; err != nil {
+		return err
+	}
+
+	log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
+	return nil
+}
+
 // DetectFaces finds the faces in the given image and saves them to the database
 func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 	if err := db.Model(media).Preload("MediaURL").First(&media).Error; err != nil {
 		return err
 	}
+
+	log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
 	var faces []face.Face
 	var thumbnailPath string
@@ -566,3 +580,136 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 	fd.imageFaceIDs = saveImageFaceIDs
 }
 
+type distElem struct {
+	sId	int
+	tId	int
+	dist	float64
+}
+
+func deleteUnused(grp []int, newId int, dists []distElem) (r []distElem) {
+	for _, grpId := range grp {
+		dists = slices.DeleteFunc(dists, func(c distElem) bool {
+			return (c.sId == grpId) && (c.tId == newId) || (c.tId == grpId) && (c.sId == newId)
+		})
+	}
+	return dists
+}
+
+func mergeGroups(groups [][]int, dists []distElem, tId int, i int) (r bool, rgroups [][]int, rdists []distElem) {
+	for j, grpS := range groups {
+		if 0 <= slices.IndexFunc(grpS, func(c int) bool { return c == tId }) {
+			log.Printf("   found two related groups that must be merged %d %d\n", i, j)
+			// merge groups because they are close to each other
+			for _, faceId := range grpS {
+				dists = deleteUnused(groups[i], faceId, dists)
+			}
+			groups[i] = slices.Concat(groups[i], grpS)
+			log.Println("   7a group", i, groups[i])
+			groups = slices.Delete(groups, j, j)
+			log.Println("   7b groupCnt", len(groups))
+			return true, groups, dists
+		}
+	}
+	log.Printf("   No group merge to group %d\n", i)
+	return false, groups, dists
+}
+
+func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
+
+	log.Printf("splitFaceGroup groupID %d\n", groupID)
+
+	fd.ReloadFacesFromDatabase(db)
+
+	// collect descriptors and faceIDs of groupID and calculate all distances in this group
+	descr := make([]face.Descriptor, 0)
+	imIds := make([]int, 0)
+	dists := make([]distElem, 0)
+	for i, faceGroupID := range fd.faceGroupIDs {
+		if faceGroupID == groupID {
+			newId := fd.imageFaceIDs[i]
+			for j, dstId := range imIds {
+				var elem distElem
+				elem.sId = newId
+				elem.tId = dstId
+				elem.dist = euclidean_distance(descr[j], fd.faceDescriptors[i])
+				log.Printf(" loop i:%d j:%d newId:%d dstId:%d dist:%f\n", i, j, newId, dstId, elem.dist)
+				dists = append(dists, elem)
+			}
+			descr = append(descr, fd.faceDescriptors[i])
+			imIds = append(imIds, newId)
+		}
+	}
+
+	// log.Printf("splitFaceGroup len(descr) %d len(dists) %d\n", len(descr), len(dists))
+
+	// order distanes ascending
+	sort.Slice(dists, func(i, j int) bool {
+		return dists[i].dist < dists[j].dist
+	})
+	
+	var groups [][]int
+	for len(dists) > 0 {
+		log.Printf("0 len(dists) %d len(groups) %d\n", len(dists), len(groups))
+		nextDist := dists[0]
+		dists = dists[1:]
+		log.Printf(" 1 next distance between %d and %d is %f\n", nextDist.sId, nextDist.tId, nextDist.dist)
+		foundA := false
+		for i, grp := range groups {
+			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
+				log.Printf("  2 found face %d in group %d\n", nextDist.sId, i)
+				var found bool
+				found, groups, dists = mergeGroups(groups, dists, nextDist.tId, i)
+				if found {
+					foundA = true
+					break
+				}
+				log.Printf("  3 found new face %d for group %d\n", nextDist.tId, i)
+				dists = deleteUnused(grp, nextDist.tId, dists)
+				groups[i] = append(grp, nextDist.tId)
+				log.Println("  3a group", i, groups[i])
+				foundA = true
+				break
+			}
+			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
+				log.Printf("  4 found new face %d for group %d\n", nextDist.sId, i)
+				dists = deleteUnused(grp, nextDist.sId, dists)
+				groups[i] = append(grp, nextDist.sId)
+				log.Println("  4a group", i, groups[i])
+				foundA = true
+				break
+			}
+		}
+		if foundA {
+			continue
+		}
+		log.Printf("  5 have to create new group for sId %d and tId %d\n", nextDist.sId, nextDist.tId)
+		groups = append(groups, []int {nextDist.sId, nextDist.tId})
+		log.Println("  5a group", len(groups)-1, groups[len(groups)-1])
+		elemCnt := 0
+		for _, grp := range groups {
+			elemCnt += len(grp)
+		}
+		log.Println("  5b elements grouped", elemCnt, "of", len(descr))
+		if elemCnt == len(descr) {
+			log.Printf("ALL faces grouped\n")
+			break
+		}
+	}
+	log.Println("FINISHED groupCnt:", len(groups))
+	for i, grp := range groups {
+		log.Println(" Group", i, grp)
+	}
+}
+
+func euclidean_distance(src face.Descriptor, dst face.Descriptor) (r float64) {
+
+	sum_of_squares := 0.0
+	for i, coord := range src {
+		//sum_of_squares += math.Pow(float64(coord-dst[i]), 2)
+		diff := float64(coord-dst[i])
+		sum_of_squares += diff * diff
+	}
+	//return 1 / (1 + math.Sqrt(sum_of_squares))
+	return math.Sqrt(sum_of_squares)
+	//return 0.5 * sum_of_squares
+}
