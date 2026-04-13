@@ -96,6 +96,7 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Media     func(childComplexity int) int
 		Rectangle func(childComplexity int) int
+		Subgroup  func(childComplexity int) int
 	}
 
 	Media struct {
@@ -599,6 +600,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ImageFace.Rectangle(childComplexity), true
+	case "ImageFace.subgroup":
+		if e.ComplexityRoot.ImageFace.Subgroup == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ImageFace.Subgroup(childComplexity), true
 
 	case "Media.album":
 		if e.ComplexityRoot.Media.Album == nil {
@@ -3282,6 +3289,8 @@ func (ec *executionContext) fieldContext_FaceGroup_imageFaces(ctx context.Contex
 				return ec.fieldContext_ImageFace_faceGroup(ctx, field)
 			case "confirmed":
 				return ec.fieldContext_ImageFace_confirmed(ctx, field)
+			case "subgroup":
+				return ec.fieldContext_ImageFace_subgroup(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ImageFace", field.Name)
 		},
@@ -3639,6 +3648,35 @@ func (ec *executionContext) fieldContext_ImageFace_confirmed(_ context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ImageFace_subgroup(ctx context.Context, field graphql.CollectedField, obj *models.ImageFace) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ImageFace_subgroup,
+		func(ctx context.Context) (any, error) {
+			return obj.Subgroup, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ImageFace_subgroup(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ImageFace",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4239,6 +4277,8 @@ func (ec *executionContext) fieldContext_Media_faces(_ context.Context, field gr
 				return ec.fieldContext_ImageFace_faceGroup(ctx, field)
 			case "confirmed":
 				return ec.fieldContext_ImageFace_confirmed(ctx, field)
+			case "subgroup":
+				return ec.fieldContext_ImageFace_subgroup(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ImageFace", field.Name)
 		},
@@ -5267,6 +5307,8 @@ func (ec *executionContext) fieldContext_Mutation_recognizeUnlabeledFaces(_ cont
 				return ec.fieldContext_ImageFace_faceGroup(ctx, field)
 			case "confirmed":
 				return ec.fieldContext_ImageFace_confirmed(ctx, field)
+			case "subgroup":
+				return ec.fieldContext_ImageFace_subgroup(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ImageFace", field.Name)
 		},
@@ -12132,6 +12174,11 @@ func (ec *executionContext) _ImageFace(ctx context.Context, sel ast.SelectionSet
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "confirmed":
 			out.Values[i] = ec._ImageFace_confirmed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "subgroup":
+			out.Values[i] = ec._ImageFace_subgroup(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
