@@ -19,18 +19,8 @@ import { useDetachImageFaces } from '../../../Pages/PeoplePage/SingleFaceGroup/D
 import MoveImageFacesModal from '../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal'
 import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
 import styled from 'styled-components'
-import { scanMediaAction, scanMediaVariables } from './__generated__/scanMediaAction'
 import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
 import { faceGroupCofirmationToggle, toggleFaceGroupCofirmationVariables } from './__generated__/faceGroupCofirmationToggle'
-
-const SCAN_MEDIA_MUTATION = gql`
-  mutation scanMediaAction( $mediaId: ID!) {
-    scanMedia( mediaId: $mediaId) {
-      success
-      message
-    }
-  }
-`
 
 const TOGGLE_FACEGROUP_CONFIRMATION_MUTATION = gql`
   mutation faceGroupCofirmationToggle( $imageFaceId: ID!) {
@@ -224,7 +214,6 @@ type MediaSidebarFacesProps = {
 
 const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
-  const [startMediaScanner, { calledMedia }] = useMutation<scanMediaAction,scanMediaVariables>(SCAN_MEDIA_MUTATION)
 
   const faceElms = (media.faces ?? []).map((face, i) => (
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
@@ -234,18 +223,6 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
 
   return (
     <SidebarSection>
-      <InputLabelDescription>
-        {t(
-          'sidebar.people.rescan.description',
-          'Gesichtserkennung'
-        )}
-      </InputLabelDescription>
-      <Button
-        onClick={() => { startMediaScanner( { variables: { mediaId: media.id } }); }}
-        disabled={calledMedia}
-      >
-        {t('sidebar.people.rescan.thumbnail', 'Rescan Thumbnail')}
-      </Button>
       <SidebarSectionTitle>
         {t('sidebar.people.title', 'People')}
       </SidebarSectionTitle>

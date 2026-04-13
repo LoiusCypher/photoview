@@ -71,6 +71,23 @@ func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.
 	}, nil
 }
 
+// ReScanMedia is the resolver for the reScanMedia field.
+func (r *mutationResolver) ReScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+	log.Printf("Media Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+	log.Println("  ", len(media.Faces), " Faces exist already for: ", media.ID)
+
+	startMessage := "Media ReScanned"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
 // ScanUser is the resolver for the scanUser field.
 func (r *mutationResolver) ScanUser(ctx context.Context, userID int) (*models.ScannerResult, error) {
 	var user models.User
