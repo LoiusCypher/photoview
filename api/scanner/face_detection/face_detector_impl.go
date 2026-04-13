@@ -614,9 +614,11 @@ func mergeGroups(groups [][]int, dists []distElem, tId int, i int) (r bool, rgro
 	return false, groups, dists
 }
 
-func (fd *faceDetector) SplitFaceGroup(groupID int32) {
+func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("splitFaceGroup groupID %d\n", groupID)
+
+	fd.ReloadFacesFromDatabase(db)
 
 	// collect descriptors and faceIDs of groupID and calculate all distances in this group
 	descr := make([]face.Descriptor, 0)
@@ -687,11 +689,15 @@ func (fd *faceDetector) SplitFaceGroup(groupID int32) {
 		for _, grp := range groups {
 			elemCnt += len(grp)
 		}
-		log.Println("  5b elements grouped", elemCnt)
+		log.Println("  5b elements grouped", elemCnt, "of", len(descr))
 		if elemCnt == len(descr) {
 			log.Printf("ALL faces grouped\n")
 			break
 		}
+	}
+	log.Println("FINISHED groupCnt:", len(groups))
+	for i, grp := range groups {
+		log.Println(" Group", i, grp)
 	}
 }
 
