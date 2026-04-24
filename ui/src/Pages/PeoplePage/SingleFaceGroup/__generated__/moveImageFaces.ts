@@ -7,15 +7,9 @@
 // GraphQL mutation operation: moveImageFaces
 // ====================================================
 
-export interface moveImageFaces_moveImageFaces_imageFaces {
-  __typename: 'ImageFace'
-  id: string
-}
-
 export interface moveImageFaces_moveImageFaces {
   __typename: 'FaceGroup'
   id: string
-  imageFaces: moveImageFaces_moveImageFaces_imageFaces[]
 }
 
 export interface moveImageFaces {

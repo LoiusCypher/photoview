@@ -85,6 +85,14 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 	return
 }
 
+func setImageFaceSubGroup(db *gorm.DB, imageFaceID int, subGroup int) (err error) {
+
+	if err := db.Where("id = ?", imageFaceID).Model(&models.ImageFace{}).UpdateColumn("subgroup", subGroup).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // ReloadFacesFromDatabase replaces the in-memory face descriptors with the ones in the database
 func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	faceDescriptors, faceGroupIDs, imageFaceIDs, err := getSamplesFromDatabase(db)
@@ -697,6 +705,13 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	}
 	log.Println("FINISHED groupCnt:", len(groups))
 	for i, grp := range groups {
+		for _, faceImageId := range grp {
+			if err := setImageFaceSubGroup(db, faceImageId, i); err != nil {
+				log.Println(" Saving Subgroup", i, "failed for FaceImageId", faceImageId)
+			} else {
+				log.Println("Saved Subgroup", i, "failed for FaceImageId", faceImageId)
+			}
+		}
 		log.Println(" Group", i, grp)
 	}
 }
