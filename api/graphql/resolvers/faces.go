@@ -41,8 +41,8 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 		Joins("Media").
 		Where(faceGroupIDIsQuestion, obj.ID).
 		Where("album_id IN (?)", userAlbumIDs).
-		Order("confirmed DESC").
-		Order("subgroup ASC")
+		Order("subgroup ASC").
+		Order("confirmed DESC")
 
 	query = models.FormatSQL(query, nil, paginate)
 

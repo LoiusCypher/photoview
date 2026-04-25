@@ -85,6 +85,14 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 	return
 }
 
+func setImageFaceSubGroup(db *gorm.DB, imageFaceID int, subGroup int) (err error) {
+
+	if err := db.Where("id = ?", imageFaceID).Model(&models.ImageFace{}).UpdateColumn("subgroup", subGroup).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // ReloadFacesFromDatabase replaces the in-memory face descriptors with the ones in the database
 func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	faceDescriptors, faceGroupIDs, imageFaceIDs, err := getSamplesFromDatabase(db)
@@ -695,8 +703,44 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			break
 		}
 	}
-	log.Println("FINISHED groupCnt:", len(groups))
-	for i, grp := range groups {
+	log.Println("FINISHED groupCnt:", len(groups), "distsCnt", len(dists))
+	// Now sort subgroups
+	var groupsSorted [][]int
+	for len(dists) > 0 {
+		log.Printf("10 len(dists) %d len(groups) %d\n", len(dists), len(groups))
+		nextDist := dists[0]
+		dists = dists[1:]
+		log.Printf(" 11 next distance between %d and %d is %f\n", nextDist.sId, nextDist.tId, nextDist.dist)
+		foundS := false
+		foundD := false
+		for i, grp := range groups {
+			if !foundS && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
+				log.Printf("  12 found face %d in group %d\n", nextDist.sId, i)
+				groupsSorted = append(groupsSorted, groups[i])
+				groups = slices.Delete(groups, i, i)
+				foundS = true
+			}
+			if !foundD && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
+				log.Printf("  14 found new face %d for group %d\n", nextDist.sId, i)
+				groupsSorted = append(groupsSorted, groups[i])
+				groups = slices.Delete(groups, i, i)
+				foundD = true
+			}
+		}
+	}
+	for _, grp := range groups {
+		groupsSorted = append(groupsSorted, grp)
+	}
+	log.Println("FINISHED sorting groups sortedCnt:", len(groupsSorted), "groupCnt:", len(groups))
+	//
+	for i, grp := range groupsSorted {
+		for _, faceImageId := range grp {
+			if err := setImageFaceSubGroup(db, faceImageId, i); err != nil {
+				log.Println(" Saving Subgroup", i, "failed for FaceImageId", faceImageId, "err", err)
+			} else {
+				log.Println("Saved Subgroup", i, "succeeded for FaceImageId", faceImageId)
+			}
+		}
 		log.Println(" Group", i, grp)
 	}
 }
