@@ -728,6 +728,11 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			}
 		}
 	}
+	// order remaing group by lng descending
+	sort.Slice(groups, func(i, j int) bool {
+		return len(groups[i]) > len(groups[j])
+	})
+	// Add them in this order
 	for _, grp := range groups {
 		groupsSorted = append(groupsSorted, grp)
 	}
@@ -741,7 +746,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 				log.Println("Saved Subgroup", i, "succeeded for FaceImageId", faceImageId)
 			}
 		}
-		log.Println(" Group", i, grp)
+		log.Println(" Group", i, "len", len(grp), grp)
 	}
 }
 
