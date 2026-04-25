@@ -37,7 +37,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 			log.Printf("Err: FillMedia %s\n", err)
 			continue
 		}
-		log.Printf(" Media: %d %s  URL Count: %d confirmed: %5t Rectangle: %f %f %f %f\n", face.Media.ID, face.Media.Path, len(face.Media.MediaURL), face.Confirmed, face.Rectangle.MinX, face.Rectangle.MaxX, face.Rectangle.MinY, face.Rectangle.MaxY)
+		log.Printf(" Media: %d %s  URL Count: %d subgroup: %03d confirmed: %5t Rectangle: %f %f %f %f\n", face.Media.ID, face.Media.Path, len(face.Media.MediaURL), face.Subgroup, face.Confirmed, face.Rectangle.MinX, face.Rectangle.MaxX, face.Rectangle.MinY, face.Rectangle.MaxY)
 
 		mw := imagick.NewMagickWand()
 		defer mw.Destroy()
@@ -74,7 +74,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 		if !face.Confirmed {
 			confirmSuffix = "-unsure"
 		}
-		d_name := fmt.Sprintf("%s/%08d%s", r_name, face.FaceGroupID, confirmSuffix)
+		d_name := fmt.Sprintf("%s/%08d-%03d%s", r_name, face.FaceGroupID, face.Subgroup, confirmSuffix)
 		if err := os.MkdirAll(d_name, 0775); err != nil {
 
 			log.Printf("Err: MkdirAll %s\n", err)
