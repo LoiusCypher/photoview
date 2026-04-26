@@ -738,15 +738,17 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	}
 	log.Println("FINISHED sorting groups sortedCnt:", len(groupsSorted), "groupCnt:", len(groups))
 	//
+	j := -len(groups)
 	for i, grp := range groupsSorted {
 		for _, faceImageId := range grp {
-			if err := setImageFaceSubGroup(db, faceImageId, i); err != nil {
-				log.Println(" Saving Subgroup", i, "failed for FaceImageId", faceImageId, "err", err)
+			if err := setImageFaceSubGroup(db, faceImageId, j); err != nil {
+				log.Println(" Saving Subgroup", j, "failed for FaceImageId", faceImageId, "err", err)
 			} else {
-				log.Println("Saved Subgroup", i, "succeeded for FaceImageId", faceImageId)
+				log.Println("Saved Subgroup", j, "succeeded for FaceImageId", faceImageId)
 			}
 		}
-		log.Println(" Group", i, "len", len(grp), grp)
+		log.Println(" Group", j, i, "len", len(grp), grp)
+		j += 1
 	}
 }
 
