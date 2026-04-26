@@ -98,7 +98,6 @@ const MediaSidebarRescan = ({ media }: MediaSidebarFacesProps) => {
           { inputScan }
           { inputSpinner }
           { inputReScan }
-          { inputSpinner }
         </SidebarSection>
       )
     } else {
@@ -107,7 +106,6 @@ const MediaSidebarRescan = ({ media }: MediaSidebarFacesProps) => {
           { inputLabel }
           { inputScan }
           { inputReScan }
-          { inputSpinner }
         </SidebarSection>
       )
     }

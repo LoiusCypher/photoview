@@ -78,9 +78,19 @@ func (r *mutationResolver) ReScanMedia(ctx context.Context, mediaID int) (*model
 	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
 		return nil, fmt.Errorf("get media from database: %w", err)
 	}
-	log.Println("  ", len(media.Faces), " Faces exist already for: ", media.ID)
+	albumID := media.AlbumID
 
-	startMessage := "Media ReScanned"
+	if err := r.DB(ctx).Delete(&media).Error; err != nil {
+		return nil, fmt.Errorf("Delete media %d from database: %w", mediaID, err)
+	}
+	var album models.Album
+	if err := r.DB(ctx).First(&album, albumID).Error; err != nil {
+		return nil, fmt.Errorf("get album from database: %w", mediaID, err)
+	}
+
+	scanner_queue.AddAlbumToQueue(&album)
+
+	startMessage := "Album ReScan"
 	return &models.ScannerResult{
 		Finished: false,
 		Success:  true,
