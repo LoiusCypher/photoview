@@ -8,6 +8,7 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"log"
 
 	api "github.com/loiuscypher/photoview/api/graphql"
 	"github.com/loiuscypher/photoview/api/graphql/auth"
@@ -18,6 +19,7 @@ import (
 
 // ImageFaces is the resolver for the imageFaces field.
 func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGroup, paginate *models.Pagination) ([]*models.ImageFace, error) {
+	log.Println("ImageFaces", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -56,6 +58,7 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 
 // ImageFaceCount is the resolver for the imageFaceCount field.
 func (r *faceGroupResolver) ImageFaceCount(ctx context.Context, obj *models.FaceGroup) (int, error) {
+	log.Println("ImageFaceCount", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -100,6 +103,7 @@ func (r *imageFaceResolver) Media(ctx context.Context, obj *models.ImageFace) (*
 
 // FaceGroup is the resolver for the faceGroup field.
 func (r *imageFaceResolver) FaceGroup(ctx context.Context, obj *models.ImageFace) (*models.FaceGroup, error) {
+	log.Println("FaceGroup", obj)
 	if obj.FaceGroup != nil {
 		return obj.FaceGroup, nil
 	}
