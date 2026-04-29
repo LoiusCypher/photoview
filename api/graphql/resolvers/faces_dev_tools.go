@@ -19,19 +19,31 @@ import (
 
 // ExportAllFaces is the resolver for the exportAllFaces field.
 func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error) {
-	db := r.DB(ctx)
-	var allImageFaces []*models.ImageFace
-	result := db.Find(&allImageFaces).Order("Confirmed asc, FaceGroupID asc, MediaID asc, ID")
-	log.Printf("Face Count: %d\n", result.RowsAffected)
+	log.Printf("ExportAllFaces\n")
+	return r.ExportFaces(ctx, false)
+}
 
-	if result.Error != nil {
-		return nil, fmt.Errorf("get media from database: %w", result.Error)
+// ExportFaces is the resolver for the exportFaces field.
+func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) (*models.DevCmdResult, error) {
+	log.Printf("ExportFaces: %b\n", onlyConfirmed)
+	db := r.DB(ctx)
+	var selectedImageFaces []*models.ImageFace
+	if onlyConfirmed {
+		if result := db.Find(&selectedImageFaces, "Confirmed = TRUE").Order("FaceGroupID asc, MediaID asc, ID"); result.Error != nil {
+			return nil, fmt.Errorf("get confirmed imageFaces from database: %w", result.Error)
+		}
+		log.Printf(" onlyConfirmed Face Count: %d\n", len(selectedImageFaces))
+	} else {
+		if result := db.Find(&selectedImageFaces).Order("Confirmed asc, FaceGroupID asc, MediaID asc, ID"); result.Error != nil {
+			return nil, fmt.Errorf("get imageFaces from database: %w", result.Error)
+		}
+		log.Printf("All Face Count: %d\n", len(selectedImageFaces))
 	}
 
 	imagick.Initialize()
 	defer imagick.Terminate()
 
-	for i, face := range allImageFaces {
+	for i, face := range selectedImageFaces {
 		log.Printf("Index %d Face ID: %d  FaceGroupID: %d\n", i, face.ID, face.FaceGroupID)
 		if err := face.FillMedia(db); err != nil {
 			log.Printf("Err: FillMedia %s\n", err)
@@ -106,7 +118,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 			}
 		*/
 	}
-	log.Printf("Export done. Count: %d\n", result.RowsAffected)
+	log.Printf("Export done. Count: %d\n", len(selectedImageFaces))
 
 	startMessage := "Export faces Done"
 	return &models.DevCmdResult{

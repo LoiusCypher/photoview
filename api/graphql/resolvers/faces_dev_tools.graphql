@@ -8,6 +8,9 @@ extend type Mutation {
   "Save all known portraits to dedicated folder"
   exportAllFaces: DevCmdResult! @isAdmin
 
+  "Save known portraits to dedicated folder"
+  exportFaces(onlyConfirmed: Boolean!): DevCmdResult! @isAdmin
+
   "Check FaceGroup consistency"
   checkFaceGroup(faceGroupID: ID!): DevCmdResult! @isAdmin
 

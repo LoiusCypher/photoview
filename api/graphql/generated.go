@@ -157,6 +157,7 @@ type ComplexityRoot struct {
 		DeleteUser                  func(childComplexity int, id int) int
 		DetachImageFaces            func(childComplexity int, imageFaceIDs []int) int
 		ExportAllFaces              func(childComplexity int) int
+		ExportFaces                 func(childComplexity int, onlyConfirmed bool) int
 		FavoriteMedia               func(childComplexity int, mediaID int, favorite bool) int
 		InitialSetupWizard          func(childComplexity int, username string, password string, rootPath string) int
 		MoveImageFaces              func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
@@ -326,6 +327,7 @@ type MutationResolver interface {
 	RecognizeUnlabeledFaces(ctx context.Context) ([]*models.ImageFace, error)
 	DetachImageFaces(ctx context.Context, imageFaceIDs []int) (*models.FaceGroup, error)
 	ExportAllFaces(ctx context.Context) (*models.DevCmdResult, error)
+	ExportFaces(ctx context.Context, onlyConfirmed bool) (*models.DevCmdResult, error)
 	CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error)
 	SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error)
 	SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
@@ -921,6 +923,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.ExportAllFaces(childComplexity), true
+	case "Mutation.exportFaces":
+		if e.ComplexityRoot.Mutation.ExportFaces == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_exportFaces_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ExportFaces(childComplexity, args["onlyConfirmed"].(bool)), true
 	case "Mutation.favoriteMedia":
 		if e.ComplexityRoot.Mutation.FavoriteMedia == nil {
 			break
@@ -1937,6 +1950,17 @@ func (ec *executionContext) field_Mutation_detachImageFaces_args(ctx context.Con
 		return nil, err
 	}
 	args["imageFaceIDs"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_exportFaces_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "onlyConfirmed", ec.unmarshalNBoolean2bool)
+	if err != nil {
+		return nil, err
+	}
+	args["onlyConfirmed"] = arg0
 	return args, nil
 }
 
@@ -5424,6 +5448,66 @@ func (ec *executionContext) fieldContext_Mutation_exportAllFaces(_ context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DevCmdResult", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_exportFaces(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_exportFaces,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ExportFaces(ctx, fc.Args["onlyConfirmed"].(bool))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_exportFaces(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_DevCmdResult_success(ctx, field)
+			case "message":
+				return ec.fieldContext_DevCmdResult_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DevCmdResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_exportFaces_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -12848,6 +12932,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "exportAllFaces":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_exportAllFaces(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "exportFaces":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_exportFaces(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
