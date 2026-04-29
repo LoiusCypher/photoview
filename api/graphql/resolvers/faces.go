@@ -365,6 +365,7 @@ func (r *mutationResolver) DetachImageFaces(ctx context.Context, imageFaceIDs []
 
 // MyFaceGroups is the resolver for the myFaceGroups field.
 func (r *queryResolver) MyFaceGroups(ctx context.Context, paginate *models.Pagination) ([]*models.FaceGroup, error) {
+	log.Println("MyFaceGroups", paginate)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
