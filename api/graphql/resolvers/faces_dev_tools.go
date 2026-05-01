@@ -82,20 +82,39 @@ func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) 
 			continue
 		}
 		r_name := "/home/photoview/media-cache/portraits"
-		var confirmSuffix = "-confirmed"
+		var confirmSuffix = "confirmed"
 		if !face.Confirmed {
-			confirmSuffix = "-unsure"
+			confirmSuffix = "unsure"
 		}
-		d_name := fmt.Sprintf("%s/%08d-%03d%s", r_name, face.FaceGroupID, face.Subgroup, confirmSuffix)
+
+		lb := ""
+		var faceGroup models.FaceGroup
+		if err := db.
+			// Debug().
+			Model(models.FaceGroup{}).
+			Where("id = ?", face.FaceGroupID).
+			First(&faceGroup).
+			Error; err == nil {
+
+			log.Printf("FaceGroup ok\n")
+			if faceGroup.Label != nil {
+				log.Printf("FaceGroup,Label %s\n", *faceGroup.Label)
+				lb = *faceGroup.Label
+			}
+		}
+
+		d_name := fmt.Sprintf("%s/%08d_%03d_%s-%s", r_name, face.FaceGroupID, -face.Subgroup, lb, confirmSuffix)
 		if err := os.MkdirAll(d_name, 0775); err != nil {
 
 			log.Printf("Err: MkdirAll %s\n", err)
 			continue
 		}
-		s_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", r_name, face.Media.ID, face.ID, f_width, f_height, x, y)
-		if err := mw.WriteImage(s_name); err != nil {
-			log.Printf("Err: WriteImage %s\n", err)
-			continue
+		if !onlyConfirmed {
+			s_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", r_name, face.Media.ID, face.ID, f_width, f_height, x, y)
+			if err := mw.WriteImage(s_name); err != nil {
+				log.Printf("Err: WriteImage %s\n", err)
+				continue
+			}
 		}
 		f_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", d_name, face.Media.ID, face.ID, f_width, f_height, x, y)
 		log.Printf(" Filename: %s\n", f_name)
