@@ -65,19 +65,68 @@ func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) 
 			log.Printf("Err: StripImage %s\n", err)
 			continue
 		}
-		const framing_factor = 0.01
+		// const framing_factor = 0.025
+		const framing_factor = 0.05
 		width := mw.GetImageWidth()
-		x := int(float64(width) * (1.0 - framing_factor) * face.Rectangle.MinX)
+		// x := int(float64(width) * (1.0 - framing_factor) * face.Rectangle.MinX)
 		height := mw.GetImageHeight()
-		y := int(float64(height) * (1.0 - framing_factor) * face.Rectangle.MinY)
-		f_width := uint(int(float64(width)*(1.0+2.0*framing_factor)*face.Rectangle.MaxX) - x)
-		f_height := uint(int(float64(height)*(1.0+2.0*framing_factor)*face.Rectangle.MaxY) - y)
-		log.Printf(" Width: %d  Height: %d  X: %d  Y: %d  Width: %d  Height: %d\n", width, height, x, y, f_height, f_width)
-		if err := mw.CropImage(f_width, f_height, x, y); err != nil {
+		// y := int(float64(height) * (1.0 - framing_factor) * face.Rectangle.MinY)
+		// f_width := uint(int(float64(width)*(1.0+2.0*framing_factor)*face.Rectangle.MaxX) - x)
+		// f_height := uint(int(float64(height)*(1.0+2.0*framing_factor)*face.Rectangle.MaxY) - y)
+		// log.Printf(" Width: %d  Height: %d  X: %d  Y: %d  Width: %d  Height: %d\n", width, height, x, y, f_height, f_width)
+
+		// Y_width_perc := face.Rectangle.MaxX - face.Rectangle.MinX
+		// f_height_perc := face.Rectangle.MaxY - face.Rectangle.MinY
+
+		// f_scaled_w_perc := (1.0 + 2 * framing_factor) * f_width_perc
+		f_scaled_w_perc := (1.0 + 2*framing_factor) * (face.Rectangle.MaxX - face.Rectangle.MinX)
+		// if f_scaled_w_perc != ((1.0 + 2*framing_factor) * f_width_perc) {
+		// 	log.Printf("   Err f_scaled_w_perc: %f != %f\n", f_scaled_w_perc, (1.0+2*framing_factor)*f_width_perc)
+		// }
+		// f_scaled_h_perc := (1.0 + 2*framing_factor) * f_height_perc
+		f_scaled_h_perc := (1.0 + 2*framing_factor) * (face.Rectangle.MaxY - face.Rectangle.MinY)
+
+		// f_center_x_perc := face.Rectangle.MinX + f_width_perc / 2
+		// f_center_x_perc := face.Rectangle.MinX/2 + face.Rectangle.MaxX/2
+		// if f_center_x_perc != (face.Rectangle.MinX + f_width_perc/2) {
+		// 	log.Printf("   Err f_center_x_perc: %f != %f\n", f_center_x_perc, face.Rectangle.MinX+f_width_perc/2)
+		// }
+		// f_center_y_perc := face.Rectangle.MinY + f_height_perc/2
+
+		// f_scaled_x_perc := f_center_x_perc - f_scaled_w_perc / 2
+		f_scaled_x_perc := (1.0+framing_factor)*face.Rectangle.MinX - face.Rectangle.MaxX*framing_factor
+		// if f_scaled_x_perc != (f_center_x_perc - f_scaled_w_perc/2) {
+		// 	log.Printf("   Err f_scaled_x_perc: %f != %f diff: %f\n", f_scaled_x_perc, f_center_x_perc-f_scaled_w_perc/2, f_scaled_x_perc-(f_center_x_perc-f_scaled_w_perc/2))
+		// }
+		// f_scaled_y_perc := f_center_y_perc - f_scaled_h_perc/2
+		f_scaled_y_perc := (1.0+framing_factor)*face.Rectangle.MinY - face.Rectangle.MaxY*framing_factor
+
+		f_scaled_x := int(float64(width) * f_scaled_x_perc)
+		f_scaled_y := int(float64(height) * f_scaled_y_perc)
+		f_scaled_w := uint(float64(width) * f_scaled_w_perc)
+		f_scaled_h := uint(float64(height) * f_scaled_h_perc)
+		log.Printf(" Width: %d  Height: %d  X: %d  Y: %d  Width: %d  Height: %d\n", width, height, f_scaled_x, f_scaled_y, f_scaled_h, f_scaled_w)
+
+		// if f_scaled_x != x {
+		// 	log.Printf("   ERR f_scaled_x: %d != %d\n", f_scaled_x, x)
+		// }
+		// if f_scaled_y != y {
+		// 	log.Printf("   ERR f_scaled_y: %d != %d\n", f_scaled_y, y)
+		// }
+		// if f_scaled_w != f_width {
+		// 	log.Printf("   ERR f_scaled_y: %d != %d\n", f_scaled_w, f_width)
+		// }
+		// if f_scaled_h != f_height {
+		// 	log.Printf("   ERR f_scaled_y: %d != %d\n", f_scaled_h, f_height)
+		// }
+
+		if err := mw.CropImage(f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y); err != nil {
+		// if err := mw.CropImage(f_width, f_height, x, y); err != nil {
 			log.Printf("Err: CropImage %s\n", err)
 			continue
 		}
-		if err := mw.SetImagePage(f_width, f_height, x, y); err != nil {
+		if err := mw.SetImagePage(f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y); err != nil {
+		// if err := mw.SetImagePage(f_width, f_height, x, y); err != nil {
 			log.Printf("Err: SetImagePage %s\n", err)
 			continue
 		}
@@ -110,13 +159,13 @@ func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) 
 			continue
 		}
 		if !onlyConfirmed {
-			s_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", r_name, face.Media.ID, face.ID, f_width, f_height, x, y)
+			s_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d-s.jpg", r_name, face.Media.ID, face.ID, f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y)
 			if err := mw.WriteImage(s_name); err != nil {
 				log.Printf("Err: WriteImage %s\n", err)
 				continue
 			}
 		}
-		f_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d.jpg", d_name, face.Media.ID, face.ID, f_width, f_height, x, y)
+		f_name := fmt.Sprintf("%s/%06d_%06d_%04d_%04d_%04d_%04d-s.jpg", d_name, face.Media.ID, face.ID, f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y)
 		log.Printf(" Filename: %s\n", f_name)
 		if err := mw.WriteImage(f_name); err != nil {
 			log.Printf("Err: WriteImage %s\n", err)
