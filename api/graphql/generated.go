@@ -161,11 +161,13 @@ type ComplexityRoot struct {
 		ExportFaces                 func(childComplexity int, onlyConfirmed bool) int
 		FavoriteMedia               func(childComplexity int, mediaID int, favorite bool) int
 		InitialSetupWizard          func(childComplexity int, username string, password string, rootPath string) int
+		MirrorMedia                 func(childComplexity int, mediaID int) int
 		MoveImageFaces              func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
 		ProtectShareToken           func(childComplexity int, token string, password *string) int
 		ReScanMedia                 func(childComplexity int, mediaID int) int
 		RecognizeUnlabeledFaces     func(childComplexity int) int
 		ResetAlbumCover             func(childComplexity int, albumID int) int
+		RotateMedia                 func(childComplexity int, mediaID int) int
 		ScanAlbum                   func(childComplexity int, albumID int) int
 		ScanAll                     func(childComplexity int) int
 		ScanMedia                   func(childComplexity int, mediaID int) int
@@ -333,6 +335,8 @@ type MutationResolver interface {
 	SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error)
 	SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
 	ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error)
+	RotateMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
+	MirrorMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
 	FavoriteMedia(ctx context.Context, mediaID int, favorite bool) (*models.Media, error)
 	ScanAll(ctx context.Context) (*models.ScannerResult, error)
 	ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error)
@@ -957,6 +961,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.InitialSetupWizard(childComplexity, args["username"].(string), args["password"].(string), args["rootPath"].(string)), true
+	case "Mutation.mirrorMedia":
+		if e.ComplexityRoot.Mutation.MirrorMedia == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_mirrorMedia_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.MirrorMedia(childComplexity, args["mediaId"].(int)), true
 	case "Mutation.moveImageFaces":
 		if e.ComplexityRoot.Mutation.MoveImageFaces == nil {
 			break
@@ -1007,6 +1022,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.ResetAlbumCover(childComplexity, args["albumID"].(int)), true
+	case "Mutation.rotateMedia":
+		if e.ComplexityRoot.Mutation.RotateMedia == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_rotateMedia_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RotateMedia(childComplexity, args["mediaId"].(int)), true
 	case "Mutation.scanAlbum":
 		if e.ComplexityRoot.Mutation.ScanAlbum == nil {
 			break
@@ -2528,6 +2554,20 @@ func (ec *executionContext) field_Mutation_initialSetupWizard_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_mirrorMedia_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "mediaId",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNID2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["mediaId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_moveImageFaces_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -2597,6 +2637,20 @@ func (ec *executionContext) field_Mutation_resetAlbumCover_args(ctx context.Cont
 		return nil, err
 	}
 	args["albumID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_rotateMedia_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "mediaId",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNID2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["mediaId"] = arg0
 	return args, nil
 }
 
@@ -5749,6 +5803,120 @@ func (ec *executionContext) fieldContext_Mutation_toggleConfirmFaceGroup(ctx con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_toggleConfirmFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_rotateMedia(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_rotateMedia(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RotateMedia(ctx, fc.Args["mediaId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
+			return ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_rotateMedia(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DevCmdResult(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_rotateMedia_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_mirrorMedia(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_mirrorMedia(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().MirrorMedia(ctx, fc.Args["mediaId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
+			return ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_mirrorMedia(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DevCmdResult(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_mirrorMedia_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -11648,6 +11816,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "toggleConfirmFaceGroup":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_toggleConfirmFaceGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rotateMedia":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_rotateMedia(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "mirrorMedia":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_mirrorMedia(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

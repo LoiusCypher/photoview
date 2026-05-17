@@ -21,6 +21,7 @@ import { sidebarDownloadQuery_media_downloads } from '../__generated__/sidebarDo
 import ExifDetails from './MediaSidebarExif'
 import MediaSidebarPeople from './MediaSidebarPeople'
 import MediaSidebarRescan from './MediaSidebarRescan'
+import MediaSidebarOrientation from './MediaSidebarOrientation'
 import MediaSidebarMap from './MediaSidebarMap'
 import {
   sidebarMediaQuery,
@@ -230,6 +231,7 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
       </div>
       <ExifDetails media={media} />
       {albumPath}
+      <MediaSidebarOrientation media={media} />
       <MediaSidebarRescan media={media} />
       <MediaSidebarPeople media={media} />
       {sidebarMap}
