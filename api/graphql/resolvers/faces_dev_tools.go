@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"bufio"
 
 	"github.com/loiuscypher/photoview/api/graphql/models"
 	"github.com/loiuscypher/photoview/api/scanner/face_detection"
@@ -25,7 +26,7 @@ func (r *mutationResolver) ExportAllFaces(ctx context.Context) (*models.DevCmdRe
 
 // ExportFaces is the resolver for the exportFaces field.
 func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) (*models.DevCmdResult, error) {
-	log.Printf("ExportFaces: %b\n", onlyConfirmed)
+	log.Printf("ExportFaces: %t\n", onlyConfirmed)
 	db := r.DB(ctx)
 	var selectedImageFaces []*models.ImageFace
 	if onlyConfirmed {
@@ -66,7 +67,12 @@ func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) 
 			continue
 		}
 		// const framing_factor = 0.025
-		const framing_factor = 0.05
+		//const framing_factor = 0.10
+		//const framing_factor = 0.20
+		// const framing_factor = 0.50 // 22.5%
+		// const framing_factor = 0.80 // 10.0
+		// const framing_factor = 1.00 // 17,0 10.0
+		const framing_factor = 2.00 //
 		width := mw.GetImageWidth()
 		// x := int(float64(width) * (1.0 - framing_factor) * face.Rectangle.MinX)
 		height := mw.GetImageHeight()
@@ -121,12 +127,12 @@ func (r *mutationResolver) ExportFaces(ctx context.Context, onlyConfirmed bool) 
 		// }
 
 		if err := mw.CropImage(f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y); err != nil {
-		// if err := mw.CropImage(f_width, f_height, x, y); err != nil {
+			// if err := mw.CropImage(f_width, f_height, x, y); err != nil {
 			log.Printf("Err: CropImage %s\n", err)
 			continue
 		}
 		if err := mw.SetImagePage(f_scaled_w, f_scaled_h, f_scaled_x, f_scaled_y); err != nil {
-		// if err := mw.SetImagePage(f_width, f_height, x, y); err != nil {
+			// if err := mw.SetImagePage(f_width, f_height, x, y); err != nil {
 			log.Printf("Err: SetImagePage %s\n", err)
 			continue
 		}
@@ -265,4 +271,104 @@ func (r *mutationResolver) ToggleConfirmFaceGroup(ctx context.Context, imageFace
 	}
 
 	return confirmed, nil
+}
+
+func recordChange( path string, incMirror bool, incRotate bool) {
+	log.Printf("recordChange Path %s\n", path)
+
+	filePath := "media-cache/rotate.txt"
+ 	// If the file doesn't exist, create it, or append to the file
+	fr, err := os.OpenFile( filePath, os.O_CREATE|os.O_RDONLY, 0644)
+	if err != nil {
+        	log.Fatal(err)
+	}
+
+	// Splits on newlines by default.
+	scanner := bufio.NewScanner(fr)
+
+	found := false
+	var lines []string
+	for scanner.Scan() {
+		text := scanner.Text()
+		str := text[3:]
+		//log.Printf("recordChange str: %s\n", str)
+		var rot, mir int
+		args, err := fmt.Sscanf(text, "%1d%1d ", &mir, &rot)
+		//log.Printf("recordChange err: %t args: %d\n", err == nil, args)
+		if err == nil && args == 2 && path == str {
+			if !found {
+				if incMirror {
+					mir = (mir + 1) % 2
+				}
+				if incRotate {
+					rot = (rot + 1) % 4
+				}
+				log.Printf("recordChange mir: %d rot: %d\n", mir, rot)
+				text = fmt.Sprintf("%1d%1d %s", mir, rot, str)
+				lines = append(lines, text + "\n")
+				found = true
+			}
+		} else {
+			lines = append(lines, text + "\n")
+		}
+	}
+	fr.Close()
+	if found {
+		fw, _ := os.OpenFile( filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+  		defer fw.Close()
+		for _, line := range lines {
+			if _, err := fw.Write([]byte(line)); err != nil {
+				panic("a problem")
+			}
+		}
+	} else {
+		fa, _ := os.OpenFile( filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+  		defer fa.Close()
+		mir := 0
+		if incMirror {
+			mir = 1
+		}
+		rot := 0
+		if incRotate {
+			rot = 1
+		}
+  		fa.WriteString( fmt.Sprintf("%1d%1d %s\n", mir, rot, path))
+	}
+}
+
+// RotateMedia is the resolver for the rotateMedia field.
+func (r *mutationResolver) RotateMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error) {
+	log.Printf("RotateMedia Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+	log.Printf("RotateMedia path %s\n", media.Path)
+
+	path := media.Path[8:]
+	recordChange( path, false, true)
+
+	startMessage := "Medie turned +90°"
+	return &models.DevCmdResult{
+		Success: true,
+		Message: &startMessage,
+	}, nil
+}
+
+// MirrorMedia is the resolver for the mirrorMedia field.
+func (r *mutationResolver) MirrorMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error) {
+	log.Printf("MirrorMedia Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	path := media.Path[8:]
+	recordChange( path, true, false)
+
+	startMessage := "Mirrored right/left"
+	return &models.DevCmdResult{
+		Success: true,
+		Message: &startMessage,
+	}, nil
 }

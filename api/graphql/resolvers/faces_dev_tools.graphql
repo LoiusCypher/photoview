@@ -22,4 +22,10 @@ extend type Mutation {
 
   "Toggle Faces FaceGroup Confirmation flag "
   toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
+
+  "Rotate Media"
+  rotateMedia(mediaId: ID!): DevCmdResult! @isAdmin
+
+  "Mirror Media"
+  mirrorMedia(mediaId: ID!): DevCmdResult! @isAdmin
 }
