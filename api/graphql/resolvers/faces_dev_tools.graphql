@@ -28,4 +28,7 @@ extend type Mutation {
 
   "Mirror Media"
   mirrorMedia(mediaId: ID!): DevCmdResult! @isAdmin
+
+  "Remove Media"
+  removeMedia(mediaId: ID!): DevCmdResult! @isAdmin
 }
