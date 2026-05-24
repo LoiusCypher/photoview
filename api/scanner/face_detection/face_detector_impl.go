@@ -291,6 +291,7 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 			MinY: float64(face.Rectangle.Min.Y) / float64(dimension.Height),
 			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
 		},
+		Detection: 0,
 	}
 	// log.Printf("    Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
 

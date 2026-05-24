@@ -27,6 +27,7 @@ type ImageFace struct {
 	Media       Media          `gorm:"constraint:OnDelete:CASCADE;"`
 	Descriptor  FaceDescriptor `gorm:"not null"`
 	Rectangle   FaceRectangle  `gorm:"not null"`
+	Detection   int            `gorm:"not null;default:0"`
 	Confirmed   bool           `gorm:"not null"`
 	Subgroup    int            `gorm:"not null"`
 }
