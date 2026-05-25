@@ -44,6 +44,7 @@ func InitializeFaceDetector(db *gorm.DB) error {
 	if err != nil {
 		return errors.Wrap(err, "get face detection samples from database")
 	}
+	rec.SetSamples(faceDescriptors, faceGroupIDs)
 
 	var classifyThreshold float32
 	site_info, err := models.GetSiteInfo(db)
@@ -81,6 +82,7 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 		faceGroupIDs[i] = int32(imgFace.FaceGroupID)
 		imageFaceIDs[i] = imgFace.ID
 	}
+	//log.Println("getSamplesFromDatabase: len(fd.descriptors):", len(samples))
 
 	return
 }
@@ -106,6 +108,7 @@ func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	fd.faceDescriptors = faceDescriptors
 	fd.faceGroupIDs = faceGroupIDs
 	fd.imageFaceIDs = imageFaceIDs
+	fd.rec.SetSamples(faceDescriptors, faceGroupIDs)
 
 	return nil
 }
@@ -128,11 +131,29 @@ func (fd *faceDetector) ReDetectFaces(db *gorm.DB, media *models.Media) error {
 
 // DetectFaces finds the faces in the given image and saves them to the database
 func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
+	return mediaDetectFaces( db, fd, media, 0)
+}
+
+// mediaDetectFaces finds the faces in the given image and saves them to the database
+func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detection int) error {
+	//if err := db.Model(media).Preload("MediaURL").Preload("Faces").First(&media).Error; err != nil {
 	if err := db.Model(media).Preload("MediaURL").First(&media).Error; err != nil {
 		return err
 	}
 
+	if media.Faces == nil {
+		log.Println("  NO Faces loaded already for: ", media.ID)
+		if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
+			return err
+		}
+	}
 	log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
+
+	var oldFaces []int32
+	if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {
+		return errors.Wrap(err, "error classify face")
+	}
+	log.Println("  existing Faces", len(oldFaces))
 
 	var faces []face.Face
 	var thumbnailPath string
@@ -226,6 +247,7 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 				continue
 			}
 			fd.mutex.Lock()
+			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
 			if faces, err = fd.rec.Recognize(blob); err != nil {
 				fd.mutex.Unlock()
 				log.Printf("Err: Recognize %s\n", err)
@@ -242,7 +264,7 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 			log.Println("  Thumbnail URL found %s", cachedPath)
 
 			fd.mutex.Lock()
-			log.Printf("RecognizeFile %s\n", cachedPath)
+			log.Printf("RecognizeFile Thumbnail %s\n", cachedPath)
 			faces, err = fd.rec.RecognizeFile(cachedPath)
 			fd.mutex.Unlock()
 
@@ -262,18 +284,26 @@ func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
 	}
 
 	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
-	for _, face := range faces {
-		// log.Println("  Faces found for: ", face)
-		fd.classifyFace(db, &face, media, thumbnailPath)
+	for _, face_ := range faces {
+		log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
+		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
+			return errors.Wrap(err, "error classify face")
+		}
 	}
+
+	if err := db.Where("id IN (?)", oldFaces).Delete(models.ImageFace{}).Error; err != nil {
+		return errors.Wrap(err, "error classify face")
+	}
+	fd.ReloadFacesFromDatabase(db)
 
 	return nil
 }
 
-func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string) error {
+func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string, detection int) error {
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
+	log.Println("classifyFace threshold: ", fd.classifyThreshold, "len(fd.descriptors):", len(fd.faceDescriptors))
 	match := int32(fd.rec.ClassifyThreshold(face.Descriptor, fd.classifyThreshold))
 
 	dimension, err := media_encoding.GetPhotoDimensions(imagePath)
@@ -291,15 +321,15 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 			MinY: float64(face.Rectangle.Min.Y) / float64(dimension.Height),
 			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
 		},
-		Detection: 0,
+		Detection: detection,
 	}
-	// log.Printf("    Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
+	//log.Printf("    Face region: %f-%f:%f-%f", imageFace.Rectangle.MinX, imageFace.Rectangle.MaxX, imageFace.Rectangle.MinY, imageFace.Rectangle.MaxX)
 
 	var faceGroup models.FaceGroup
 
 	// If no match add it new to samples
 	if match < 0 {
-		// log.Println("     No match, assigning new face")
+		log.Println("     No match, assigning new face")
 
 		faceGroup = models.FaceGroup{
 			ImageFaces: []models.ImageFace{imageFace},
@@ -310,7 +340,7 @@ func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models
 		}
 
 	} else {
-		// log.Println("     Found match")
+		log.Println("     Found match", match)
 
 		if err := db.First(&faceGroup, int(match)).Error; err != nil {
 			return err
@@ -410,6 +440,7 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 	fd.faceGroupIDs = newFaceGroupIDs
 	fd.faceDescriptors = newDescriptors
 	fd.imageFaceIDs = newImageFaceIDs
+	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
 
 	updatedImageFaces := make([]*models.ImageFace, 0)
 
@@ -442,6 +473,7 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 			fd.faceDescriptors = append(fd.faceDescriptors, descriptor)
 			fd.imageFaceIDs = append(fd.imageFaceIDs, imageFaceID)
 		}
+		fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
 	}
 
 	return updatedImageFaces, nil
@@ -587,6 +619,7 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 	fd.faceDescriptors = saveFaceDescriptors
 	fd.faceGroupIDs = saveFaceGroupIDs
 	fd.imageFaceIDs = saveImageFaceIDs
+	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
 }
 
 type distElem struct {

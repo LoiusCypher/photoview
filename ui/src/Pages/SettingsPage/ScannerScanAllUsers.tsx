@@ -15,7 +15,7 @@ const SCAN_MUTATION = gql`
   }
 `
 
-const ScannerScanAllUsers = () => {
+export const ScannerScanAllUsers = () => {
   const { t } = useTranslation()
   const [startScanner, { data: data, loading, error, called }] = useMutation<scanAllMutation>(SCAN_MUTATION)
 
@@ -55,5 +55,3 @@ const ScannerScanAllUsers = () => {
     </>
   )
 }
-
-export default ScannerScanAllUsers

@@ -9,8 +9,6 @@ import { useTranslation } from 'react-i18next'
 const ScannerSection = () => {
   const { t } = useTranslation()
 
-  console.log('apollo', data?.scanAll);
-
   return (
     <div>
       <SectionTitle nospace>
