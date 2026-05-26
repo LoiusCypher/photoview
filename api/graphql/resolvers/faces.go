@@ -18,15 +18,16 @@ import (
 	"gorm.io/gorm"
 )
 
-var sum1IFs time.Duration
-var sum2IFs time.Duration
-
+var sum1Is time.Duration
+var sum2Is time.Duration
 var sum1Cs time.Duration
 var sum2Cs time.Duration
+var sum1Ms time.Duration
+var sum2Ms time.Duration
 
 // ImageFaces is the resolver for the imageFaces field.
 func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGroup, paginate *models.Pagination) ([]*models.ImageFace, error) {
-	log.Println("TRACE ImageFaces", obj)
+	//log.Println("TRACE ImageFaces", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -78,13 +79,15 @@ begin2 := time.Now()
 		return nil, err
 	}
 time2 := time.Since(begin2)
-sum1IFs += time1
-sum2IFs += time2
+sum1Is += time1
+sum2Is += time2
 if len(imageFaces) != len(imageFaces2) {
 	log.Println("ERROR ImageFaces len", len(imageFaces), "!=", len(imageFaces2))
 } else {
 	log.Println("TRACE ImageFaces len", len(imageFaces), "Time1", time1, "Time2", time2, "Diff", time1 - time2)
-	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs), "DiffIFs", sum1IFs - sum2IFs, "Sum1IFs", sum1IFs, "Sum2IFs", sum2IFs, "Diff %", 100 * float64(sum1IFs - sum2IFs) / float64(sum1IFs) )
+	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+	log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+	log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
 }
 //////////////////////////////////////
 
@@ -93,7 +96,7 @@ if len(imageFaces) != len(imageFaces2) {
 
 // ImageFaceCount is the resolver for the imageFaceCount field.
 func (r *faceGroupResolver) ImageFaceCount(ctx context.Context, obj *models.FaceGroup) (int, error) {
-	log.Println("TRACE ImageFaceCount", obj)
+	//log.Println("TRACE ImageFaceCount", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -144,10 +147,11 @@ sum2Cs += time2
 if count != count2 {
 	log.Println("ERROR ImageFaceCount", count, "!=", count2)
 } else {
-	log.Println("TRACE ImageFaceCount1", count, "Time1", time1, "Time2", time2, "Diff", time1 - time2)
-	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs), "DiffIFs", sum1IFs - sum2IFs, "Sum1IFs", sum1IFs, "Sum2IFs", sum2IFs, "Diff %", 100 * float64(sum1IFs - sum2IFs) / float64(sum1IFs) )
+	log.Println("TRACE ImageFaceCount", count, "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+	log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+	log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
 }
-//////////////////////////////////////
 //////////////////////////////////////
 
 	return int(count), nil
@@ -164,7 +168,7 @@ func (r *imageFaceResolver) Media(ctx context.Context, obj *models.ImageFace) (*
 
 // FaceGroup is the resolver for the faceGroup field.
 func (r *imageFaceResolver) FaceGroup(ctx context.Context, obj *models.ImageFace) (*models.FaceGroup, error) {
-	log.Println("FaceGroup", obj)
+	//log.Println("FaceGroup", obj)
 	if obj.FaceGroup != nil {
 		return obj.FaceGroup, nil
 	}
@@ -426,7 +430,7 @@ func (r *mutationResolver) DetachImageFaces(ctx context.Context, imageFaceIDs []
 
 // MyFaceGroups is the resolver for the myFaceGroups field.
 func (r *queryResolver) MyFaceGroups(ctx context.Context, paginate *models.Pagination) ([]*models.FaceGroup, error) {
-	log.Println("TRACE MyFaceGroups", paginate)
+	//log.Println("TRACE MyFaceGroups", paginate)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -482,7 +486,16 @@ begin2 := time.Now()
 		return nil, err
 	}
 time2 := time.Since(begin2)
-log.Println("TRACE MyFaceGroups", len(faceGroups), "MyFaceGroups2", len(faceGroups2), "Time1", time1, "Time2", time2)
+sum1Ms += time1
+sum2Ms += time2
+if len(faceGroups) != len(faceGroups2) {
+	log.Println("ERROR MyFaceGroups len", len(faceGroups), "!=", len(faceGroups2))
+} else {
+	log.Println("TRACE MyFaceGroups len", len(faceGroups), "MyFaceGroups2 len", len(faceGroups2), "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+	log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+	log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+}
 //////////////////////////////////////
 
 	return faceGroups2, nil
@@ -490,7 +503,7 @@ log.Println("TRACE MyFaceGroups", len(faceGroups), "MyFaceGroups2", len(faceGrou
 
 // FaceGroup is the resolver for the faceGroup field.
 func (r *queryResolver) FaceGroup(ctx context.Context, id int) (*models.FaceGroup, error) {
-	log.Println("TRACE FaceGroup", id)
+	//log.Println("TRACE FaceGroup", id)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -536,7 +549,16 @@ begin2 := time.Now()
 		return nil, err
 	}
 time2 := time.Since(begin2)
-log.Println("TRACE FaceGroup1", faceGroup.ID, "FaceGroup2", faceGroup2.ID, "Time1", time1, "Time2", time2)
+sum1Ms += time1
+sum2Ms += time2
+if faceGroup.ID != faceGroup2.ID {
+	log.Println("ERROR FaceGroup", faceGroup.ID, "!=", faceGroup2.ID)
+} else {
+	log.Println("TRACE FaceGroup", faceGroup.ID, "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+	log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+	log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+	log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+}
 //////////////////////////////////////
 
 	return &faceGroup, nil

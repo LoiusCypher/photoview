@@ -490,9 +490,9 @@ func (fd *faceDetector) findFaceGroupCandidates( faceGroup int, checkLng int) {
 	descriptor := fd.faceDescriptors[k]
 	faceGroupID := fd.faceGroupIDs[k]
 	imageFaceID := fd.imageFaceIDs[k]
-	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k)
-	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k)
-	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k)
+	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k + 1)
+	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k + 1)
+	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k + 1)
 	for j := range checkLng {
 		i := j + k
 		// log.Printf("findFaceGroupCandidates index %d\n", i)
@@ -609,11 +609,11 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 			return
 		}
 		fd.faceDescriptors = append(fd.faceDescriptors, fd.faceDescriptors[idx])
-		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx)
+		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx + 1)
 		fd.faceGroupIDs = append(fd.faceGroupIDs, 0)
-		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx)
+		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx + 1)
 		fd.imageFaceIDs = append(fd.imageFaceIDs, faceID)
-		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx)
+		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx + 1)
 	}
 	fd.findFaceGroupCandidates( groupID, len(faceIDs))
 	fd.faceDescriptors = saveFaceDescriptors
@@ -637,22 +637,23 @@ func deleteUnused(grp []int, newId int, dists []distElem) (r []distElem) {
 	return dists
 }
 
-func mergeGroups(groups [][]int, dists []distElem, tId int, i int) (r bool, rgroups [][]int, rdists []distElem) {
-	for j, grpS := range groups {
-		if 0 <= slices.IndexFunc(grpS, func(c int) bool { return c == tId }) {
-			log.Printf("   found two related groups that must be merged %d %d\n", i, j)
+func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex int) (r bool, rgroups [][]int, rdists []distElem) {
+	for j, grpT := range groups {
+		if 0 <= slices.IndexFunc(grpT, func(c int) bool { return c == tId }) {
+			log.Printf("   found two related groups that must be merged %d %d\n", sGrpIndex, j)
 			// merge groups because they are close to each other
-			for _, faceId := range grpS {
-				dists = deleteUnused(groups[i], faceId, dists)
+			for _, faceId := range grpT {
+				dists = deleteUnused(groups[sGrpIndex], faceId, dists)
 			}
-			groups[i] = slices.Concat(groups[i], grpS)
-			log.Println("   7a group", i, groups[i])
-			groups = slices.Delete(groups, j, j)
-			log.Println("   7b groupCnt", len(groups))
-			return true, groups, dists
+			//groups[sGrpIndex] = slices.Concat(groups[sGrpIndex], grpT)
+			groups[sGrpIndex] = slices.Concat(groups[sGrpIndex], groups[j])
+			log.Println("   7a group", sGrpIndex, groups[sGrpIndex])
+			groupn := slices.Delete(groups, j, j + 1)
+			log.Println("   7b groupCnt", len(groupn))
+			return true, groupn, dists
 		}
 	}
-	log.Printf("   No group merge to group %d\n", i)
+	log.Printf("   No group merge to group %d\n", sGrpIndex)
 	return false, groups, dists
 }
 
@@ -696,11 +697,12 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		dists = dists[1:]
 		log.Printf(" 1 next distance between %d and %d is %f\n", nextDist.sId, nextDist.tId, nextDist.dist)
 		foundA := false
+		foundB := false
 		for i, grp := range groups {
 			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
 				log.Printf("  2 found face %d in group %d\n", nextDist.sId, i)
 				var found bool
-				found, groups, dists = mergeGroups(groups, dists, nextDist.tId, i)
+				found, groups, dists = mergeGroupsIfPossible(groups, dists, nextDist.tId, i)
 				if found {
 					foundA = true
 					break
@@ -713,25 +715,32 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 				break
 			}
 			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
-				log.Printf("  4 found new face %d for group %d\n", nextDist.sId, i)
+				log.Printf("  4 found new face %d for group %d\n", nextDist.tId, i)
+				var found bool
+				found, groups, dists = mergeGroupsIfPossible(groups, dists, nextDist.sId, i)
+				if found {
+					foundB = true
+					break
+				}
+				log.Printf("  5 found new face %d for group %d\n", nextDist.sId, i)
 				dists = deleteUnused(grp, nextDist.sId, dists)
 				groups[i] = append(grp, nextDist.sId)
-				log.Println("  4a group", i, groups[i])
-				foundA = true
+				log.Println("  5a group", i, groups[i])
+				foundB = true
 				break
 			}
 		}
-		if foundA {
+		if foundA || foundB {
 			continue
 		}
-		log.Printf("  5 have to create new group for sId %d and tId %d\n", nextDist.sId, nextDist.tId)
+		log.Printf("  6 have to create new group for sId %d and tId %d\n", nextDist.sId, nextDist.tId)
 		groups = append(groups, []int {nextDist.sId, nextDist.tId})
-		log.Println("  5a group", len(groups)-1, groups[len(groups)-1])
+		log.Println("  6a group", len(groups)-1, groups[len(groups)-1])
 		elemCnt := 0
 		for _, grp := range groups {
 			elemCnt += len(grp)
 		}
-		log.Println("  5b elements grouped", elemCnt, "of", len(descr))
+		log.Println("  6b elements grouped", elemCnt, "of", len(descr))
 		if elemCnt == len(descr) {
 			log.Printf("ALL faces grouped\n")
 			break
@@ -751,13 +760,13 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			if !foundS && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
 				log.Printf("  12 found face %d in group %d\n", nextDist.sId, i)
 				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i)
+				groups = slices.Delete(groups, i, i + 1)
 				foundS = true
 			}
 			if !foundD && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
 				log.Printf("  14 found new face %d for group %d\n", nextDist.sId, i)
 				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i)
+				groups = slices.Delete(groups, i, i + 1)
 				foundD = true
 			}
 		}

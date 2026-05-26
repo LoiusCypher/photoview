@@ -9,6 +9,10 @@ import { scanMediaAction, scanMediaActionVariables } from './__generated__/scanM
 import { reScanMediaAction, reScanMediaActionVariables } from './__generated__/reScanMediaAction'
 import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
 import { ReactComponent as LoadingSpinnerIcon } from '../../../primitives/form/icons/textboxLoadingSpinner.svg'
+//import { Link, useNavigate } from 'react-router-dom'
+//import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
+//import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
+import { sidebarMediaQuery_media_faces } from './__generated__/sidebarMediaQuery'
 
 const SCAN_MEDIA_MUTATION = gql`
   mutation scanMediaAction( $mediaId: ID!) {
@@ -35,7 +39,7 @@ type MediaSidebarFacesProps = {
 const MediaSidebarRescan = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
   const [startMediaScanner, { calledMediaScan }] = useMutation<scanMediaAction,scanMediaActionVariables>(SCAN_MEDIA_MUTATION)
-  const [startReMediaScanner, { calledReMedia }] = useMutation<reScanMediaAction,reScanMediaActionVariables>(RE_SCAN_MEDIA_MUTATION)
+  const [startReMediaScanner, { calledReMedia }] = useMutation<reScanMediaAction,reScanMediaActionVariables>(RE_SCAN_MEDIA_MUTATION,{refetchQueries: [ { qery : sidebarMediaQuery_media_faces } ] } )
 
   let inputLabel = (
       <InputLabelDescription>
@@ -60,7 +64,7 @@ const MediaSidebarRescan = ({ media }: MediaSidebarFacesProps) => {
         onClick={() => { startReMediaScanner( { variables: { mediaId: media.id } }); }}
         disabled={calledReMedia}
       >
-        {t('sidebar.people.rescan.thumbnail', 'Rescan Thumbnail')}
+        {t('sidebar.people.rescan.original', 'Rescan Media')}
       </Button>
   )
 
