@@ -164,7 +164,7 @@ func (r *faceGroupResolver) ImageFaceCount(ctx context.Context, obj *models.Face
 	}
 //////////////////////////////////////
 
-	return int(count), nil
+	return int(count2), nil
 }
 
 // Media is the resolver for the media field.
