@@ -20,6 +20,7 @@ const (
 	EnvMediaCachePath            EnvironmentVariable = "PHOTOVIEW_MEDIA_CACHE"
 	EnvFaceRecognitionModelsPath EnvironmentVariable = "PHOTOVIEW_FACE_RECOGNITION_MODELS_PATH"
 	EnvMediaProbeTimeout         EnvironmentVariable = "PHOTOVIEW_MEDIA_PROBE_TIMEOUT"
+	EnvCheckTiming               EnvironmentVariable = "PHOTOVIEW_CHECK_TIMING"
 )
 
 // Network related
@@ -102,3 +103,10 @@ func UIPath() string {
 
 	return "./ui"
 }
+
+// CheckSqlTiming describes whether or not the server is running in development mode,
+func DevelopmentCheckSqlTiming() bool {
+	//log.Info(nil, "PHOTOVIEW_CHECK_TIMINGs", "value", EnvCheckTiming.GetBool())
+	return EnvCheckTiming.GetBool()
+}
+
