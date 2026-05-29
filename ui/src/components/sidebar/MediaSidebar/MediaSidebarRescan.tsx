@@ -65,7 +65,7 @@ const MediaSidebarRescan = ({ media }: MediaSidebarFacesProps) => {
         onClick={() => { startMediaScanner( { variables: { mediaId: media.id } }); }}
         disabled={calledMediaScan}
       >
-        {t('sidebar.people.rescan.thumbnail', 'Scan album containig thumbnail')}
+        {t('sidebar.people.rescan.thumbnail', 'ReScan All Album Media')}
       </Button>
     )
 

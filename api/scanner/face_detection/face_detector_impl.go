@@ -141,12 +141,12 @@ func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detec
 		return err
 	}
 
-	if media.Faces == nil {
-		if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
-			return err
-		}
-	}
-	log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
+	//if media.Faces == nil {
+		//if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
+			//return err
+		//}
+	//}
+	//log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
 	var oldFaces []int32
 	if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {

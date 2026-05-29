@@ -57,13 +57,24 @@ func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.
 
 // ScanMedia is the resolver for the scanMedia field.
 func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
-	log.Printf("Media Id: %d\n", mediaID)
-	var media models.Media
-	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+	log.Printf(ScanMedia "Media Id: %d\n", mediaID)
+	var albumMedia models.Media
+	if err := r.DB(ctx).First(&albumMedia, mediaID).Error; err != nil {
 		return nil, fmt.Errorf("get media from database: %w", err)
 	}
 
-	scanner_queue.AddMediaAlbumToQueue(&media)
+	var media []models.Media
+	if err := r.DB(ctx).Where("album_id = ?", albumMedia.AlbumID).Find(&media).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	for _, _media := range media {
+		if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &_media); err != nil {
+			return nil, fmt.Errorf( "Error detecting faces in image (%s): %s", _media.Path, err)
+		}
+	}
+
+	scanner_queue.AddMediaAlbumToQueue(&albumMedia)
 
 	startMessage := "Media Scanner started"
 	return &models.ScannerResult{
@@ -75,24 +86,12 @@ func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.
 
 // ReScanMedia is the resolver for the reScanMedia field.
 func (r *mutationResolver) ReScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
-	log.Printf("Media Id: %d\n", mediaID)
+	log.Printf("ReScanMedia Media Id: %d\n", mediaID)
 	var media models.Media
 	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
 		return nil, fmt.Errorf("get media from database: %w", err)
 	}
-	/*
-	albumID := media.AlbumID
 
-	if err := r.DB(ctx).Delete(&media).Error; err != nil {
-		return nil, fmt.Errorf("Delete media %d from database: %w", mediaID, err)
-	}
-	var album models.Album
-	if err := r.DB(ctx).First(&album, albumID).Error; err != nil {
-		return nil, fmt.Errorf("get album from database: %w", mediaID, err)
-	}
-
-	scanner_queue.AddAlbumToQueue(&album)
-	*/
 	if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &media); err != nil {
 		return nil, fmt.Errorf( "Error detecting faces in image (%s): %s", media.Path, err)
 	}
