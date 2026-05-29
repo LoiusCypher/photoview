@@ -57,7 +57,7 @@ func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.
 
 // ScanMedia is the resolver for the scanMedia field.
 func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
-	log.Printf(ScanMedia "Media Id: %d\n", mediaID)
+	log.Printf("ScanMedia Media Id: %d\n", mediaID)
 	var albumMedia models.Media
 	if err := r.DB(ctx).First(&albumMedia, mediaID).Error; err != nil {
 		return nil, fmt.Errorf("get media from database: %w", err)
