@@ -70,7 +70,7 @@ func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.
 
 	for _, _media := range media {
 		if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &_media); err != nil {
-			return nil, fmt.Errorf( "Error detecting faces in image (%s): %s", _media.Path, err)
+			log.Printf("Error detecting faces in image (%s): %s", _media.Path, err)
 		}
 	}
 
