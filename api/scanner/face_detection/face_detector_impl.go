@@ -142,7 +142,6 @@ func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detec
 	}
 
 	if media.Faces == nil {
-		log.Println("  NO Faces loaded already for: ", media.ID)
 		if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
 			return err
 		}
@@ -285,7 +284,7 @@ func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detec
 
 	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
 	for _, face_ := range faces {
-		log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
+		// log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
 		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
 			return errors.Wrap(err, "error classify face")
 		}
