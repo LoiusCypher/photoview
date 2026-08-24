@@ -12,6 +12,10 @@ export interface sidebarGetPhotoShares_media_shares {
   id: string
   token: string
   /**
+   * Optional label visible to the owner or an administrator
+   */
+  label: string | null
+  /**
    * Whether or not a password is needed to access the share
    */
   hasPassword: boolean
