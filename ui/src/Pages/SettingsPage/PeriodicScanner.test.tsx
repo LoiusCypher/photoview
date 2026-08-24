@@ -23,19 +23,19 @@ test('Enable periodic scanner', async () => {
         query: SCAN_INTERVAL_MUTATION,
         variables: { interval: 0 },
       },
-      result: { data: { setPeriodicScanInterval: 0 } },
+      result: { data: { setPeriodicScanInterval: 0 }, __typename: 'SiteInfo' },
     },
     {
       request: {
         query: SCAN_INTERVAL_MUTATION,
         variables: { interval: 123 * 60 },
       },
-      result: { data: { setPeriodicScanInterval: 123 * 60 } },
+      result: { data: { setPeriodicScanInterval: 123 * 60 }, __typename: 'SiteInfo' },
     },
   ]
 
   render(
-    <MockedProvider mocks={graphqlMocks} addTypename={true}>
+    <MockedProvider mocks={graphqlMocks}>
       <PeriodicScanner />
     </MockedProvider>
   )
