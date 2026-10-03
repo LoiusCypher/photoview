@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"path"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/models/actions"
-	"github.com/photoview/photoview/api/scanner"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models/actions"
+	"github.com/loiuscypher/photoview/api/scanner"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

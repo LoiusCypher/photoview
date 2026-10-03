@@ -4,12 +4,16 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL query operation: mapboxEnabledQuery
+// GraphQL mutation operation: setClassifyThreshold
 // ====================================================
 
-export interface mapboxEnabledQuery {
+export interface setClassifyThreshold {
   /**
-   * Get the mapbox api token, returns null if mapbox is not enabled
+   * Set threshold for face classification
    */
-  mapboxToken: string | null
+  setFaceClassifyThreshold: number
+}
+
+export interface setClassifyThresholdVariables {
+  threshold: number
 }

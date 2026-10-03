@@ -7,17 +7,17 @@ import (
 	"os"
 	"path"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/scanner_cache"
-	"github.com/photoview/photoview/api/scanner/scanner_tasks/cleanup_tasks"
-	"github.com/photoview/photoview/api/scanner/scanner_utils"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_cache"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_tasks/cleanup_tasks"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
 	ignore "github.com/sabhiram/go-gitignore"
 	"gorm.io/gorm"
 )
 
-func getPhotoviewIgnore(ignorePath string) ([]string, error) {
+func GetPhotoviewIgnore(ignorePath string) ([]string, error) {
 	var photoviewIgnore []string
 
 	// Open .photoviewignore file, if exists
@@ -114,7 +114,7 @@ func FindAlbumsForUser(db *gorm.DB, user *models.User, albumCache *scanner_cache
 		}
 
 		// Update ignore dir list
-		photoviewIgnore, err := getPhotoviewIgnore(albumPath)
+		photoviewIgnore, err := GetPhotoviewIgnore(albumPath)
 		if err != nil {
 			log.Printf("Failed to get ignore file, err = %s", err)
 		} else {
@@ -244,7 +244,7 @@ func directoryContainsPhotos(rootPath string, cache *scanner_cache.AlbumScannerC
 		scannedDirectories = append(scannedDirectories, dirPath)
 
 		// Update ignore dir list
-		photoviewIgnore, err := getPhotoviewIgnore(dirPath)
+		photoviewIgnore, err := GetPhotoviewIgnore(dirPath)
 		if err != nil {
 			log.Printf("Failed to get ignore file, err = %s", err)
 		} else {

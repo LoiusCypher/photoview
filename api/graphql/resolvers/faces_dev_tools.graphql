@@ -1,0 +1,34 @@
+type DevCmdResult {
+  success: Boolean!
+  message: String
+}
+
+extend type Mutation {
+
+  "Save all known portraits to dedicated folder"
+  exportAllFaces: DevCmdResult! @isAdmin
+
+  "Save known portraits to dedicated folder"
+  exportFaces(onlyConfirmed: Boolean!): DevCmdResult! @isAdmin
+
+  "Check FaceGroup consistency"
+  checkFaceGroup(faceGroupID: ID!): DevCmdResult! @isAdmin
+
+  "Set threshold for face classification"
+  setFaceClassifyThreshold(threshold: Float!): Float! @isAdmin
+
+  "See if group contains several persons"
+  splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
+  "Toggle Faces FaceGroup Confirmation flag "
+  toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
+
+  "Rotate Media"
+  rotateMedia(mediaId: ID!): DevCmdResult! @isAdmin
+
+  "Mirror Media"
+  mirrorMedia(mediaId: ID!): DevCmdResult! @isAdmin
+
+  "Remove Media"
+  removeMedia(mediaId: ID!): DevCmdResult! @isAdmin
+}

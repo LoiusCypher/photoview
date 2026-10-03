@@ -25,6 +25,11 @@ type Coordinates struct {
 	Longitude float64 `json:"longitude"`
 }
 
+type DevCmdResult struct {
+	Success bool    `json:"success"`
+	Message *string `json:"message,omitempty"`
+}
+
 type MediaDownload struct {
 	// A description of the role of the media file
 	Title    string    `json:"title"`

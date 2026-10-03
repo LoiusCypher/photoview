@@ -1,4 +1,4 @@
-import { gql, useLazyQuery, useMutation } from '@apollo/client'
+import { gql, useLazyQuery, useMutation, PureQueryOptions } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
@@ -29,9 +29,6 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
       destinationFaceGroupID: $destFaceGroupID
     ) {
       id
-      imageFaces {
-        id
-      }
     }
   }
 `
@@ -44,6 +41,7 @@ type MoveImageFacesModalProps = {
     | singleFaceGroup_faceGroup_imageFaces
     | myFaces_myFaceGroups_imageFaces
   )[]
+  refetchQueries: PureQueryOptions[]
 }
 
 const MoveImageFacesModal = ({
@@ -58,8 +56,8 @@ const MoveImageFacesModal = ({
     (singleFaceGroup_faceGroup_imageFaces | myFaces_myFaceGroups_imageFaces)[]
   >([])
   const [selectedFaceGroup, setSelectedFaceGroup] = useState<
-    myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
-  >(null)
+    Set<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>
+  >(new Set())
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
@@ -95,7 +93,7 @@ const MoveImageFacesModal = ({
     if (!open) {
       setImagesSelected(false)
       setSelectedImageFaces([])
-      setSelectedFaceGroup(null)
+      setSelectedFaceGroup(new Set())
     }
   }, [open])
 
@@ -108,14 +106,16 @@ const MoveImageFacesModal = ({
       throw new Error('Expected selectedFaceGroup not to be null')
     }
 
+    const destGroupID: string[] = [...selectedFaceGroup].filter(fc => fc !== null).map(fc => fc.id)
+
     moveImageFacesMutation({
       variables: {
         faceIDs,
-        destFaceGroupID: selectedFaceGroup.id,
+        destFaceGroupID: [...selectedFaceGroup].filter(fc => fc !== null).map(fc => fc.id)[0], // destGroupID[0],
       },
     }).then(() => {
       setOpen(false)
-      navigate(`/people/${selectedFaceGroup.id}`)
+      navigate(`/people/${destGroupID}`)
     })
   }
 
@@ -127,7 +127,7 @@ const MoveImageFacesModal = ({
       <SelectImageFacesTable
         imageFaces={imageFaces}
         selectedImageFaces={selectedImageFaces}
-        setSelectedImageFaces={setSelectedImageFaces}
+	setSelectedImageFaces={setSelectedImageFaces}
         title={t(
           'people_page.modal.move_image_faces.image_select_table.title',
           'Select images to move'
@@ -146,8 +146,8 @@ const MoveImageFacesModal = ({
             'Select destination face group'
           )}
           faceGroups={filteredFaceGroups}
-          selectedFaceGroup={selectedFaceGroup}
-          setSelectedFaceGroup={setSelectedFaceGroup}
+          selectedFaceGroups={selectedFaceGroup}
+          toggleSelectedFaceGroup={(face) => { if(face === null) return; setSelectedFaceGroup(new Set([face])) }}
         />
       )
     } else {

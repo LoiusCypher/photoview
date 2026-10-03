@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner/externaltools/exiftool"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/scanner/externaltools/exiftool"
 )
 
 var globalExifParser *exiftool.Exiftool

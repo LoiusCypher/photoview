@@ -8,16 +8,27 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"log"
+	"time"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/utils"
 	"gorm.io/gorm"
 )
 
+var sum1Is time.Duration
+var sum2Is time.Duration
+var sum1Cs time.Duration
+var sum2Cs time.Duration
+var sum1Ms time.Duration
+var sum2Ms time.Duration
+
 // ImageFaces is the resolver for the imageFaces field.
 func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGroup, paginate *models.Pagination) ([]*models.ImageFace, error) {
+	//log.Println("TRACE ImageFaces", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -27,33 +38,71 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 	if face_detection.GlobalFaceDetector == nil {
 		return nil, ErrFaceDetectorNotInitialized
 	}
+	begin1 := time.Now()
+	var count int
+	if utils.DevelopmentCheckSqlTiming() {
+		if err := user.FillAlbums(db); err != nil {
+			return nil, err
+		}
 
-	if err := user.FillAlbums(db); err != nil {
-		return nil, err
+		userAlbumIDs := make([]int, len(user.Albums))
+		for i, album := range user.Albums {
+			userAlbumIDs[i] = album.ID
+		}
+
+		query := db.
+			Joins("Media").
+			Where(faceGroupIDIsQuestion, obj.ID).
+			Where("album_id IN (?)", userAlbumIDs).
+			Order("subgroup ASC").
+			Order("confirmed DESC")
+
+		query = models.FormatSQL(query, nil, paginate)
+
+		var imageFaces []*models.ImageFace
+		if err := query.Find(&imageFaces).Error; err != nil {
+			return nil, err
+		}
+		count = len(imageFaces)
 	}
-
-	userAlbumIDs := make([]int, len(user.Albums))
-	for i, album := range user.Albums {
-		userAlbumIDs[i] = album.ID
-	}
-
-	query := db.
+	time1 := time.Since(begin1)
+	//log.Println("FaceGroup1", faceGroup.ID, "Time1", time1)
+//////////////////////////////////////
+	begin2 := time.Now()
+	query2 := db.
 		Joins("Media").
+		Joins("JOIN user_albums ON user_albums.album_id = Media.album_id").Where("user_albums.user_id = ?", user.ID).
 		Where(faceGroupIDIsQuestion, obj.ID).
-		Where("album_id IN (?)", userAlbumIDs)
+		Order("subgroup ASC").
+		Order("confirmed DESC")
 
-	query = models.FormatSQL(query, nil, paginate)
+	query2 = models.FormatSQL(query2, nil, paginate)
 
-	var imageFaces []*models.ImageFace
-	if err := query.Find(&imageFaces).Error; err != nil {
+	var imageFaces2 []*models.ImageFace
+	if err := query2.Find(&imageFaces2).Error; err != nil {
 		return nil, err
 	}
+	if utils.DevelopmentCheckSqlTiming() {
+		time2 := time.Since(begin2)
+		sum1Is += time1
+		sum2Is += time2
+		if count != len(imageFaces2) {
+			log.Println("ERROR ImageFaces len", count, "!=", len(imageFaces2))
+		} else {
+			log.Println("TRACE ImageFaces len", len(imageFaces2), "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+			log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+			log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+			log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+		}
+	}
+//////////////////////////////////////
 
-	return imageFaces, nil
+	return imageFaces2, nil
 }
 
 // ImageFaceCount is the resolver for the imageFaceCount field.
 func (r *faceGroupResolver) ImageFaceCount(ctx context.Context, obj *models.FaceGroup) (int, error) {
+	//log.Println("TRACE ImageFaceCount", obj)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -68,23 +117,54 @@ func (r *faceGroupResolver) ImageFaceCount(ctx context.Context, obj *models.Face
 		return -1, err
 	}
 
-	userAlbumIDs := make([]int, len(user.Albums))
-	for i, album := range user.Albums {
-		userAlbumIDs[i] = album.ID
-	}
+	begin1 := time.Now()
+	var count int64
+	if utils.DevelopmentCheckSqlTiming() {
+		userAlbumIDs := make([]int, len(user.Albums))
+		for i, album := range user.Albums {
+			userAlbumIDs[i] = album.ID
+		}
 
-	query := db.
+		query := db.
+			Model(&models.ImageFace{}).
+			Joins("Media").
+			Where(faceGroupIDIsQuestion, obj.ID).
+			Where("album_id IN (?)", userAlbumIDs)
+
+		if err := query.Count(&count).Error; err != nil {
+			return -1, err
+		}
+	}
+	time1 := time.Since(begin1)
+	//log.Println("FaceGroup1", faceGroup.ID, "Time1", time1)
+//////////////////////////////////////
+	begin2 := time.Now()
+	query2 := db.
 		Model(&models.ImageFace{}).
 		Joins("Media").
-		Where(faceGroupIDIsQuestion, obj.ID).
-		Where("album_id IN (?)", userAlbumIDs)
+		Joins("LEFT JOIN user_albums ON Media.album_id = user_albums.album_id").Where("user_albums.user_id = ?", user.ID).
+		Where(faceGroupIDIsQuestion, obj.ID)
 
-	var count int64
-	if err := query.Count(&count).Error; err != nil {
+	var count2 int64
+	if err := query2.Count(&count2).Error; err != nil {
 		return -1, err
 	}
+	if utils.DevelopmentCheckSqlTiming() {
+		time2 := time.Since(begin2)
+		sum1Cs += time1
+		sum2Cs += time2
+		if count != count2 {
+			log.Println("ERROR ImageFaceCount", count, "!=", count2)
+		} else {
+			log.Println("TRACE ImageFaceCount", count, "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+			log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+			log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+			log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+		}
+	}
+//////////////////////////////////////
 
-	return int(count), nil
+	return int(count2), nil
 }
 
 // Media is the resolver for the media field.
@@ -98,6 +178,7 @@ func (r *imageFaceResolver) Media(ctx context.Context, obj *models.ImageFace) (*
 
 // FaceGroup is the resolver for the faceGroup field.
 func (r *imageFaceResolver) FaceGroup(ctx context.Context, obj *models.ImageFace) (*models.FaceGroup, error) {
+	//log.Println("FaceGroup", obj)
 	if obj.FaceGroup != nil {
 		return obj.FaceGroup, nil
 	}
@@ -375,6 +456,7 @@ func (r *mutationResolver) DetachImageFaces(ctx context.Context, imageFaceIDs []
 
 // MyFaceGroups is the resolver for the myFaceGroups field.
 func (r *queryResolver) MyFaceGroups(ctx context.Context, paginate *models.Pagination) ([]*models.FaceGroup, error) {
+	//log.Println("TRACE MyFaceGroups", paginate)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -385,36 +467,75 @@ func (r *queryResolver) MyFaceGroups(ctx context.Context, paginate *models.Pagin
 		return nil, ErrFaceDetectorNotInitialized
 	}
 
-	if err := user.FillAlbums(db); err != nil {
-		return nil, err
-	}
+	begin1 := time.Now()
+	var count int
+	if utils.DevelopmentCheckSqlTiming() {
+		if err := user.FillAlbums(db); err != nil {
+			return nil, err
+		}
 
-	userAlbumIDs := make([]int, len(user.Albums))
-	for i, album := range user.Albums {
-		userAlbumIDs[i] = album.ID
-	}
+		userAlbumIDs := make([]int, len(user.Albums))
+		for i, album := range user.Albums {
+			userAlbumIDs[i] = album.ID
+		}
 
-	faceGroupQuery := db.
+		faceGroupQuery := db.
+			Joins("JOIN image_faces ON image_faces.face_group_id = face_groups.id").
+			Where("image_faces.media_id IN (?)",
+				db.Select("media.id").Table("media").Where(mediaAlbumIDInQuestion, userAlbumIDs)).
+			Group("image_faces.face_group_id").
+			Group("face_groups.id").
+			Order("CASE WHEN label IS NULL THEN 1 ELSE 0 END").
+			Order("COUNT(image_faces.id) DESC")
+
+		faceGroupQuery = models.FormatSQL(faceGroupQuery, nil, paginate)
+
+		var faceGroups []*models.FaceGroup
+		if err := faceGroupQuery.Find(&faceGroups).Error; err != nil {
+			return nil, err
+		}
+		count = len(faceGroups)
+	}
+	time1 := time.Since(begin1)
+	//log.Println("MyFaceGroups1", len(faceGroups), "Time1", time1)
+//////////////////////////////////////
+	begin2 := time.Now()
+	faceGroupQuery2 := db.
 		Joins("JOIN image_faces ON image_faces.face_group_id = face_groups.id").
 		Where("image_faces.media_id IN (?)",
-			db.Select("media.id").Table("media").Where(mediaAlbumIDInQuestion, userAlbumIDs)).
+			db.Select("media.id").Table("media").Joins("JOIN user_albums ON user_albums.album_id = media.album_id").Where("user_albums.user_id = ?", user.ID)).
 		Group("image_faces.face_group_id").
 		Group("face_groups.id").
 		Order("CASE WHEN label IS NULL THEN 1 ELSE 0 END").
 		Order("COUNT(image_faces.id) DESC")
 
-	faceGroupQuery = models.FormatSQL(faceGroupQuery, nil, paginate)
+	faceGroupQuery2 = models.FormatSQL(faceGroupQuery2, nil, paginate)
 
-	var faceGroups []*models.FaceGroup
-	if err := faceGroupQuery.Find(&faceGroups).Error; err != nil {
+	var faceGroups2 []*models.FaceGroup
+	if err := faceGroupQuery2.Find(&faceGroups2).Error; err != nil {
 		return nil, err
 	}
+	if utils.DevelopmentCheckSqlTiming() {
+		time2 := time.Since(begin2)
+		sum1Ms += time1
+		sum2Ms += time2
+		if count != len(faceGroups2) {
+			log.Println("ERROR MyFaceGroups len", count, "!=", len(faceGroups2))
+		} else {
+			log.Println("TRACE MyFaceGroups len", count, "MyFaceGroups2 len", len(faceGroups2), "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+			log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+			log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+			log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+		}
+	}
+//////////////////////////////////////
 
-	return faceGroups, nil
+	return faceGroups2, nil
 }
 
 // FaceGroup is the resolver for the faceGroup field.
 func (r *queryResolver) FaceGroup(ctx context.Context, id int) (*models.FaceGroup, error) {
+	//log.Println("TRACE FaceGroup", id)
 	db := r.DB(ctx)
 	user := auth.UserFromContext(ctx)
 	if user == nil {
@@ -425,27 +546,60 @@ func (r *queryResolver) FaceGroup(ctx context.Context, id int) (*models.FaceGrou
 		return nil, ErrFaceDetectorNotInitialized
 	}
 
-	if err := user.FillAlbums(db); err != nil {
-		return nil, err
-	}
+	begin1 := time.Now()
+	var fid int
+	if utils.DevelopmentCheckSqlTiming() {
+		if err := user.FillAlbums(db); err != nil {
+			return nil, err
+		}
 
-	userAlbumIDs := make([]int, len(user.Albums))
-	for i, album := range user.Albums {
-		userAlbumIDs[i] = album.ID
-	}
+		userAlbumIDs := make([]int, len(user.Albums))
+		for i, album := range user.Albums {
+			userAlbumIDs[i] = album.ID
+		}
 
-	faceGroupQuery := db.
+		faceGroupQuery := db.
+			Joins("LEFT JOIN image_faces ON image_faces.face_group_id = face_groups.id").
+			Joins("LEFT JOIN media ON image_faces.media_id = media.id").
+			Where("face_groups.id = ?", id).
+			Where(mediaAlbumIDInQuestion, userAlbumIDs)
+
+		var faceGroup models.FaceGroup
+		if err := faceGroupQuery.Find(&faceGroup).Error; err != nil {
+			return nil, err
+		}
+		fid = faceGroup.ID
+	}
+	time1 := time.Since(begin1)
+	//log.Println("FaceGroup1", faceGroup.ID, "Time1", time1)
+//////////////////////////////////////
+	begin2 := time.Now()
+	faceGroupQuery2 := db.
 		Joins("LEFT JOIN image_faces ON image_faces.face_group_id = face_groups.id").
 		Joins("LEFT JOIN media ON image_faces.media_id = media.id").
-		Where("face_groups.id = ?", id).
-		Where(mediaAlbumIDInQuestion, userAlbumIDs)
+		Joins("JOIN user_albums ON user_albums.album_id = media.album_id").Where("user_albums.user_id = ?", user.ID).
+		Where("face_groups.id = ?", id)
 
-	var faceGroup models.FaceGroup
-	if err := faceGroupQuery.Find(&faceGroup).Error; err != nil {
+	var faceGroup2 models.FaceGroup
+	if err := faceGroupQuery2.Find(&faceGroup2).Error; err != nil {
 		return nil, err
 	}
+	if utils.DevelopmentCheckSqlTiming() {
+		time2 := time.Since(begin2)
+		sum1Ms += time1
+		sum2Ms += time2
+		if fid != faceGroup2.ID {
+			log.Println("ERROR FaceGroup", fid, "!=", faceGroup2.ID)
+		} else {
+			log.Println("TRACE FaceGroup", faceGroup2.ID, "Time1", time1, "Time2", time2, "Diff", time1 - time2)
+			log.Println("TRACE DiffCs", sum1Cs - sum2Cs, "Sum1Cs", sum1Cs, "Sum2Cs", sum2Cs, "Diff %", 100 * float64(sum1Cs - sum2Cs) / float64(sum1Cs) )
+			log.Println("TRACE DiffIs", sum1Is - sum2Is, "Sum1Is", sum1Is, "Sum2Is", sum2Is, "Diff %", 100 * float64(sum1Is - sum2Is) / float64(sum1Is) )
+			log.Println("TRACE DiffMs", sum1Ms - sum2Ms, "Sum1Ms", sum1Ms, "Sum2Ms", sum2Ms, "Diff %", 100 * float64(sum1Ms - sum2Ms) / float64(sum1Ms) )
+		}
+	}
+//////////////////////////////////////
 
-	return &faceGroup, nil
+	return &faceGroup2, nil
 }
 
 // FaceGroup returns api.FaceGroupResolver implementation.

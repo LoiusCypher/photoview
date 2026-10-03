@@ -8,6 +8,7 @@ import UserPreferences from './UserPreferences'
 import UsersTable from './Users/UsersTable'
 import VersionInfo from './VersionInfo'
 import classNames from 'classnames'
+import DeveloperTools from './DeveloperTools'
 
 type SectionTitleProps = {
   children: string
@@ -48,6 +49,7 @@ const SettingsPage = () => {
           <UsersTable />
         </>
       )}
+      <DeveloperTools />
       <VersionInfo />
     </Layout>
   )

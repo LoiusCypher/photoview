@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/photoview/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/database/drivers"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
@@ -27,6 +27,9 @@ type ImageFace struct {
 	Media       Media          `gorm:"constraint:OnDelete:CASCADE;"`
 	Descriptor  FaceDescriptor `gorm:"not null"`
 	Rectangle   FaceRectangle  `gorm:"not null"`
+	Detection   int            `gorm:"not null;default:0"`
+	Confirmed   bool           `gorm:"not null"`
+	Subgroup    int            `gorm:"not null"`
 }
 
 func (f *ImageFace) FillMedia(db *gorm.DB) error {

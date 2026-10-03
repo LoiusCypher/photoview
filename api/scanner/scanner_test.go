@@ -14,7 +14,7 @@ import (
 	"github.com/photoview/photoview/api/scanner/face_detection"
 	"github.com/photoview/photoview/api/scanner/scanner_queue"
 	"github.com/photoview/photoview/api/test_utils"
-	scanner_utils "github.com/photoview/photoview/api/test_utils/scanner"
+	scanner_utils "github.com/loiuscypher/photoview/api/test_utils/scanner"
 )
 
 func TestMain(m *testing.M) {

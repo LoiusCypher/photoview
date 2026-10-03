@@ -3,15 +3,18 @@ package face_detection
 import (
 	"gorm.io/gorm"
 
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 )
 
 type FaceDetector interface {
-	ReloadFacesFromDatabase(db *gorm.DB) error
+	ChangeClassifyFaceThreshold(threshold float32)
+	CheckFaceGroup(db *gorm.DB, groupID int32)
 	DetectFaces(db *gorm.DB, media *models.Media) error
 	MergeCategories(sourceID int32, destID int32)
 	MergeImageFaces(imageFaceIDs []int, destFaceGroupID int32)
-	RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) ([]*models.ImageFace, error)
+	RecognizeUnlabeledFaces(db *gorm.DB, user *models.User) ([]*models.ImageFace, error)
+	ReloadFacesFromDatabase(db *gorm.DB) error
+	SplitFaceGroup(db *gorm.DB, groupID int32)
 }
 
 var GlobalFaceDetector FaceDetector = nil

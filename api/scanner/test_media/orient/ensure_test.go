@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/photoview/photoview/api/scanner/externaltools/exiftool"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/scanner/externaltools/exiftool"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 func TestMain(m *testing.M) {

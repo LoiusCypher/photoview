@@ -252,7 +252,7 @@ export const PeoplePage = () => {
     myFacesVariables
   >(MY_FACES_QUERY, {
     variables: {
-      limit: 50,
+      limit: 20,
       offset: 0,
     },
   })

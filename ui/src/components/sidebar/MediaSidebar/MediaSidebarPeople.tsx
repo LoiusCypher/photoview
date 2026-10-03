@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useMutation, gql } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
@@ -17,6 +18,15 @@ import MergeFaceGroupsModal, {
 import { useDetachImageFaces } from '../../../Pages/PeoplePage/SingleFaceGroup/DetachImageFacesModal'
 import MoveImageFacesModal from '../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal'
 import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
+import styled from 'styled-components'
+import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
+import { faceGroupCofirmationToggle, toggleFaceGroupCofirmationVariables } from './__generated__/faceGroupCofirmationToggle'
+
+const TOGGLE_FACEGROUP_CONFIRMATION_MUTATION = gql`
+  mutation faceGroupCofirmationToggle( $imageFaceId: ID!) {
+    toggleConfirmFaceGroup( imageFaceId: $imageFaceId)
+  }
+`
 
 type PersonMoreMenuItemProps = {
   label: string
@@ -115,6 +125,8 @@ const PersonMoreMenu = ({
     })
   }
 
+  const [ confirmGroupToggle, newConfirmState ] = useMutation<faceGroupCofirmationToggle, toggleConfirmFaceGroupVariables>(TOGGLE_FACEGROUP_CONFIRMATION_MUTATION)
+
   return (
     <>
       <Menu
@@ -149,6 +161,10 @@ const PersonMoreMenu = ({
             <PersonMoreMenuItem
               onClick={() => setMoveModalOpen(true)}
               label={t('sidebar.people.action_label.move_face', 'Move face')}
+            />
+            <PersonMoreMenuItem
+              onClick={() => { confirmGroupToggle({ variables: { imageFaceId: face.id } }); }}
+              label={t('sidebar.people.action_label.confirm_group', 'Confirm identification')}
             />
           </ArrowPopoverPanel>
         </Menu.Items>

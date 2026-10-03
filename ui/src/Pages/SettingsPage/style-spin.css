@@ -1,0 +1,52 @@
+.animate-rotate {
+  --spinner--AnimationDuration: 1.4s;
+  --rotate--AnimationTimingFunction: linear;
+  fill:none
+}
+
+.animate-dash {
+  --spinner--AnimationDuration: 1.4s;
+  --dash--StrokeWidth: 20;
+  --dash--AnimationTimingFunction: ease-in-out;
+  stroke-dasharray:283;
+  stroke-dashoffset:280;
+  stroke:currentColor
+}
+
+@keyframes animation-rotate-frames {
+  0% {
+    transform:rotate(0)
+  }
+  to {
+    transform:rotate(360deg)
+  }
+}
+
+@keyframes animation-dash-frames {
+  0% {
+    transform:rotate(0)
+  }
+  15% {
+    stroke-width:calc(var(--dash--StrokeWidth) - 8)
+  }
+  40% {
+    stroke-dasharray:220;
+    stroke-dashoffset:150
+  }
+  to {
+    stroke-dashoffset:280;
+    transform:rotate(720deg)
+  }
+}
+
+.animate-dash {
+  stroke-linecap:round;
+  stroke-width:var(--dash--StrokeWidth);
+  transform-origin:50% 50%;
+  animation:animation-dash-frames var(--spinner--AnimationDuration) var(--dash--AnimationTimingFunction) infinite
+}
+
+.animate-rotate {
+  overflow:hidden;
+  animation:animation-rotate-frames calc(var(--spinner--AnimationDuration) * 2) var(--rotate--AnimationTimingFunction) infinite
+}

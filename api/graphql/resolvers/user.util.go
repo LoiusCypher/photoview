@@ -5,9 +5,9 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/utils"
 	"gorm.io/gorm"
 )
 

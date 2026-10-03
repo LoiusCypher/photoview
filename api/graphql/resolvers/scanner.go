@@ -9,13 +9,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/periodic_scanner"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/periodic_scanner"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"gorm.io/gorm"
+
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 )
 
 // ScanAll is the resolver for the scanAll field.
@@ -27,6 +30,73 @@ func (r *mutationResolver) ScanAll(ctx context.Context) (*models.ScannerResult, 
 
 	startMessage := "Scanner started"
 
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanAlbum is the resolver for the scanAlbum field.
+func (r *mutationResolver) ScanAlbum(ctx context.Context, albumID int) (*models.ScannerResult, error) {
+	log.Printf("Album Id: %d\n", albumID)
+	var album models.Album
+	if err := r.DB(ctx).First(&album, albumID).Error; err != nil {
+		return nil, fmt.Errorf("get album from database: %w", err)
+	}
+
+	scanner_queue.AddAlbumToQueue(&album)
+
+	startMessage := "Album Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ScanMedia is the resolver for the scanMedia field.
+func (r *mutationResolver) ScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+	log.Printf("ScanMedia Media Id: %d\n", mediaID)
+	var albumMedia models.Media
+	if err := r.DB(ctx).First(&albumMedia, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	var media []models.Media
+	if err := r.DB(ctx).Where("album_id = ?", albumMedia.AlbumID).Find(&media).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	for _, _media := range media {
+		if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &_media); err != nil {
+			log.Printf("Error detecting faces in image (%s): %s", _media.Path, err)
+		}
+	}
+
+	scanner_queue.AddMediaAlbumToQueue(&albumMedia)
+
+	startMessage := "Media Scanner started"
+	return &models.ScannerResult{
+		Finished: false,
+		Success:  true,
+		Message:  &startMessage,
+	}, nil
+}
+
+// ReScanMedia is the resolver for the reScanMedia field.
+func (r *mutationResolver) ReScanMedia(ctx context.Context, mediaID int) (*models.ScannerResult, error) {
+	log.Printf("ReScanMedia Media Id: %d\n", mediaID)
+	var media models.Media
+	if err := r.DB(ctx).First(&media, mediaID).Error; err != nil {
+		return nil, fmt.Errorf("get media from database: %w", err)
+	}
+
+	if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &media); err != nil {
+		return nil, fmt.Errorf( "Error detecting faces in image (%s): %s", media.Path, err)
+	}
+
+	startMessage := "Album ReScan"
 	return &models.ScannerResult{
 		Finished: false,
 		Success:  true,

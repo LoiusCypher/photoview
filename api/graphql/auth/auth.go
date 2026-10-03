@@ -7,9 +7,9 @@ import (
 	"regexp"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/photoview/photoview/api/dataloader"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/dataloader"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
 	"gorm.io/gorm"
 )
 

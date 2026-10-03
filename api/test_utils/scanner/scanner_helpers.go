@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )

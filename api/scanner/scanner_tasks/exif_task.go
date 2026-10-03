@@ -6,10 +6,10 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner/externaltools/exif"
-	"github.com/photoview/photoview/api/scanner/scanner_task"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/scanner/externaltools/exif"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_task"
 )
 
 type ExifTask struct {

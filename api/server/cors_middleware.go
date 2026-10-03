@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/utils"
 )
 
 // Variable to allow mocking in tests

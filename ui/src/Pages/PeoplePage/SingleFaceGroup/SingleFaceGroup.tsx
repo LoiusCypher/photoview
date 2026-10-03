@@ -24,6 +24,7 @@ export const SINGLE_FACE_GROUP = gql`
           minY
           maxY
         }
+        confirmed
         media {
           id
           type

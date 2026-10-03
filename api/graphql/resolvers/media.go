@@ -9,12 +9,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/photoview/photoview/api/dataloader"
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/models/actions"
-	"github.com/photoview/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/dataloader"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models/actions"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
