@@ -13956,11 +13956,7 @@ func (ec *executionContext) marshalNAny2interface(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNAuthorizeResult2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAuthorizeResult(ctx context.Context, sel ast.SelectionSet, v models.AuthorizeResult) graphql.Marshaler {
-	return ec._AuthorizeResult(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNAuthorizeResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAuthorizeResult(ctx context.Context, sel ast.SelectionSet, v *models.AuthorizeResult) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthorizeResult2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAuthorizeResult(ctx context.Context, sel ast.SelectionSet, v *models.AuthorizeResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -13986,25 +13982,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNDevCmdResult2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx context.Context, sel ast.SelectionSet, v models.DevCmdResult) graphql.Marshaler {
-	return ec._DevCmdResult(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx context.Context, sel ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._DevCmdResult(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNFaceGroup2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroup(ctx context.Context, sel ast.SelectionSet, v models.FaceGroup) graphql.Marshaler {
-	return ec._FaceGroup(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNFaceGroup2ᚕᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.FaceGroup) graphql.Marshaler {
+func (ec *executionContext) marshalNFaceGroup2ᚕᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.FaceGroup) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -14153,11 +14131,7 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNMedia2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐMedia(ctx context.Context, sel ast.SelectionSet, v models.Media) graphql.Marshaler {
-	return ec._Media(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNMedia2ᚕᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐMediaᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Media) graphql.Marshaler {
+func (ec *executionContext) marshalNMedia2ᚕᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐMediaᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Media) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -14236,11 +14210,7 @@ func (ec *executionContext) marshalNMediaURL2ᚖgithubᚗcomᚋloiuscypherᚋpho
 	return ec._MediaURL(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNNotification2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐNotification(ctx context.Context, sel ast.SelectionSet, v models.Notification) graphql.Marshaler {
-	return ec._Notification(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNotification2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐNotification(ctx context.Context, sel ast.SelectionSet, v *models.Notification) graphql.Marshaler {
+func (ec *executionContext) marshalNNotification2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐNotification(ctx context.Context, sel ast.SelectionSet, v *models.Notification) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -14260,11 +14230,7 @@ func (ec *executionContext) marshalNNotificationType2githubᚗcomᚋloiuscypher�
 	return v
 }
 
-func (ec *executionContext) marshalNScannerResult2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult(ctx context.Context, sel ast.SelectionSet, v models.ScannerResult) graphql.Marshaler {
-	return ec._ScannerResult(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult(ctx context.Context, sel ast.SelectionSet, v *models.ScannerResult) graphql.Marshaler {
+func (ec *executionContext) marshalNScannerResult2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult(ctx context.Context, sel ast.SelectionSet, v *models.ScannerResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -14274,11 +14240,7 @@ func (ec *executionContext) marshalNScannerResult2ᚖgithubᚗcomᚋloiuscypher�
 	return ec._ScannerResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v models.SearchResult) graphql.Marshaler {
-	return ec._SearchResult(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSearchResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v *models.SearchResult) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchResult2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v *models.SearchResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -14288,11 +14250,7 @@ func (ec *executionContext) marshalNSearchResult2ᚖgithubᚗcomᚋloiuscypher�
 	return ec._SearchResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNShareToken2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareToken(ctx context.Context, sel ast.SelectionSet, v models.ShareToken) graphql.Marshaler {
-	return ec._ShareToken(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNShareToken2ᚕᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ShareToken) graphql.Marshaler {
+func (ec *executionContext) marshalNShareToken2ᚕᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ShareToken) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -14323,11 +14281,7 @@ func (ec *executionContext) unmarshalNShareTokenCredentials2githubᚗcomᚋloius
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSiteInfo2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSiteInfo(ctx context.Context, sel ast.SelectionSet, v models.SiteInfo) graphql.Marshaler {
-	return ec._SiteInfo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSiteInfo2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSiteInfo(ctx context.Context, sel ast.SelectionSet, v *models.SiteInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNSiteInfo2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSiteInfo(ctx context.Context, sel ast.SelectionSet, v *models.SiteInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -14399,11 +14353,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋloiuscypherᚋphotovi
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserPreferences2githubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐUserPreferences(ctx context.Context, sel ast.SelectionSet, v models.UserPreferences) graphql.Marshaler {
-	return ec._UserPreferences(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUserPreferences2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐUserPreferences(ctx context.Context, sel ast.SelectionSet, v *models.UserPreferences) graphql.Marshaler {
+func (ec *executionContext) marshalNUserPreferences2ᚖgithubᚗcomᚋphotoviewᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐUserPreferences(ctx context.Context, sel ast.SelectionSet, v *models.UserPreferences) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")

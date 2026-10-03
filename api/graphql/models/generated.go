@@ -184,7 +184,7 @@ func (e *LanguageTranslation) UnmarshalGQL(v any) error {
 }
 
 func (e LanguageTranslation) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *LanguageTranslation) UnmarshalJSON(b []byte) error {
@@ -245,7 +245,7 @@ func (e *NotificationType) UnmarshalGQL(v any) error {
 }
 
 func (e NotificationType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *NotificationType) UnmarshalJSON(b []byte) error {
@@ -303,7 +303,7 @@ func (e *OrderDirection) UnmarshalGQL(v any) error {
 }
 
 func (e OrderDirection) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *OrderDirection) UnmarshalJSON(b []byte) error {
