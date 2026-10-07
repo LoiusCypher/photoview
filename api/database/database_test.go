@@ -3,9 +3,9 @@ package database_test
 import (
 	"testing"
 
-	"github.com/photoview/photoview/api/database"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/database"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/test_utils"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

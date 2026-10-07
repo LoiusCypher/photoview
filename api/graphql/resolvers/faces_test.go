@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/face_detection"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/test_utils"
 )
 
 func setupFaceMutationTest(t *testing.T) (*mutationResolver, context.Context, *models.User) {

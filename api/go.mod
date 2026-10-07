@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 	github.com/otiai10/copy v1.14.1
-	github.com/photoview/photoview/api v0.0.0-20260401150619-3665a66b3bfc
+	github.com/loiuscypher/photoview/api v0.0.0-20260401150619-3665a66b3bfc
 	github.com/pkg/errors v0.9.1
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/stretchr/testify v1.12.1

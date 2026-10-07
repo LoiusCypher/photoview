@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/log"
 )
 
 // EnvironmentVariable represents the name of an environment variable used to configure Photoview

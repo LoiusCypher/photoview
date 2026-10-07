@@ -158,7 +158,7 @@ jobs:
       matrix:
         tags: ${{ fromJson(needs.prepare.outputs.tags) }}
     # Comment out when pushing images with forked repos.
-    if: ${{ github.event_name != 'pull_request' && github.repository == 'photoview/photoview' }}
+    if: ${{ github.event_name != 'pull_request' && github.repository == 'loiuscypher/photoview' }}
     steps:
       # Makes sure your .dockleignore file is available to the next step
       - name: Checkout ${{ matrix.tags.ref }}
