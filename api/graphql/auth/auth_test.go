@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/photoview/photoview/api/dataloader"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/dataloader"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 

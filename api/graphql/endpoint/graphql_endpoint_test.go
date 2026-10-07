@@ -3,8 +3,8 @@ package graphql_endpoint_test
 import (
 	"testing"
 
-	graphql_endpoint "github.com/photoview/photoview/api/graphql/endpoint"
-	"github.com/photoview/photoview/api/test_utils"
+	graphql_endpoint "github.com/loiuscypher/photoview/api/graphql/endpoint"
+	"github.com/loiuscypher/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
