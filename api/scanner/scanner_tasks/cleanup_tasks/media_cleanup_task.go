@@ -1,9 +1,9 @@
 package cleanup_tasks
 
 import (
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/scanner_task"
-	"github.com/photoview/photoview/api/scanner/scanner_utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_task"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_utils"
 )
 
 type MediaCleanupTask struct {

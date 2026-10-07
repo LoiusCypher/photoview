@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
 )
 

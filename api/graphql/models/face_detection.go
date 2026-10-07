@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/photoview/photoview/api/database/drivers"
+	"github.com/loiuscypher/photoview/api/database/drivers"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )

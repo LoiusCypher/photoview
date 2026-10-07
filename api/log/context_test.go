@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	_ "github.com/photoview/photoview/api/test_utils/flags"
+	_ "github.com/loiuscypher/photoview/api/test_utils/flags"
 )
 
 func mockDefaultLogger(t *testing.T) *bytes.Buffer {

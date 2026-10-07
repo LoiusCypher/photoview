@@ -10,10 +10,10 @@ import (
 	"errors"
 	"fmt"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/models/actions"
+	api "github.com/loiuscypher/photoview/api/graphql"
+	"github.com/loiuscypher/photoview/api/graphql/auth"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models/actions"
 	"gorm.io/gorm"
 )
 

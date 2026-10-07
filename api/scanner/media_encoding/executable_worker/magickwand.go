@@ -3,7 +3,7 @@ package executable_worker
 import (
 	"fmt"
 
-	"github.com/photoview/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/log"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 

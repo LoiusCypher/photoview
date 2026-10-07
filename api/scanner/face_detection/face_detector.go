@@ -3,7 +3,7 @@ package face_detection
 import (
 	"gorm.io/gorm"
 
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 )
 
 type FaceDetector interface {

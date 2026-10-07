@@ -9,12 +9,12 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/notification"
-	"github.com/photoview/photoview/api/scanner/face_detection"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
-	"github.com/photoview/photoview/api/test_utils"
-	scanner_utils "github.com/photoview/photoview/api/test_utils/scanner"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/notification"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/test_utils"
+	scanner_utils "github.com/loiuscypher/photoview/api/test_utils/scanner"
 )
 
 func TestMain(m *testing.M) {

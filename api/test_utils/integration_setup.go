@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/photoview/photoview/api/scanner/externaltools/exif"
-	"github.com/photoview/photoview/api/scanner/media_encoding/executable_worker"
-	"github.com/photoview/photoview/api/test_utils/flags"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/scanner/externaltools/exif"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding/executable_worker"
+	"github.com/loiuscypher/photoview/api/test_utils/flags"
+	"github.com/loiuscypher/photoview/api/utils"
 	"gorm.io/gorm"
 )
 

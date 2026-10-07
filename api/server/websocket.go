@@ -9,7 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	coderws "github.com/coder/websocket"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/utils"
 )
 
 type websocketImplementation struct {

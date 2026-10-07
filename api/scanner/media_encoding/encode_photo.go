@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/utils"
-	"github.com/photoview/photoview/api/scanner/media_encoding/executable_worker"
-	"github.com/photoview/photoview/api/scanner/media_type"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding/executable_worker"
+	"github.com/loiuscypher/photoview/api/scanner/media_type"
 	"github.com/pkg/errors"
 	"gopkg.in/vansante/go-ffprobe.v2"
 

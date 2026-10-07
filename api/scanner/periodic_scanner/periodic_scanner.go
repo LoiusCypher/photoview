@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/log"
-	"github.com/photoview/photoview/api/scanner/scanner_queue"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/log"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"gorm.io/gorm"
 )
 

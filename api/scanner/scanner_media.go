@@ -7,11 +7,11 @@ import (
 	"os"
 	"path"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/media_encoding"
-	"github.com/photoview/photoview/api/scanner/media_type"
-	"github.com/photoview/photoview/api/scanner/scanner_cache"
-	"github.com/photoview/photoview/api/scanner/scanner_task"
+	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/media_encoding"
+	"github.com/loiuscypher/photoview/api/scanner/media_type"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_cache"
+	"github.com/loiuscypher/photoview/api/scanner/scanner_task"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
