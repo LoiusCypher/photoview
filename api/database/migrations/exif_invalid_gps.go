@@ -3,7 +3,7 @@ package migrations
 import (
 	"fmt"
 
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/graphql/models"
 	"gorm.io/gorm"
 )
 
