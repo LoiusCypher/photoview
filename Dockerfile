@@ -98,6 +98,9 @@ RUN set -a && source /env && set +a \
         github.com/Kagami/go-face
 
 COPY api /app/api
+RUN ls -a /
+RUN cat /env
+RUN set -a && source /env && set +a
 RUN set -a && source /env && set +a \
     && go env \
     && go build -v -o photoview .
