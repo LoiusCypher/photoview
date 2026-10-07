@@ -2,7 +2,7 @@ name: "Code Analysis"
 
 on:
   push:
-    branches: [master]
+    branches: [master master-upgraded]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
@@ -26,7 +26,7 @@ jobs:
   code-ql:
     name: CodeQL
     needs: create-matrix
-    if: ${{ needs.create-matrix.outputs.matrix != '[]' && github.repository == 'photoview/photoview' }}
+    if: ${{ needs.create-matrix.outputs.matrix != '[]' && github.repository == 'loiuscypher/photoview' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
