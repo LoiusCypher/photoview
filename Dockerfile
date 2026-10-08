@@ -3,7 +3,7 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-ARG NODE_ENV=dev
+ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /app/ui
