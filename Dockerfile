@@ -50,7 +50,7 @@ WORKDIR /dependencies
 RUN tar xfv /artifacts.tar.gz
 
 ### Build API ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.26-trixie AS api
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.27-trixie AS api
 ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -174,6 +174,6 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
         --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
     || exit 1
 
-LABEL org.opencontainers.image.source=https://github.com/photoview/photoview/
+LABEL org.opencontainers.image.source=https://github.com/loiuscypher/photoview/
 USER photoview
 ENTRYPOINT ["/app/photoview"]

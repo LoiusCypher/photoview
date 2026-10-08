@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/photoview/photoview/api/test_utils"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/loiuscypher/photoview/api/test_utils"
+	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
 )
 

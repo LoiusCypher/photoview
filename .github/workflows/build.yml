@@ -12,12 +12,12 @@ on:
     - cron: '18 1 * * 4'
 
 env:
-  # IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'loiuscypher/photoview' }}
-  IS_PUSHING_IMAGES: true # Switch on when pushing images with forked repos.
-  DOCKER_REGISTRY: ${{ github.repository != 'loiusc/photoview' && 'ghcr.io/' || '' }}
+  IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'loiuscypher/photoview' }}
+  # IS_PUSHING_IMAGES: true # Switch on when pushing images with forked repos.
+  DOCKER_REGISTRY: ${{ github.repository != 'loiuscypher/photoview' && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: loiusc
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  DOCKER_IMAGE: ${{ github.repository }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+  DOCKER_IMAGE: loiusc/photoview # ${{ github.repository }}
   DOCKER_PLATFORMS: linux/amd64,linux/arm64
   QEMU_PLATFORMS: amd64,arm64
 
@@ -158,7 +158,7 @@ jobs:
       matrix:
         tags: ${{ fromJson(needs.prepare.outputs.tags) }}
     # Comment out when pushing images with forked repos.
-    if: ${{ github.event_name != 'pull_request' && github.repository == 'photoview/photoview' }}
+    if: ${{ github.event_name != 'pull_request' && github.repository == 'loiuscypher/photoview' }}
     steps:
       # Makes sure your .dockleignore file is available to the next step
       - name: Checkout ${{ matrix.tags.ref }}

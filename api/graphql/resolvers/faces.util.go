@@ -3,6 +3,7 @@ package resolvers
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/loiuscypher/photoview/api/graphql/models"
 	"gorm.io/gorm"
@@ -160,4 +161,38 @@ func deleteFaceGroups(sourceFaceGroups []*models.FaceGroup, tx *gorm.DB) error {
 		}
 	}
 	return nil
+
+}
+
+var v_begin [2]time.Time
+var v_time [2]time.Duration
+var _summ [2][3]time.Duration
+
+func m_begin(idx1 int) {
+	v_begin[idx1] = time.Now()
+}
+
+func m_stop(idx1 int,idx2 int) {
+	v_time[idx1] = time.Since(v_begin[idx1])
+	_summ[idx1][idx2] += v_time[idx1]
+}
+
+func m_time(idx1 int) time.Duration {
+	return v_time[idx1]
+}
+
+func m_diff() time.Duration {
+	return v_time[1]-v_time[0]
+}
+
+func m_summ(idx1 int,idx2 int) time.Duration {
+	return _summ[idx1][idx2]
+}
+
+func m_sdif(idx2 int) time.Duration {
+	return -_summ[0][idx2]-_summ[1][idx2]
+}
+
+func m_perc(idx2 int) float64 {
+	return -100*float64(_summ[0][idx2]-_summ[1][idx2])/float64(_summ[0][idx2])
 }
