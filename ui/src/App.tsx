@@ -28,6 +28,16 @@ const App = () => {
             'Simple and User-friendly Photo Gallery for Personal Servers'
           )}
         />
+<script type="module" src="{{ vite_dev_url }}/@vite/client"></script>
+<script type="module">
+  import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+  RefreshRuntime.injectIntoGlobalHook(window)
+  window.$RefreshReg$ = () => { }
+  window.$RefreshSig$ = () => (type) => type
+  window.__vite_plugin_react_preamble_installed__ = true
+</script>
+<script type="module" src="{{ vite_dev_url }}/src/main.tsx"></script>
+
       </Helmet>
       <Routes />
       <Messages />
