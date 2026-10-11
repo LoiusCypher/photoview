@@ -31,16 +31,14 @@ const App = () => {
           )}
         />
         <script type="module" src="{{ vite_dev_url }}/@vite/client"></script>
-<script type="module">
-  import RefreshRuntime from 'http://localhost:5173/@react-refresh'
-  RefreshRuntime.injectIntoGlobalHook(window)
-  {{ add1 }}
-  {{ add2 }}
-  
-  window.__vite_plugin_react_preamble_installed__ = true
-</script>
-<script type="module" src="{{ vite_dev_url }}/src/main.tsx"></script>
-
+        <script type="module">
+          import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+          RefreshRuntime.injectIntoGlobalHook(window)
+          {{ add1 }}
+          {{ add2 }}
+          window.__vite_plugin_react_preamble_installed__ = true
+        </script>
+        <script type="module" src="{{ vite_dev_url }}/src/main.tsx"></script>
       </Helmet>
       <Routes />
       <Messages />
