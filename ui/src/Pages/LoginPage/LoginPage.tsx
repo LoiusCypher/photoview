@@ -147,7 +147,7 @@ const LoginPage = () => {
       <Helmet>
         <script type="module" src="{{ vite_dev_url }}/@vite/client"></script>
         <script type="module">
-          import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+          import RefreshRuntime from 'http://localhost:1234/@react-refresh'
           RefreshRuntime.injectIntoGlobalHook(window)
           {{ add1 }}
           {{ add2 }}
