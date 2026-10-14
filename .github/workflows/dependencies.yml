@@ -8,6 +8,7 @@ on:
   schedule:
     # At 23:18 every Wednesday, 2 hours before `photoview`. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
     - cron: '18 23 * * 3'
+  workflow_dispatch:
 
 env:
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'LoiusCypher/photoview' }}
