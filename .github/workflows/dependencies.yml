@@ -2,7 +2,7 @@ name: Dependencies builds
 
 on:
   push:
-    branches: [trial]
+    branches: [master-upgraded]
   pull_request:
     branches: [master]
   schedule:
