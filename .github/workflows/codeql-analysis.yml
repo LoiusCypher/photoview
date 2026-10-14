@@ -9,6 +9,7 @@ on:
   schedule:
     # At 01:37 every Thursday. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
     - cron: '37 1 * * 4'
+  workflow_dispatch:
 
 jobs:
   create-matrix:
@@ -26,7 +27,7 @@ jobs:
   code-ql:
     name: CodeQL
     needs: create-matrix
-    if: ${{ needs.create-matrix.outputs.matrix != '[]' && github.repository == 'loiuscypher/photoview' }}
+    if: ${{ needs.create-matrix.outputs.matrix != '[]' && github.repository == 'LoiusCypher/photoview' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
