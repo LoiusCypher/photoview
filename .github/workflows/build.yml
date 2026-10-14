@@ -14,11 +14,13 @@ on:
 env:
   DEBUG_REP: ${{ github.repository }}
   DEBUG_BRA: ${{ github.ref }}
+  DEBUG_TAG: ${{ github.tag }}
+  DEBUG_TAGS: ${{ github.tags }}
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'LoiusCypher/photoview' }}
-  DOCKER_REGISTRY: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'master-upgraded' ) && 'ghcr.io/' || '' }}
+  DOCKER_REGISTRY: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'refs/heads/master-upgraded' ) && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: loiusc
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-  DOCKER_IMAGE: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'master-upgraded' ) && 'loiuscypher/photoview' || 'loiusc/photoview' }}
+  DOCKER_IMAGE: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'refs/heads/master-upgraded' ) && 'loiuscypher/photoview' || 'loiusc/photoview' }}
   DOCKER_PLATFORMS: linux/amd64,linux/arm64
   QEMU_PLATFORMS: amd64,arm64
 
