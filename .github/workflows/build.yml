@@ -20,7 +20,7 @@ env:
   DOCKER_USERNAME: loiusc
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
   # DOCKER_IMAGE: loiusc/photoview # ${{ github.repository }}
-  DOCKER_IMAGE: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.repository || 'loiusc/photoview' }}
+  DOCKER_IMAGE: ${{ ( github.repository != 'loiuscypher/photoview' || github.ref != 'master' ) && github.repository || 'loiusc/photoview' }}
   DOCKER_PLATFORMS: linux/amd64,linux/arm64
   QEMU_PLATFORMS: amd64,arm64
 
