@@ -6,16 +6,12 @@ on:
     tags:
       - v*
   pull_request:
-    branches: [master master-upgraded]
+    branches: [master]
   schedule:
     # At 01:18 every Thursday. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
     - cron: '18 1 * * 4'
 
 env:
-  DEBUG_REP: ${{ github.repository }}
-  DEBUG_BRA: ${{ github.ref }}
-  DEBUG_TAG: ${{ github.tag }}
-  DEBUG_TAGS: ${{ github.tags }}
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'LoiusCypher/photoview' }}
   DOCKER_REGISTRY: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'refs/heads/master-upgraded' ) && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: loiusc
