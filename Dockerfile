@@ -48,7 +48,7 @@ RUN REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')" \
     npm run build"$( [ "$NODE_ENV" != "production" ] && echo :dev )" -- --base="${UI_PUBLIC_URL}"
 
 ### Prepare dependencies ###
-FROM photoview/dependencies:trixie AS dependencies
+FROM loiusc/dependencies:trixie AS dependencies
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
