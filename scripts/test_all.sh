@@ -10,4 +10,5 @@ for test in "$(dirname "$0")"/test_*; do
 
   echo "Running ${test}..."
   "${test}"
+  echo "Done ${test}..."
 done
