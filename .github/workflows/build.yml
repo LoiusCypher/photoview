@@ -12,6 +12,8 @@ on:
     - cron: '18 1 * * 4'
 
 env:
+  DEBUG_REP: ${{ github.repository }}
+  DEBUG_BRA: ${{ github.ref }}
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'LoiusCypher/photoview' }}
   DOCKER_REGISTRY: ${{ ( github.repository != 'LoiusCypher/photoview' || github.ref != 'master-upgraded' ) && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: loiusc
