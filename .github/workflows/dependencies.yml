@@ -2,7 +2,7 @@ name: Dependencies builds
 
 on:
   push:
-    branches: [master master-upgraded]
+    branches: [master master-upgraded devbutton]
   pull_request:
     branches: [master]
   schedule:
@@ -10,7 +10,7 @@ on:
     - cron: '18 23 * * 3'
 
 env:
-  IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'loiuscypher/photoview' }}
+  IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'LoiusCypher/photoview' }}
   IS_CACHING: true
   DOCKER_USERNAME: loiusc
   DOCKER_IMAGE: loiusc/dependencies
