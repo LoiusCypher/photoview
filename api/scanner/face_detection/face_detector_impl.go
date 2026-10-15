@@ -4,6 +4,7 @@ package face_detection
 
 import (
 	"log"
+	"slices"
 	"sync"
 
 	"github.com/Kagami/go-face"
@@ -206,11 +207,8 @@ func (fd *faceDetector) MergeImageFaces(imageFaceIDs []int, destFaceGroupID int3
 	for i := range fd.faceGroupIDs {
 		imageFaceID := fd.imageFaceIDs[i]
 
-		for _, id := range imageFaceIDs {
-			if imageFaceID == id {
-				fd.faceGroupIDs[i] = destFaceGroupID
-				break
-			}
+		if slices.Contains(imageFaceIDs, imageFaceID) {
+			fd.faceGroupIDs[i] = destFaceGroupID
 		}
 	}
 }

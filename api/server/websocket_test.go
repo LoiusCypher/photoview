@@ -40,7 +40,7 @@ func configureTestEndpointsFromEnv(t *testing.T) {
 	if serveUI == "0" || serveUI == "false" {
 		uiEndpointsStr := os.Getenv("PHOTOVIEW_UI_ENDPOINTS")
 		if uiEndpointsStr != "" {
-			for _, urlStr := range strings.Split(uiEndpointsStr, ",") {
+			for urlStr := range strings.SplitSeq(uiEndpointsStr, ",") {
 				urlStr = strings.TrimSpace(urlStr)
 				if urlStr == "" {
 					continue

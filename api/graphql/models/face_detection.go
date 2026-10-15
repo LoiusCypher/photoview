@@ -56,7 +56,7 @@ func (FaceDescriptor) GormDBDataType(db *gorm.DB, field *schema.Field) string {
 }
 
 // Scan tells GORM how to convert database data to Go format
-func (fd *FaceDescriptor) Scan(value interface{}) error {
+func (fd *FaceDescriptor) Scan(value any) error {
 	byteValue := value.([]byte)
 	reader := bytes.NewReader(byteValue)
 	binary.Read(reader, binary.LittleEndian, fd)
@@ -85,7 +85,7 @@ func (fr FaceRectangle) GormDataType() string {
 }
 
 // Scan tells GORM how to convert database data to Go format
-func (fr *FaceRectangle) Scan(value interface{}) error {
+func (fr *FaceRectangle) Scan(value any) error {
 	stringArray, ok := value.(string)
 	if !ok {
 		byteArray := value.([]uint8)

@@ -48,20 +48,20 @@ func createFaceMutationFixtures(t *testing.T, r *mutationResolver) {
 	}
 
 	testMedia := []models.Media{
-		{Model: models.Model{ID: 1}, Path: "test1", AlbumID: testAlbum.ID},
-		{Model: models.Model{ID: 2}, Path: "test2", AlbumID: testAlbum.ID},
-		{Model: models.Model{ID: 3}, Path: "test3", AlbumID: testAlbum.ID},
-		{Model: models.Model{ID: 4}, Path: "test4", AlbumID: testAlbum.ID},
+		{ID: 1, Path: "test1", AlbumID: testAlbum.ID},
+		{ID: 2, Path: "test2", AlbumID: testAlbum.ID},
+		{ID: 3, Path: "test3", AlbumID: testAlbum.ID},
+		{ID: 4, Path: "test4", AlbumID: testAlbum.ID},
 	}
 	if err := db.Create(&testMedia).Error; err != nil {
 		t.Fatal(err)
 	}
 
 	testFaceGroups := []models.FaceGroup{
-		{Model: models.Model{ID: 1}},
-		{Model: models.Model{ID: 2}},
-		{Model: models.Model{ID: 3}},
-		{Model: models.Model{ID: 4}},
+		{ID: 1},
+		{ID: 2},
+		{ID: 3},
+		{ID: 4},
 	}
 	if err := db.Create(&testFaceGroups).Error; err != nil {
 		t.Fatal(err)
@@ -96,10 +96,10 @@ func TestCombineFaceGroups(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 1, MediaID: 2},
-			{Model: models.Model{ID: 3}, FaceGroupID: 2, MediaID: 3},
-			{Model: models.Model{ID: 4}, FaceGroupID: 3, MediaID: 4},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 1, MediaID: 2},
+			{ID: 3, FaceGroupID: 2, MediaID: 3},
+			{ID: 4, FaceGroupID: 3, MediaID: 4},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -128,10 +128,10 @@ func TestCombineFaceGroups(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 1, MediaID: 2},
-			{Model: models.Model{ID: 3}, FaceGroupID: 2, MediaID: 2},
-			{Model: models.Model{ID: 4}, FaceGroupID: 2, MediaID: 3},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 1, MediaID: 2},
+			{ID: 3, FaceGroupID: 2, MediaID: 2},
+			{ID: 4, FaceGroupID: 2, MediaID: 3},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -162,9 +162,9 @@ func TestCombineFaceGroups(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 2, MediaID: 2},
-			{Model: models.Model{ID: 3}, FaceGroupID: 3, MediaID: 2},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 2, MediaID: 2},
+			{ID: 3, FaceGroupID: 3, MediaID: 2},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -188,10 +188,10 @@ func TestCombineFaceGroups(t *testing.T) {
 		_, ctx := setupNonAdminUserWithAlbum(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 1, MediaID: 2},
-			{Model: models.Model{ID: 3}, FaceGroupID: 2, MediaID: 3},
-			{Model: models.Model{ID: 4}, FaceGroupID: 3, MediaID: 4},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 1, MediaID: 2},
+			{ID: 3, FaceGroupID: 2, MediaID: 3},
+			{ID: 4, FaceGroupID: 3, MediaID: 4},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -221,8 +221,8 @@ func TestMoveImageFaces(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 2, MediaID: 2},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 2, MediaID: 2},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -250,8 +250,8 @@ func TestMoveImageFaces(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 2, MediaID: 1},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 2, MediaID: 1},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -282,9 +282,9 @@ func TestMoveImageFaces(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 3, MediaID: 1},
-			{Model: models.Model{ID: 3}, FaceGroupID: 2, MediaID: 2},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 3, MediaID: 1},
+			{ID: 3, FaceGroupID: 2, MediaID: 2},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -308,8 +308,8 @@ func TestMoveImageFaces(t *testing.T) {
 		_, ctx := setupNonAdminUserWithAlbum(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
-			{Model: models.Model{ID: 2}, FaceGroupID: 2, MediaID: 2},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
+			{ID: 2, FaceGroupID: 2, MediaID: 2},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
@@ -351,7 +351,7 @@ func TestGetUserOwnedImageFaces(t *testing.T) {
 		createFaceMutationFixtures(t, r)
 
 		testDataList := []models.ImageFace{
-			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
+			{ID: 1, FaceGroupID: 1, MediaID: 1},
 		}
 		if err := r.database.Create(&testDataList).Error; err != nil {
 			t.Fatal(err)
