@@ -1,11 +1,10 @@
 #!/bin/bash
-set -veuo pipefail
-echo "\ncd $(dirname "$0")/../api"
+set -euo pipefail
 
 cd "$(dirname "$0")/../api"
-echo "\ngo generate ./..."
+go -n generate ./...
 go generate ./...
-echo "\ndone go generate ./..."
+echo "done go generate ./..."
 if [[ "$(git status -s 2>/dev/null | head -1)" != "" ]]; then
   # shellcheck disable=SC2016
   echo '--- FAIL: The generated API code is out of sync with the recent changes. Please run `go generate ./...` under `./api` to regenerate it and commit it to this branch.'
