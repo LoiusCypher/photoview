@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -62,13 +63,7 @@ func (v EnvironmentVariable) GetBool() bool {
 	value := strings.ToLower(os.Getenv(string(v)))
 	trueValues := []string{"1", "true"}
 
-	for _, x := range trueValues {
-		if value == x {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(trueValues, value)
 }
 
 // ShouldServeUI whether or not the "serve ui" option is enabled
@@ -109,4 +104,3 @@ func DevelopmentCheckSqlTiming() bool {
 	//log.Info(nil, "PHOTOVIEW_CHECK_TIMINGs", "value", EnvCheckTiming.GetBool())
 	return EnvCheckTiming.GetBool()
 }
-

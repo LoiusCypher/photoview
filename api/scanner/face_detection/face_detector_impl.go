@@ -14,8 +14,8 @@ import (
 	"github.com/loiuscypher/photoview/api/scanner/media_encoding"
 	"github.com/loiuscypher/photoview/api/utils"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"gopkg.in/gographics/imagick.v3/imagick"
+	"gorm.io/gorm"
 )
 
 type faceDetector struct {
@@ -113,7 +113,7 @@ func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	return nil
 }
 
-// ChangeClassifyFaceThreshold 
+// ChangeClassifyFaceThreshold
 func (fd *faceDetector) ChangeClassifyFaceThreshold(classifyThreshold float32) {
 	fd.classifyThreshold = classifyThreshold
 	log.Println("ChangeClassifyFaceThreshold: threshold, ", classifyThreshold)
@@ -125,26 +125,26 @@ func (fd *faceDetector) ReDetectFaces(db *gorm.DB, media *models.Media) error {
 		return err
 	}
 
-	log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
+	log.Println("  ", len(media.Faces), " Faces exist already for: ", media.ID)
 	return nil
 }
 
 // DetectFaces finds the faces in the given image and saves them to the database
 func (fd *faceDetector) DetectFaces(db *gorm.DB, media *models.Media) error {
-	return mediaDetectFaces( db, fd, media, 0)
+	return mediaDetectFaces(db, fd, media, 0)
 }
 
 // mediaDetectFaces finds the faces in the given image and saves them to the database
-func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detection int) error {
+func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detection int) error {
 	//if err := db.Model(media).Preload("MediaURL").Preload("Faces").First(&media).Error; err != nil {
 	if err := db.Model(media).Preload("MediaURL").First(&media).Error; err != nil {
 		return err
 	}
 
 	//if media.Faces == nil {
-		//if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
-			//return err
-		//}
+	//if err := db.Model(media).Where("Detection = ?", detection).Association("Faces").Find(&media.Faces); err != nil {
+	//return err
+	//}
 	//}
 	//log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
@@ -219,7 +219,7 @@ func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detec
 					return errors.Wrap(err, "error read faces")
 					continue
 				}
-				mw = mw.CombineImages(23);
+				mw = mw.CombineImages(23)
 				color = mw.GetImageColorspace()
 			}
 			if color != 23 {
@@ -275,14 +275,14 @@ func  mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detec
 		}
 
 		// if url.Purpose == models.PhotoHighRes {
-			// thumbnailURL = &url
-			// thumbnailURL.Media = media
-			// log.Println("  Thumbnail URL found")
-			// break
+		// thumbnailURL = &url
+		// thumbnailURL.Media = media
+		// log.Println("  Thumbnail URL found")
+		// break
 		// }
 	}
 
-	log.Println("  ", len(faces)," Faces found for: ", thumbnailPath)
+	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
 	for _, face_ := range faces {
 		// log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
 		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
@@ -376,11 +376,8 @@ func (fd *faceDetector) MergeImageFaces(imageFaceIDs []int, destFaceGroupID int3
 	for i := range fd.faceGroupIDs {
 		imageFaceID := fd.imageFaceIDs[i]
 
-		for _, id := range imageFaceIDs {
-			if imageFaceID == id {
-				fd.faceGroupIDs[i] = destFaceGroupID
-				break
-			}
+		if slices.Contains(imageFaceIDs, imageFaceID) {
+			fd.faceGroupIDs[i] = destFaceGroupID
 		}
 	}
 }
@@ -478,7 +475,7 @@ func (fd *faceDetector) RecognizeUnlabeledFaces(tx *gorm.DB, user *models.User) 
 	return updatedImageFaces, nil
 }
 
-func (fd *faceDetector) findFaceGroupCandidates( faceGroup int, checkLng int) {
+func (fd *faceDetector) findFaceGroupCandidates(faceGroup int, checkLng int) {
 
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
@@ -489,14 +486,14 @@ func (fd *faceDetector) findFaceGroupCandidates( faceGroup int, checkLng int) {
 	descriptor := fd.faceDescriptors[k]
 	faceGroupID := fd.faceGroupIDs[k]
 	imageFaceID := fd.imageFaceIDs[k]
-	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k + 1)
-	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k + 1)
-	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k + 1)
+	fd.faceDescriptors = slices.Delete(fd.faceDescriptors, k, k+1)
+	fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, k, k+1)
+	fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, k, k+1)
 	for j := range checkLng {
 		i := j + k
 		// log.Printf("findFaceGroupCandidates index %d\n", i)
 		fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
-		match := fd.rec.ClassifyThreshold( descriptor, fd.classifyThreshold)
+		match := fd.rec.ClassifyThreshold(descriptor, fd.classifyThreshold)
 		if match == faceGroup {
 			log.Printf("Face %d matches desired face group %d \n", imageFaceID, match)
 		} else {
@@ -522,7 +519,7 @@ func (fd *faceDetector) findFaceGroupCandidates( faceGroup int, checkLng int) {
 	fd.rec.SetSamples(fd.faceDescriptors, fd.faceGroupIDs)
 }
 
-func (fd *faceDetector) ConfirmedFaceGroups(db *gorm.DB) ( []int, error ) {
+func (fd *faceDetector) ConfirmedFaceGroups(db *gorm.DB) ([]int, error) {
 	var groupIDs []int
 	if err := db.
 		Model(models.ImageFace{}).
@@ -530,19 +527,19 @@ func (fd *faceDetector) ConfirmedFaceGroups(db *gorm.DB) ( []int, error ) {
 		Where("confirmed = TRUE").
 		Group("face_group_id").
 		Order("COUNT(face_group_id)").
-		Pluck("face_group_id",&groupIDs).
+		Pluck("face_group_id", &groupIDs).
 		Error; err != nil {
 
-		return make([]int,0), err
+		return make([]int, 0), err
 	}
 
 	// for _, groupId := range groupIDs {
-		// log.Printf("Group ID %d with confirmed faces\n", groupId)
+	// log.Printf("Group ID %d with confirmed faces\n", groupId)
 	// }
 	return groupIDs, nil
 }
 
-func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId int) ( []int, error ) {
+func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId int) ([]int, error) {
 
 	var faceIDs []int
 	if err := db.
@@ -550,10 +547,10 @@ func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId in
 		// Debug().
 		Where("face_group_id = ?", groupId).
 		Where("confirmed = ?", confirmed).
-		Pluck("ID",&faceIDs).
+		Pluck("ID", &faceIDs).
 		Error; err != nil {
 
-		return make([]int,0), err
+		return make([]int, 0), err
 	}
 
 	var faceGroup models.FaceGroup
@@ -564,7 +561,7 @@ func (fd *faceDetector) FaceGroupFaceIDs(db *gorm.DB, confirmed bool, groupId in
 		First(&faceGroup).
 		Error; err != nil {
 
-		return make([]int,0), err
+		return make([]int, 0), err
 	}
 	// log.Println("Face ", imgFace)
 	// log.Println("FaceGroup* ", *imgFace.FaceGroup)
@@ -578,15 +575,15 @@ func (fd *faceDetector) CheckFaceGroup(db *gorm.DB, groupID int32) {
 	log.Printf("Groups with confirmed faces %d\n", len(grps))
 	for _, grpID := range grps {
 		log.Printf("Group ID %d\n", grpID)
-		confFaceIDs, _ := fd.FaceGroupFaceIDs( db, true, grpID)
+		confFaceIDs, _ := fd.FaceGroupFaceIDs(db, true, grpID)
 		log.Printf("Group %d with %d confirmed faces\n", grpID, len(confFaceIDs))
 		// for _, faceID := range confFaceIDs {
-			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
 		// }
-		faceIDs, _ := fd.FaceGroupFaceIDs( db, false, grpID)
+		faceIDs, _ := fd.FaceGroupFaceIDs(db, false, grpID)
 		log.Printf("Group %d with %d unconfirmed faces\n", grpID, len(faceIDs))
 		// for _, faceID := range faceIDs {
-			// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
+		// log.Printf("GrpID %d faceID %d \n", grpID, faceID)
 		// }
 		fd.nextFaceForGroup(db, grpID, faceIDs)
 	}
@@ -608,13 +605,13 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 			return
 		}
 		fd.faceDescriptors = append(fd.faceDescriptors, fd.faceDescriptors[idx])
-		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx + 1)
+		fd.faceDescriptors = slices.Delete(fd.faceDescriptors, idx, idx+1)
 		fd.faceGroupIDs = append(fd.faceGroupIDs, 0)
-		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx + 1)
+		fd.faceGroupIDs = slices.Delete(fd.faceGroupIDs, idx, idx+1)
 		fd.imageFaceIDs = append(fd.imageFaceIDs, faceID)
-		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx + 1)
+		fd.imageFaceIDs = slices.Delete(fd.imageFaceIDs, idx, idx+1)
 	}
-	fd.findFaceGroupCandidates( groupID, len(faceIDs))
+	fd.findFaceGroupCandidates(groupID, len(faceIDs))
 	fd.faceDescriptors = saveFaceDescriptors
 	fd.faceGroupIDs = saveFaceGroupIDs
 	fd.imageFaceIDs = saveImageFaceIDs
@@ -622,9 +619,9 @@ func (fd *faceDetector) nextFaceForGroup(db *gorm.DB, groupID int, faceIDs []int
 }
 
 type distElem struct {
-	sId	int
-	tId	int
-	dist	float64
+	sId  int
+	tId  int
+	dist float64
 }
 
 func deleteUnused(grp []int, newId int, dists []distElem) (r []distElem) {
@@ -647,7 +644,7 @@ func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex 
 			//groups[sGrpIndex] = slices.Concat(groups[sGrpIndex], grpT)
 			groups[sGrpIndex] = slices.Concat(groups[sGrpIndex], groups[j])
 			log.Println("   7a group", sGrpIndex, groups[sGrpIndex])
-			groupn := slices.Delete(groups, j, j + 1)
+			groupn := slices.Delete(groups, j, j+1)
 			log.Println("   7b groupCnt", len(groupn))
 			return true, groupn, dists
 		}
@@ -688,7 +685,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	sort.Slice(dists, func(i, j int) bool {
 		return dists[i].dist < dists[j].dist
 	})
-	
+
 	var groups [][]int
 	for len(dists) > 0 {
 		log.Printf("0 len(dists) %d len(groups) %d\n", len(dists), len(groups))
@@ -733,7 +730,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			continue
 		}
 		log.Printf("  6 have to create new group for sId %d and tId %d\n", nextDist.sId, nextDist.tId)
-		groups = append(groups, []int {nextDist.sId, nextDist.tId})
+		groups = append(groups, []int{nextDist.sId, nextDist.tId})
 		log.Println("  6a group", len(groups)-1, groups[len(groups)-1])
 		elemCnt := 0
 		for _, grp := range groups {
@@ -759,13 +756,13 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			if !foundS && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
 				log.Printf("  12 found face %d in group %d\n", nextDist.sId, i)
 				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i + 1)
+				groups = slices.Delete(groups, i, i+1)
 				foundS = true
 			}
 			if !foundD && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
 				log.Printf("  14 found new face %d for group %d\n", nextDist.sId, i)
 				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i + 1)
+				groups = slices.Delete(groups, i, i+1)
 				foundD = true
 			}
 		}
@@ -799,7 +796,7 @@ func euclidean_distance(src face.Descriptor, dst face.Descriptor) (r float64) {
 	sum_of_squares := 0.0
 	for i, coord := range src {
 		//sum_of_squares += math.Pow(float64(coord-dst[i]), 2)
-		diff := float64(coord-dst[i])
+		diff := float64(coord - dst[i])
 		sum_of_squares += diff * diff
 	}
 	//return 1 / (1 + math.Sqrt(sum_of_squares))
