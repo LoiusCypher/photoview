@@ -57,12 +57,12 @@ jobs:
       - name: Build test image
         uses: docker/build-push-action@v7
         with:
-          #pull: true
+          pull: true
           push: false
           load: true
           target: api
           tags: photoview/api
-          #cache-from: type=gha,scope=api
+          cache-from: type=gha,scope=api
 
       - name: Test
         id: test
