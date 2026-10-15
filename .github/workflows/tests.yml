@@ -113,9 +113,9 @@ jobs:
           load: true
           target: ui
           tags: photoview/ui
-          cache-from: |
-            type=gha,scope=ui
-            type=gha,scope=test-ui
+          #cache-from: |
+          #  type=gha,scope=ui
+          #  type=gha,scope=test-ui
           cache-to: type=gha,mode=max,scope=test-ui
           build-args: |
             NODE_ENV=testing
