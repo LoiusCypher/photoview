@@ -2,6 +2,8 @@ module github.com/loiuscypher/photoview/api
 
 go 1.27.0
 
+toolchain go1.27.2
+
 require (
 	github.com/99designs/gqlgen v0.17.95
 	github.com/Kagami/go-face v0.0.0-20210630145111-0c14797b4d0e
