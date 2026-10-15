@@ -57,12 +57,12 @@ jobs:
       - name: Build test image
         uses: docker/build-push-action@v7
         with:
-          pull: true
+          #pull: true
           push: false
           load: true
           target: api
           tags: photoview/api
-          cache-from: type=gha,scope=api
+          #cache-from: type=gha,scope=api
 
       - name: Test
         id: test
@@ -113,9 +113,9 @@ jobs:
           load: true
           target: ui
           tags: photoview/ui
-          #cache-from: |
-          #  type=gha,scope=ui
-          #  type=gha,scope=test-ui
+          cache-from: |
+            type=gha,scope=ui
+            type=gha,scope=test-ui
           cache-to: type=gha,mode=max,scope=test-ui
           build-args: |
             NODE_ENV=testing
