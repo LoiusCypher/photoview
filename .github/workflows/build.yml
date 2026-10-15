@@ -130,14 +130,14 @@ jobs:
           sbom: true
           provenance: mode=max
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          pull: true
+          #pull: true
           push: ${{ env.IS_PUSHING_IMAGES }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          cache-from: |
-            type=gha,scope=ui
-            type=gha,scope=api
+          #cache-from: |
+          #  type=gha,scope=ui
+          #  type=gha,scope=api
           cache-to: |
             type=gha,mode=max,scope=ui
             type=gha,mode=max,scope=api

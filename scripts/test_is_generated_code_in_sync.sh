@@ -2,6 +2,8 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../api"
+go mod verify || echo failed
+go mod download || echo failed
 go generate -x ./... || cat -n /app/api/graphql/models/generated.go
 echo "done go generate ./..."
 if [[ "$(git status -s 2>/dev/null | head -1)" != "" ]]; then
