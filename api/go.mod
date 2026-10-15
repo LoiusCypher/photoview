@@ -2,6 +2,8 @@ module github.com/loiuscypher/photoview/api
 
 go 1.27.0
 
+toolchain go1.27.2
+
 require (
 	github.com/99designs/gqlgen v0.17.95
 	github.com/Kagami/go-face v0.0.0-20210630145111-0c14797b4d0e
@@ -16,10 +18,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/stretchr/testify v1.12.1
-	github.com/vektah/gqlparser/v2 v2.5.58
+	github.com/vektah/gqlparser/v2 v2.5.60
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0
-	golang.org/x/crypto v0.57.0
-	golang.org/x/text v0.42.0
+	golang.org/x/crypto v0.58.0
+	golang.org/x/text v0.43.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gopkg.in/vansante/go-ffprobe.v2 v2.3.1
 	gorm.io/driver/mysql v1.6.0
@@ -49,9 +51,9 @@ require (
 	github.com/urfave/cli/v3 v3.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 )
 
 tool github.com/99designs/gqlgen

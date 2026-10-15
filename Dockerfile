@@ -4,7 +4,7 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-ARG NODE_ENV=production # dev
+ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /app/ui
@@ -17,7 +17,6 @@ RUN npm install --global npm@10 --no-audit --no-fund \
         npm ci --omit=dev --no-audit --no-fund; \
     else \
         echo "Installing all dependencies..."; \
-        npm install --no-audit --no-fund; \
         npm ci --no-audit --no-fund; \
     fi
 

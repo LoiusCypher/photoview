@@ -37,9 +37,7 @@ func TestMediaURLCachePath(t *testing.T) {
 		Purpose: models.PhotoThumbnail,
 		MediaID: 1,
 		Media: &models.Media{
-			Model: models.Model{
-				ID: 1,
-			},
+			ID:      1,
 			Title:   "media.jpg",
 			AlbumID: 2,
 		},

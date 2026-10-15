@@ -17,7 +17,7 @@ type geoJSONFeatureCollection struct {
 
 type geoJSONFeature struct {
 	Type       string                 `json:"type"`
-	Properties interface{}            `json:"properties"`
+	Properties any                    `json:"properties"`
 	Geometry   geoJSONFeatureGeometry `json:"geometry"`
 }
 
@@ -43,7 +43,7 @@ func makeGeoJSONFeatureCollection(features []geoJSONFeature) geoJSONFeatureColle
 	}
 }
 
-func makeGeoJSONFeature(properties interface{}, geometry geoJSONFeatureGeometry) geoJSONFeature {
+func makeGeoJSONFeature(properties any, geometry geoJSONFeatureGeometry) geoJSONFeature {
 	return geoJSONFeature{
 		Type:       "Feature",
 		Properties: properties,

@@ -173,8 +173,8 @@ func FindAlbumsForUser(db *gorm.DB, user *models.User, albumCache *scanner_cache
 					return err
 				}
 				if len(userAlbumOwner) == 0 {
-					newUser := models.User{}
-					newUser.ID = user.ID
+					newUser := models.User{
+						ID: user.ID}
 					if err := tx.Model(&album).Association("Owners").Append(&newUser); err != nil {
 						return err
 					}

@@ -74,7 +74,7 @@ func (c TaskContext) DatabaseTransaction(transFunc func(ctx TaskContext) error, 
 	}, opts...)
 }
 
-func (c TaskContext) WithValue(key, val interface{}) TaskContext {
+func (c TaskContext) WithValue(key, val any) TaskContext {
 	return TaskContext{
 		Context: context.WithValue(c.Context, key, val),
 	}

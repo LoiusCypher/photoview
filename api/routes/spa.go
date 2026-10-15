@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/loiuscypher/photoview/api/log"
@@ -238,12 +239,7 @@ func isCompressedFormat(ext string) bool {
 		".woff", ".woff2",
 	}
 
-	for _, compExt := range compressedExts {
-		if ext == compExt {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(compressedExts, ext)
 }
 
 // filterZeroQuality removes encodings with q=0 or q=0.0 from Accept-Encoding header
@@ -254,8 +250,8 @@ func filterZeroQuality(acceptEncoding string) string {
 	}
 
 	var filtered []string
-	parts := strings.Split(acceptEncoding, ",")
-	for _, part := range parts {
+	parts := strings.SplitSeq(acceptEncoding, ",")
+	for part := range parts {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue

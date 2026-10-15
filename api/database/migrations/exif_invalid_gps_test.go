@@ -17,14 +17,14 @@ func TestExifMigration(t *testing.T) {
 
 	// Create test data
 	exifEntries := []models.MediaEXIF{
-		{GPSLatitude: floatPtr(90.1), GPSLongitude: floatPtr(90.0)},   // Invalid GPSLatitude
-		{GPSLatitude: floatPtr(-90.1), GPSLongitude: floatPtr(-90.0)}, // Invalid GPSLatitude
-		{GPSLatitude: floatPtr(90.0), GPSLongitude: floatPtr(90.1)},   // Invalid GPSLongitude
-		{GPSLatitude: floatPtr(-90.0), GPSLongitude: floatPtr(-90.1)}, // Invalid GPSLongitude
-		{GPSLatitude: floatPtr(90.0), GPSLongitude: floatPtr(90.0)},   // Valid GPS data
-		{GPSLatitude: floatPtr(-90.0), GPSLongitude: floatPtr(-90.0)}, // Valid GPS data
-		{GPSLatitude: floatPtr(90.1), GPSLongitude: floatPtr(90.1)},   // Invalid GPSLatitude and GPSLongitude
-		{GPSLatitude: floatPtr(-90.1), GPSLongitude: floatPtr(-90.1)}, // Invalid GPSLatitude and GPSLongitude
+		{GPSLatitude: new(90.1), GPSLongitude: new(90.0)},   // Invalid GPSLatitude
+		{GPSLatitude: new(-90.1), GPSLongitude: new(-90.0)}, // Invalid GPSLatitude
+		{GPSLatitude: new(90.0), GPSLongitude: new(90.1)},   // Invalid GPSLongitude
+		{GPSLatitude: new(-90.0), GPSLongitude: new(-90.1)}, // Invalid GPSLongitude
+		{GPSLatitude: new(90.0), GPSLongitude: new(90.0)},   // Valid GPS data
+		{GPSLatitude: new(-90.0), GPSLongitude: new(-90.0)}, // Valid GPS data
+		{GPSLatitude: new(90.1), GPSLongitude: new(90.1)},   // Invalid GPSLatitude and GPSLongitude
+		{GPSLatitude: new(-90.1), GPSLongitude: new(-90.1)}, // Invalid GPSLatitude and GPSLongitude
 	}
 
 	// Insert test data
@@ -49,6 +49,7 @@ func TestExifMigration(t *testing.T) {
 	}
 }
 
+//go:fix inline
 func floatPtr(f float64) *float64 {
-	return &f
+	return new(f)
 }

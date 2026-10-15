@@ -36,18 +36,18 @@ func TestShareTokenLabelVisibility(t *testing.T) {
 		},
 		{
 			name: "owner",
-			user: &models.User{Model: models.Model{ID: 42}},
+			user: &models.User{ID: 42},
 			want: &label,
 		},
 		{
 			name: "unrelated user",
-			user: &models.User{Model: models.Model{ID: 7}},
+			user: &models.User{ID: 7},
 			want: nil,
 		},
 		{
 			name: "administrator",
 			user: &models.User{
-				Model: models.Model{ID: 7},
+				ID:    7,
 				Admin: true,
 			},
 			want: &label,
@@ -90,7 +90,7 @@ func TestSetShareTokenLabel(t *testing.T) {
 	})
 
 	t.Run("unrelated user", func(t *testing.T) {
-		ctx := auth.AddUserToContext(context.Background(), &models.User{Model: models.Model{ID: owner.ID + 1}})
+		ctx := auth.AddUserToContext(context.Background(), &models.User{ID: owner.ID + 1})
 		result, err := resolver.SetShareTokenLabel(ctx, share.Value, &label)
 		assert.Error(t, err)
 		assert.Nil(t, result)
@@ -104,7 +104,7 @@ func TestSetShareTokenLabel(t *testing.T) {
 	})
 
 	t.Run("administrator", func(t *testing.T) {
-		admin := &models.User{Model: models.Model{ID: owner.ID + 2}, Admin: true}
+		admin := &models.User{ID: owner.ID + 2, Admin: true}
 		ctx := auth.AddUserToContext(context.Background(), admin)
 		adminLabel := "Admin label"
 		result, err := resolver.SetShareTokenLabel(ctx, share.Value, &adminLabel)

@@ -70,7 +70,7 @@ func DeleteOldUserAlbums(db *gorm.DB, scannedAlbums []*models.Album, user *model
 		return nil
 	}
 
-	scannedAlbumIDs := make([]interface{}, len(scannedAlbums))
+	scannedAlbumIDs := make([]any, len(scannedAlbums))
 	for i, album := range scannedAlbums {
 		scannedAlbumIDs[i] = album.ID
 	}
