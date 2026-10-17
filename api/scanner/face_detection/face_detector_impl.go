@@ -204,27 +204,29 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			color := mw.GetImageColorspace()
 			itype := mw.GetImageType()
 			if color == 3 {
-				log.Printf("   GRAY ColorSpace %d %s type %d\n", color, cachedPath, itype )
-				if err = mw.AddImage(mw.Clone()); err != nil {
-					log.Printf("Err: AddImage 1 %s\n", err)
-					return errors.Wrap(err, "error read faces")
-					continue
-				}
-				if err = mw.AddImage(mw.Clone()); err != nil {
+				log.Printf("   GRAY ColorSpace dep %d col %d typ %d %s\n", depth, color, itype, cachedPath )
+				cw := mw.Clone()
+				//if err = mw.AddImage(cw.Clone()); err != nil {
+				//	log.Printf("Err: AddImage 1 %s\n", err)
+				//	return errors.Wrap(err, "error read faces")
+				//	continue
+				//}
+				if err = mw.AddImage(cw.Clone()); err != nil {
 					log.Printf("Err: AddImage 2 %s\n", err)
 					return errors.Wrap(err, "error read faces")
 					continue
 				}
-				if err = mw.AddImage(mw.Clone()); err != nil {
+				if err = mw.AddImage(cw.Clone()); err != nil {
 					log.Printf("Err: AddImage 3 %s\n", err)
 					return errors.Wrap(err, "error read faces")
 					continue
 				}
-				mw = mw.CombineImages(23)
+				mw = mw.CombineImages( imagick.COLORSPACE_RGB)
 				color = mw.GetImageColorspace()
 				depthn := mw.GetImageDepth()
+				itypen := mw.GetImageType()
+				log.Printf("   NEW  ColorSpace dep %d col %d typ %d %s\n", depthn, color, itypen )
 				if err = mw.SetImageType( imagick.IMAGE_TYPE_TRUE_COLOR); err != nil {
-				//if err = mw.SetImageType( 6); err != nil {
 					log.Printf("Err: SetImageType %s\n", err)
 					return errors.Wrap(err, "error read faces")
 					continue
