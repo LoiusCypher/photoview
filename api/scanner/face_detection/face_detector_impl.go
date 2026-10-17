@@ -233,7 +233,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				}
 				colSp = mw.GetImageColorspace()
 				depth = mw.GetImageDepth()
-				itype x:= mw.GetImageType()
+				itype = mw.GetImageType()
 				log.Printf("   NOW  ColorSpace col %d dep %d typ %d %s\n", colSp, depth, itype )
 			}
 			if colSp != 23 {
