@@ -195,8 +195,8 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
-			if err = mw.SetImageFormat("RGB"); err != nil {
-				log.Printf("Err: SetImageFormat RGB %s\n", err)
+			if err = mw.SetImageFormat("JPEG"); err != nil {
+				log.Printf("Err: SetImageFormat %s\n", err)
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
@@ -233,11 +233,6 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// depthn := mw.GetImageDepth()
 				// colorn := mw.GetImageColorspace()
 				// log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
-			}
-			if err = mw.SetImageFormat("JPEG"); err != nil {
-				log.Printf("Err: SetImageFormat %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
 			}
 			var blob []byte
 			if blob, err = mw.GetImageBlob(); err != nil {
