@@ -223,18 +223,18 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				}
 				mw = mw.CombineImages( imagick.COLORSPACE_SRGB)
 				colSp = mw.GetImageColorspace()
-				depthn := mw.GetImageDepth()
-				itypen := mw.GetImageType()
-				log.Printf("   NEW  ColorSpace col %d dep %d typ %d %s\n", colSp, depthn, itypen )
+				depth = mw.GetImageDepth()
+				itype = mw.GetImageType()
+				log.Printf("   NEW  ColorSpace col %d dep %d typ %d %s\n", colSp, depth, itype )
 				if err = mw.SetImageType( imagick.IMAGE_TYPE_TRUE_COLOR); err != nil {
 					log.Printf("Err: SetImageType %s\n", err)
 					return errors.Wrap(err, "error read faces")
 					continue
 				}
 				colSp = mw.GetImageColorspace()
-				depthn := mw.GetImageDepth()
-				itypen := mw.GetImageType()
-				log.Printf("   NOW  ColorSpace col %d dep %d typ %d %s\n", colSp, depthn, itypen )
+				depth = mw.GetImageDepth()
+				itype x:= mw.GetImageType()
+				log.Printf("   NOW  ColorSpace col %d dep %d typ %d %s\n", colSp, depth, itype )
 			}
 			if colSp != 23 {
 				log.Printf("   ColorSpace %d  Depth %d\n", colSp, depth)
