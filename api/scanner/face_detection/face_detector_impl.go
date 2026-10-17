@@ -202,8 +202,9 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			}
 			depth := mw.GetImageDepth()
 			color := mw.GetImageColorspace()
+			itype := mw.GetImageType()
 			if color == 3 {
-				log.Printf("   GRAY ColorSpace %d %s\n", color, cachedPath)
+				log.Printf("   GRAY ColorSpace %d %s type %d\n", color, cachedPath, itype )
 				if err = mw.AddImage(mw.Clone()); err != nil {
 					log.Printf("Err: AddImage 1 %s\n", err)
 					return errors.Wrap(err, "error read faces")
@@ -221,6 +222,13 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				}
 				mw = mw.CombineImages(23)
 				color = mw.GetImageColorspace()
+				depthn := mw.GetImageDepth()
+				if err = mw.SetImageType(IMAGE_TYPE_TRUE_COLOR); err != nil {
+					log.Printf("Err: SetImageType %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				log.Printf("   New ColorSpace %d  Depth %d\n", color, depthn)
 			}
 			if color != 23 {
 				log.Printf("   ColorSpace %d  Depth %d\n", color, depth)
@@ -232,7 +240,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				}
 				// depthn := mw.GetImageDepth()
 				// colorn := mw.GetImageColorspace()
-				// log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
+				//log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
 			}
 			var blob []byte
 			if blob, err = mw.GetImageBlob(); err != nil {
