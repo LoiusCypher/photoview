@@ -148,8 +148,12 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 	//}
 	//log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
-	var oldFaces []int32
-	if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {
+	//var oldFaces []int32
+	//if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {
+		//return errors.Wrap(err, "error classify face")
+	//}
+	var oldFaces []models.ImageFace
+	if err := db.Where("media_id = ? AND detection = ?", media.ID, detection).Find(&oldFaces).Error; err != nil {
 		return errors.Wrap(err, "error classify face")
 	}
 	log.Println("  existing Faces", len(oldFaces))
@@ -324,7 +328,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 
 	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
 	for _, face_ := range faces {
-		// log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
+		//log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
 		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
 			return errors.Wrap(err, "error classify face")
 		}
@@ -332,17 +336,17 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 	for _, face_ := range oldFaces {
 		log.Println("  Old FaceGroup: ", face_.FaceGroupID)
 		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
+		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
-	for _, face_ := range faces {
-		log.Println("  New FaceGroup: ", face_.FaceGroupID)
-		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
-	}
+	//for _, face_ := range faces {
+	//	log.Println("  New FaceGroup: ", face_.FaceGroupID)
+	//	log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+	//	log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
+	//}
 
-	if err := db.Where("id IN (?)", oldFaces).Delete(models.ImageFace{}).Error; err != nil {
-		return errors.Wrap(err, "error classify face")
-	}
+	//if err := db.Where("id IN (?)", oldFace).Delete(models.ImageFace{}).Error; err != nil {
+	//	return errors.Wrap(err, "error classify face")
+	//}
 	fd.ReloadFacesFromDatabase(db)
 
 	return nil
