@@ -190,6 +190,22 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
+			defer mw.Destroy()
+			mt := mw.Clone()
+			mt.ThumbnailImage(mw.GetImageWidth(),mw.GetImageHeight())
+			depth := mt.GetImageDepth()
+			colSp := mt.GetImageColorspace()
+			itype := mt.GetImageType()
+			log.Printf("   ImageColorspace §d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
+			if err = mw.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			depth = mw.GetImageDepth()
+			colSp = mw.GetImageColorspace()
+			itype = mw.GetImageType()
+			log.Printf("   ImageColorspace §d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, cachedPath )
 			if err = mw.AutoOrientImage(); err != nil {
 				log.Printf("Err: AutoOrientImage %s\n", err)
 				// return errors.Wrap(err, "error read faces")
@@ -200,9 +216,9 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
-			depth := mw.GetImageDepth()
-			colSp := mw.GetImageColorspace()
-			itype := mw.GetImageType()
+			depth = mw.GetImageDepth()
+			colSp = mw.GetImageColorspace()
+			itype = mw.GetImageType()
 			if colSp == imagick.COLORSPACE_GRAY {
 				log.Printf("   GRAY dep %d typ %d %s\n", depth, itype, cachedPath )
 				cw := mw.Clone()
