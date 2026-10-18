@@ -61,7 +61,7 @@ jobs:
           load: true
           target: api
           tags: photoview/api
-          cache-from: type=gha,scope=api
+          cache-from: type=gha,scope=api-ma
 
       - name: Test
         id: test
@@ -113,9 +113,9 @@ jobs:
           target: ui
           tags: photoview/ui
           cache-from: |
-            type=gha,scope=ui
-            type=gha,scope=test-ui
-          cache-to: type=gha,mode=max,scope=test-ui
+            type=gha,scope=ui-ma
+            type=gha,scope=test-ui-ma
+          cache-to: type=gha,mode=max,scope=test-ui-ma
           build-args: |
             NODE_ENV=testing
 

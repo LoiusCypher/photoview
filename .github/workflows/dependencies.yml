@@ -73,8 +73,8 @@ jobs:
           sbom:        true
           provenance:  mode=max
           no-cache:    ${{ env.IS_CACHING != 'true' }}
-          cache-from:  type=gha,scope=dependencies
-          cache-to:    type=gha,mode=max,scope=dependencies
+          cache-from:  type=gha,scope=dependencies-ma
+          cache-to:    type=gha,mode=max,scope=dependencies-ma
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
           build-args: |
