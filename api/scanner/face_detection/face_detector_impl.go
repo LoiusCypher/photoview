@@ -364,7 +364,7 @@ if 1 == 0 {
 			d_MaxX := (float64(nFace_.Rectangle.Max.X) / img_width) - oFace_.Rectangle.MaxX
 			d_MinY := (float64(nFace_.Rectangle.Min.Y) / img_height) - oFace_.Rectangle.MinY
 			d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
-			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY
+			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
 		}
 	}
 
