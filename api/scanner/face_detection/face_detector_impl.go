@@ -184,14 +184,14 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 
 			mw := imagick.NewMagickWand()
 			defer mw.Destroy()
-			mt := mw.Clone()
-			defer mt.Destroy()
-
 			if err = mw.ReadImage(cachedPath); err != nil {
 				log.Printf("Err: ReadImage %s %s\n", err, cachedPath)
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
+			mt := mw.Clone()
+			defer mt.Destroy()
+
 			depth := mw.GetImageDepth()
 			colSp := mw.GetImageColorspace()
 			itype := mw.GetImageType()
@@ -231,7 +231,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				colSp = mw.GetImageColorspace()
 				depth = mw.GetImageDepth()
 				itype = mw.GetImageType()
-				log.Printf("   NEW  ColorSpace col %d dep %d typ %d %s\n", colSp, depth, itype )
+				log.Printf("   NEW  ColorSpace col %d dep %d typ %d\n", colSp, depth, itype )
 				if err = mw.SetImageType( imagick.IMAGE_TYPE_TRUE_COLOR); err != nil {
 					log.Printf("Err: SetImageType %s\n", err)
 					return errors.Wrap(err, "error read faces")
@@ -240,7 +240,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				colSp = mw.GetImageColorspace()
 				depth = mw.GetImageDepth()
 				itype = mw.GetImageType()
-				log.Printf("   NOW  ColorSpace col %d dep %d typ %d %s\n", colSp, depth, itype )
+				log.Printf("   NOW  ColorSpace col %d dep %d typ %d\n", colSp, depth, itype )
 			}
 			if colSp != 23 {
 				log.Printf("   ColorSpace %d  Depth %d\n", colSp, depth)
@@ -328,6 +328,16 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
 			return errors.Wrap(err, "error classify face")
 		}
+	}
+	for _, face_ := range oldFaces {
+		log.Println("  Old FaceGroup: ", face_.FaceGroupID)
+		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
+	}
+	for _, face_ := range faces {
+		log.Println("  New FaceGroup: ", face_.FaceGroupID)
+		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
 
 	if err := db.Where("id IN (?)", oldFaces).Delete(models.ImageFace{}).Error; err != nil {
