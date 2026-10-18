@@ -310,8 +310,6 @@ if 1 == 0 {
 		}
 
 		if url.Purpose == models.PhotoThumbnail {
-			log.Println("  Thumbnail URL found %s", cachedPath)
-
 			fd.mutex.Lock()
 			log.Printf("RecognizeFile Thumbnail %s\n", cachedPath)
 			faces, err = fd.rec.RecognizeFile(cachedPath)
@@ -342,6 +340,11 @@ if 1 == 0 {
 		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
 		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
+	//for _, face_ := range faces {
+	//	log.Println("  New FaceGroup: ", face_.FaceGroupID)
+	//	log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+	//	log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
+	//}
 
 	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
 	var keepFaces []models.ImageFace
@@ -356,7 +359,7 @@ if 1 == 0 {
 				oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
 				oldFaces = oldFaces[:len(oldFaces)-1]
 				log.Println("   Keep identical face: EuD", eu_dist)
-				break
+				continue // break
 			}
 			o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
 			o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
@@ -366,6 +369,7 @@ if 1 == 0 {
 			d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
 			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
 		}
+		return errors.New( "NEW Image detected that was not known before!!!!")
 	}
 
 	//if err := db.Where("id IN (?)", oldFace).Delete(models.ImageFace{}).Error; err != nil {
