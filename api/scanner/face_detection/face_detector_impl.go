@@ -184,28 +184,18 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 
 			mw := imagick.NewMagickWand()
 			defer mw.Destroy()
+			mt := mw.Clone()
+			defer mt.Destroy()
 
 			if err = mw.ReadImage(cachedPath); err != nil {
 				log.Printf("Err: ReadImage %s %s\n", err, cachedPath)
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
-			defer mw.Destroy()
-			mt := mw.Clone()
-			mt.ThumbnailImage(mw.GetImageWidth(),mw.GetImageHeight())
-			depth := mt.GetImageDepth()
-			colSp := mt.GetImageColorspace()
-			itype := mt.GetImageType()
-			log.Printf("   ImageColorspace §d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
-			if err = mw.AutoOrientImage(); err != nil {
-				log.Printf("Err: AutoOrientImage %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
-			}
-			depth = mw.GetImageDepth()
-			colSp = mw.GetImageColorspace()
-			itype = mw.GetImageType()
-			log.Printf("   ImageColorspace §d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, cachedPath )
+			depth := mw.GetImageDepth()
+			colSp := mw.GetImageColorspace()
+			itype := mw.GetImageType()
+			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, cachedPath )
 			if err = mw.AutoOrientImage(); err != nil {
 				log.Printf("Err: AutoOrientImage %s\n", err)
 				// return errors.Wrap(err, "error read faces")
@@ -266,6 +256,31 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			}
 			var blob []byte
 			if blob, err = mw.GetImageBlob(); err != nil {
+				log.Printf("Err: GetImageBlob %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Lock()
+			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
+			if faces, err = fd.rec.Recognize(blob); err != nil {
+				fd.mutex.Unlock()
+				log.Printf("Err: Recognize %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Unlock()
+
+			mt.ThumbnailImage(mt.GetImageWidth(),mt.GetImageHeight())
+			depth = mt.GetImageDepth()
+			colSp = mt.GetImageColorspace()
+			itype = mt.GetImageType()
+			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
+			if err = mt.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if blob, err = mt.GetImageBlob(); err != nil {
 				log.Printf("Err: GetImageBlob %s\n", err)
 				// return errors.Wrap(err, "error read faces")
 				continue
