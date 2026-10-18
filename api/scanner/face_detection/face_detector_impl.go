@@ -348,6 +348,8 @@ if 1 == 0 {
 
 	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
 	matches := make([][]bool, len(faces))
+	matchedOld := make([]bool, len(oldFaces))
+	matchedNew := make([]bool, len(faces))
 	for nIdx, nFace_ := range faces {
 		matches[nIdx] = make([]bool, len(oldFaces))
 		if err := fd.classifyFace(db, &nFace_, media, thumbnailPath, detection); err != nil {
@@ -357,6 +359,8 @@ if 1 == 0 {
 			eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
 			matches[nIdx][oIdx] = eu_dist == 0
 			if eu_dist == 0 {
+				matchedOld[oIdx] = true
+				matchedNew[nIdx] = true
 				// oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
 				// oldFaces = oldFaces[:len(oldFaces)-1]
 				log.Println("   Keep identical face: EuD", eu_dist)
@@ -374,6 +378,12 @@ if 1 == 0 {
 	}
 	for nIdx, _ := range faces {
 		log.Println("   matches: ", matches[nIdx])
+	}
+	if slices.Contains( matchedOld, false) {
+		log.Println("   matchedOld: ", matchedOld)
+	}
+	if slices.Contains( matchedNew, false) {
+		log.Println("   matchedNew: ", matchedNew)
 	}
 
 	//if err := db.Where("id IN (?)", oldFace).Delete(models.ImageFace{}).Error; err != nil {
