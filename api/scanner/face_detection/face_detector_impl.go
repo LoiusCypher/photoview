@@ -335,21 +335,18 @@ if 1 == 0 {
 		// }
 	}
 
+    if false {
 	for _, face_ := range oldFaces {
 		log.Println("  Old FaceID: ", face_.ID, "  FaceGroup: ", face_.FaceGroupID)
 		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
 		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
-	//for _, face_ := range faces {
-	//	log.Println("  New FaceGroup: ", face_.FaceGroupID)
-	//	log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-	//	log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
-	//}
+    }
 
 	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
 	matches := make([][]bool, len(faces))
-	matchedOld := make([]bool, len(oldFaces))
-	matchedNew := make([]bool, len(faces))
+	matchedOld := make([]int, len(oldFaces))
+	matchedNew := make([]int, len(faces))
 	for nIdx, nFace_ := range faces {
 		matches[nIdx] = make([]bool, len(oldFaces))
 		if err := fd.classifyFace(db, &nFace_, media, thumbnailPath, detection); err != nil {
@@ -359,13 +356,14 @@ if 1 == 0 {
 			eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
 			matches[nIdx][oIdx] = eu_dist == 0
 			if eu_dist == 0 {
-				matchedOld[oIdx] = true
-				matchedNew[nIdx] = true
+				matchedOld[oIdx] += 1
+				matchedNew[nIdx] += 1
 				// oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
 				// oldFaces = oldFaces[:len(oldFaces)-1]
 				log.Println("   Keep identical face: EuD", eu_dist)
 				// break
 			} else {
+			    if false {
 				o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
 				o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 				d_MinX := (float64(nFace_.Rectangle.Min.X) / img_width) - oFace_.Rectangle.MinX
@@ -373,15 +371,18 @@ if 1 == 0 {
 				d_MinY := (float64(nFace_.Rectangle.Min.Y) / img_height) - oFace_.Rectangle.MinY
 				d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
 				log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
+			    }
 			}
 		}
 	}
 	for nIdx, _ := range faces {
 		log.Println("   matches: ", matches[nIdx])
 	}
+		log.Println("   matchedOld: ", matchedOld)
 	if slices.Contains( matchedOld, false) {
 		log.Println("   matchedOld: ", matchedOld)
 	}
+		log.Println("   matchedNew: ", matchedNew)
 	if slices.Contains( matchedNew, false) {
 		log.Println("   matchedNew: ", matchedNew)
 	}
