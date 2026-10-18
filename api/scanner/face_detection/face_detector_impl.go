@@ -379,11 +379,11 @@ if 1 == 0 {
 		log.Println("   matches: ", matches[nIdx])
 	}
 		log.Println("   matchedOld: ", matchedOld)
-	if slices.Contains( matchedOld, false) {
+	if slices.Contains( matchedOld, 0) {
 		log.Println("   matchedOld: ", matchedOld)
 	}
 		log.Println("   matchedNew: ", matchedNew)
-	if slices.Contains( matchedNew, false) {
+	if slices.Contains( matchedNew, 0) {
 		log.Println("   matchedNew: ", matchedNew)
 	}
 
