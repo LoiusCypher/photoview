@@ -148,10 +148,6 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 	//}
 	//log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
-	//var oldFaces []int32
-	//if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {
-		//return errors.Wrap(err, "error classify face")
-	//}
 	var oldFaces []models.ImageFace
 	if err := db.Where("media_id = ? AND detection = ?", media.ID, detection).Find(&oldFaces).Error; err != nil {
 		return errors.Wrap(err, "error classify face")
@@ -348,19 +344,27 @@ if 1 == 0 {
 	}
 
 	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
+	var keepFaces []models.ImageFace
 	for _, nFace_ := range faces {
-		//log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( nFace_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
 		if err := fd.classifyFace(db, &nFace_, media, thumbnailPath, detection); err != nil {
 			return errors.Wrap(err, "error classify face")
 		}
-		for _, oFace_ := range oldFaces {
+		for oIdx, oFace_ := range oldFaces {
 			eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
+			if eu_dist == 0 {
+				keepFaces = append( keepFaces, oldFaces[oIdx])
+				oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
+				oldFaces = oldFaces[:len(oldFaces)-1]
+				log.Println("   Keep identical face: EuD", eu_dist)
+				break
+			}
+			o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
+			o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 			d_MinX := (float64(nFace_.Rectangle.Min.X) / img_width) - oFace_.Rectangle.MinX
 			d_MaxX := (float64(nFace_.Rectangle.Max.X) / img_width) - oFace_.Rectangle.MaxX
 			d_MinY := (float64(nFace_.Rectangle.Min.Y) / img_height) - oFace_.Rectangle.MinY
 			d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
-			//log.Println("   DiffRectangle: EuD", eu_dist)
-			log.Println("   DiffRectangle: EuD", eu_dist, " RecD", d_MinX, d_MaxX, d_MinY, d_MaxY)
+			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY
 		}
 	}
 
