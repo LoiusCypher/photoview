@@ -184,63 +184,103 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 
 			mw := imagick.NewMagickWand()
 			defer mw.Destroy()
-
 			if err = mw.ReadImage(cachedPath); err != nil {
 				log.Printf("Err: ReadImage %s %s\n", err, cachedPath)
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
+			mt := mw.Clone()
+			defer mt.Destroy()
+
+			depth := mw.GetImageDepth()
+			colSp := mw.GetImageColorspace()
+			itype := mw.GetImageType()
+			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, cachedPath )
 			if err = mw.AutoOrientImage(); err != nil {
 				log.Printf("Err: AutoOrientImage %s\n", err)
 				// return errors.Wrap(err, "error read faces")
 				continue
-			}
-			if err = mw.SetImageFormat("RGB"); err != nil {
-				log.Printf("Err: SetImageFormat RGB %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
-			}
-			depth := mw.GetImageDepth()
-			color := mw.GetImageColorspace()
-			if color == 3 {
-				log.Printf("   GRAY ColorSpace %d %s\n", color, cachedPath)
-				if err = mw.AddImage(mw.Clone()); err != nil {
-					log.Printf("Err: AddImage 1 %s\n", err)
-					return errors.Wrap(err, "error read faces")
-					continue
-				}
-				if err = mw.AddImage(mw.Clone()); err != nil {
-					log.Printf("Err: AddImage 2 %s\n", err)
-					return errors.Wrap(err, "error read faces")
-					continue
-				}
-				if err = mw.AddImage(mw.Clone()); err != nil {
-					log.Printf("Err: AddImage 3 %s\n", err)
-					return errors.Wrap(err, "error read faces")
-					continue
-				}
-				mw = mw.CombineImages(23)
-				color = mw.GetImageColorspace()
-			}
-			if color != 23 {
-				log.Printf("   ColorSpace %d  Depth %d\n", color, depth)
-				// if err = mw.SetImageColorspace(COLORSPACE_SRGB); err != nil {
-				if err = mw.SetImageColorspace(23); err != nil {
-					log.Printf("Err: SetImageColorspace %s\n", err)
-					return errors.Wrap(err, "error read faces")
-					continue
-				}
-				// depthn := mw.GetImageDepth()
-				// colorn := mw.GetImageColorspace()
-				// log.Printf("   New ColorSpace %d  Depth %d\n", colorn, depthn)
 			}
 			if err = mw.SetImageFormat("JPEG"); err != nil {
 				log.Printf("Err: SetImageFormat %s\n", err)
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
+			depth = mw.GetImageDepth()
+			colSp = mw.GetImageColorspace()
+			itype = mw.GetImageType()
+			if colSp == imagick.COLORSPACE_GRAY {
+				log.Printf("   GRAY dep %d typ %d %s\n", depth, itype, cachedPath )
+				cw := mw.Clone()
+				//if err = mw.AddImage(cw.Clone()); err != nil {
+				//	log.Printf("Err: AddImage 1 %s\n", err)
+				//	return errors.Wrap(err, "error read faces")
+				//	continue
+				//}
+				if err = mw.AddImage(cw.Clone()); err != nil {
+					log.Printf("Err: AddImage 2 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				if err = mw.AddImage(cw.Clone()); err != nil {
+					log.Printf("Err: AddImage 3 %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				mw = mw.CombineImages( imagick.COLORSPACE_SRGB)
+				colSp = mw.GetImageColorspace()
+				depth = mw.GetImageDepth()
+				itype = mw.GetImageType()
+				log.Printf("   NEW  ColorSpace col %d dep %d typ %d\n", colSp, depth, itype )
+				if err = mw.SetImageType( imagick.IMAGE_TYPE_TRUE_COLOR); err != nil {
+					log.Printf("Err: SetImageType %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				colSp = mw.GetImageColorspace()
+				depth = mw.GetImageDepth()
+				itype = mw.GetImageType()
+				log.Printf("   NOW  ColorSpace col %d dep %d typ %d\n", colSp, depth, itype )
+			}
+			if colSp != 23 {
+				log.Printf("   ColorSpace %d  Depth %d\n", colSp, depth)
+				if err = mw.SetImageColorspace( imagick.COLORSPACE_SRGB); err != nil {
+				// if err = mw.SetImageColorspace(23); err != nil {
+					log.Printf("Err: SetImageColorspace %s\n", err)
+					return errors.Wrap(err, "error read faces")
+					continue
+				}
+				// depthn := mw.GetImageDepth()
+				// colSpn := mw.GetImageColorspace()
+				//log.Printf("   New ColorSpace %d  Depth %d\n", colSpn, depthn)
+			}
 			var blob []byte
 			if blob, err = mw.GetImageBlob(); err != nil {
+				log.Printf("Err: GetImageBlob %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Lock()
+			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
+			if faces, err = fd.rec.Recognize(blob); err != nil {
+				fd.mutex.Unlock()
+				log.Printf("Err: Recognize %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Unlock()
+
+			mt.ThumbnailImage(mt.GetImageWidth(),mt.GetImageHeight())
+			depth = mt.GetImageDepth()
+			colSp = mt.GetImageColorspace()
+			itype = mt.GetImageType()
+			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
+			if err = mt.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			if blob, err = mt.GetImageBlob(); err != nil {
 				log.Printf("Err: GetImageBlob %s\n", err)
 				// return errors.Wrap(err, "error read faces")
 				continue
@@ -288,6 +328,16 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
 			return errors.Wrap(err, "error classify face")
 		}
+	}
+	for _, face_ := range oldFaces {
+		log.Println("  Old FaceGroup: ", face_.FaceGroupID)
+		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
+	}
+	for _, face_ := range faces {
+		log.Println("  New FaceGroup: ", face_.FaceGroupID)
+		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
+		log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
 
 	if err := db.Where("id IN (?)", oldFaces).Delete(models.ImageFace{}).Error; err != nil {
