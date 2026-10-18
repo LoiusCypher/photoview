@@ -148,10 +148,6 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 	//}
 	//log.Println("  ", len(media.Faces)," Faces exist already for: ", media.ID)
 
-	//var oldFaces []int32
-	//if err := db.Model(&models.ImageFace{}).Where("media_id = ? AND detection = ?", media.ID, detection).Select("ID").Find(&oldFaces).Error; err != nil {
-		//return errors.Wrap(err, "error classify face")
-	//}
 	var oldFaces []models.ImageFace
 	if err := db.Where("media_id = ? AND detection = ?", media.ID, detection).Find(&oldFaces).Error; err != nil {
 		return errors.Wrap(err, "error classify face")
@@ -160,6 +156,8 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 
 	var faces []face.Face
 	var thumbnailPath string
+	var img_width float64
+	var img_height float64
 	for _, url := range media.MediaURL {
 		var thumbnailURL *models.MediaURL
 		thumbnailURL = &url
@@ -196,6 +194,36 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			mt := mw.Clone()
 			defer mt.Destroy()
 
+			mt.ThumbnailImage(mt.GetImageWidth(),mt.GetImageHeight())
+			depth := mt.GetImageDepth()
+			colSp := mt.GetImageColorspace()
+			itype := mt.GetImageType()
+			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
+			if err = mt.AutoOrientImage(); err != nil {
+				log.Printf("Err: AutoOrientImage %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			var blob []byte
+			if blob, err = mt.GetImageBlob(); err != nil {
+				log.Printf("Err: GetImageBlob %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			img_width = float64(mt.GetImageWidth())
+			img_height = float64(mt.GetImageHeight())
+			fd.mutex.Lock()
+			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
+			if faces, err = fd.rec.Recognize(blob); err != nil {
+				fd.mutex.Unlock()
+				log.Printf("Err: Recognize %s\n", err)
+				// return errors.Wrap(err, "error read faces")
+				continue
+			}
+			fd.mutex.Unlock()
+			thumbnailPath = cachedPath
+
+if 1 == 0 {
 			depth := mw.GetImageDepth()
 			colSp := mw.GetImageColorspace()
 			itype := mw.GetImageType()
@@ -257,7 +285,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// depthn := mw.GetImageDepth()
 				// colSpn := mw.GetImageColorspace()
 				//log.Printf("   New ColorSpace %d  Depth %d\n", colSpn, depthn)
-			}
+				}
 			var blob []byte
 			if blob, err = mw.GetImageBlob(); err != nil {
 				log.Printf("Err: GetImageBlob %s\n", err)
@@ -265,31 +293,8 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				continue
 			}
 			fd.mutex.Lock()
-			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
-			if faces, err = fd.rec.Recognize(blob); err != nil {
-				fd.mutex.Unlock()
-				log.Printf("Err: Recognize %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
-			}
-			fd.mutex.Unlock()
-
-			mt.ThumbnailImage(mt.GetImageWidth(),mt.GetImageHeight())
-			depth = mt.GetImageDepth()
-			colSp = mt.GetImageColorspace()
-			itype = mt.GetImageType()
-			log.Printf("   ImageColorspace %d  Imagedepth %d  ImageType %d %s\n", colSp, depth, itype, "THUMBNAIL" )
-			if err = mt.AutoOrientImage(); err != nil {
-				log.Printf("Err: AutoOrientImage %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
-			}
-			if blob, err = mt.GetImageBlob(); err != nil {
-				log.Printf("Err: GetImageBlob %s\n", err)
-				// return errors.Wrap(err, "error read faces")
-				continue
-			}
-			fd.mutex.Lock()
+			img_width = float64(mw.GetImageWidth())
+			img_height = float64(mw.GetImageHeight())
 			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
 			if faces, err = fd.rec.Recognize(blob); err != nil {
 				fd.mutex.Unlock()
@@ -300,6 +305,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			fd.mutex.Unlock()
 
 			thumbnailPath = cachedPath
+}
 			break
 		}
 
@@ -310,9 +316,14 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 			log.Printf("RecognizeFile Thumbnail %s\n", cachedPath)
 			faces, err = fd.rec.RecognizeFile(cachedPath)
 			fd.mutex.Unlock()
-
 			if err != nil {
 				return errors.Wrap(err, "error read faces")
+			}
+			dimension, err := media_encoding.GetPhotoDimensions(cachedPath)
+			img_width = float64(dimension.Width)
+			img_height = float64(dimension.Height)
+			if err != nil {
+				return errors.Wrap(err, "error get dimensions")
 			}
 			thumbnailPath = cachedPath
 			continue
@@ -326,15 +337,8 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		// }
 	}
 
-	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
-	for _, face_ := range faces {
-		//log.Println("  Faces FaceGroup: ", media.Faces[0].FaceGroupID, "distance:",euclidean_distance( face_.Descriptor, face.Descriptor(media.Faces[0].Descriptor)))
-		if err := fd.classifyFace(db, &face_, media, thumbnailPath, detection); err != nil {
-			return errors.Wrap(err, "error classify face")
-		}
-	}
 	for _, face_ := range oldFaces {
-		log.Println("  Old FaceGroup: ", face_.FaceGroupID)
+		log.Println("  Old FaceID: ", face_.ID, "  FaceGroup: ", face_.FaceGroupID)
 		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
 		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	}
@@ -343,6 +347,31 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 	//	log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
 	//	log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
 	//}
+
+	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
+	var keepFaces []models.ImageFace
+	for _, nFace_ := range faces {
+		if err := fd.classifyFace(db, &nFace_, media, thumbnailPath, detection); err != nil {
+			return errors.Wrap(err, "error classify face")
+		}
+		for oIdx, oFace_ := range oldFaces {
+			eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
+			if eu_dist == 0 {
+				keepFaces = append( keepFaces, oldFaces[oIdx])
+				oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
+				oldFaces = oldFaces[:len(oldFaces)-1]
+				log.Println("   Keep identical face: EuD", eu_dist)
+				break
+			}
+			o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
+			o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
+			d_MinX := (float64(nFace_.Rectangle.Min.X) / img_width) - oFace_.Rectangle.MinX
+			d_MaxX := (float64(nFace_.Rectangle.Max.X) / img_width) - oFace_.Rectangle.MaxX
+			d_MinY := (float64(nFace_.Rectangle.Min.Y) / img_height) - oFace_.Rectangle.MinY
+			d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
+			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
+		}
+	}
 
 	//if err := db.Where("id IN (?)", oldFace).Delete(models.ImageFace{}).Error; err != nil {
 	//	return errors.Wrap(err, "error classify face")
