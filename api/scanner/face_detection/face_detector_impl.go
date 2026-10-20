@@ -402,7 +402,7 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 		if oFace_.FaceGroup == nil {
 			var faceGroup models.FaceGroup
 			if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
-				return nil, err
+				return err
 			}
 			oFace_.FaceGroup = &faceGroup
 			log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
