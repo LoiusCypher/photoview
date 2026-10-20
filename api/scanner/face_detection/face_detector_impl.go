@@ -410,6 +410,8 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 							return err
 						}
 						oFace_.FaceGroup = &faceGroup
+						log.Println("check oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
+						oldFaces[oIdx].FaceGroup = &faceGroup
 					}
 					log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", *oFace_.FaceGroup.Label, " oIdx: ", oIdx)
 					if keep < 0 {
