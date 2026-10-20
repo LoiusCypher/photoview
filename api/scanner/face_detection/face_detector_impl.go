@@ -153,6 +153,15 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		return errors.Wrap(err, "error classify face")
 	}
 	log.Println("  existing Faces", len(oldFaces))
+	for _, oFace_ := range oldFaces {
+		if oFace_.FaceGroup == nil {
+			var faceGroup models.FaceGroup
+			if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
+				return err
+			}
+			oFace_.FaceGroup = &faceGroup
+		}
+	}
 
 	var faces []face.Face
 	var img_width float64
@@ -401,9 +410,9 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 							return err
 						}
 						oFace_.FaceGroup = &faceGroup
-						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
-						log.Println("   Faceoup Label: ", *oFace_.FaceGroup.Label)
 					}
+					log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
+					log.Println("   Faceoup Label: ", *oFace_.FaceGroup.Label)
 					if keep < 0 {
 						keep = oIdx
 						log.Println("keep 1: ", keep)
