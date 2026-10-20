@@ -411,8 +411,7 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 						}
 						oFace_.FaceGroup = &faceGroup
 					}
-					log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
-					log.Println("   Faceoup Label: ", *oFace_.FaceGroup.Label)
+					log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", *oFace_.FaceGroup.Label, " oIdx: ", oIdx)
 					if keep < 0 {
 						keep = oIdx
 						log.Println("keep 1: ", keep)
@@ -423,6 +422,7 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 								return errors.Wrap(err, "error deletim#ng face")
 							}
 						} else {
+							log.Println("check keep 1: ", keep, oldFaces[keep].FaceGroup == nil)
 							if oldFaces[keep].FaceGroup.Label == nil || !oFace_.Confirmed {
 								log.Println("delete 2: ", oIdx)
 								if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
