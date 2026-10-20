@@ -392,22 +392,22 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 			var keep int = -1
 			for oIdx, oFace_ := range oldFaces {
 				if matches[nIdx][oIdx] {
+					log.Println("  Old FaceID: ", oFace_.ID, "  FaceGroup: ", oFace_.FaceGroupID, oFace_.FaceGroup != nil)
+					log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
+					log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
+					if oFace_.FaceGroup == nil {
+						var faceGroup models.FaceGroup
+						if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
+							return err
+						}
+						oFace_.FaceGroup = &faceGroup
+						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
+						log.Println("   Faceoup Label: ", *oFace_.FaceGroup.Label)
+					}
 					if keep < 0 {
 						keep = oIdx
 						log.Println("keep 1: ", keep)
 					} else {
-		log.Println("  Old FaceID: ", oFace_.ID, "  FaceGroup: ", oFace_.FaceGroupID, oFace_.FaceGroup != nil)
-		log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
-		log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
-		if oFace_.FaceGroup == nil {
-			var faceGroup models.FaceGroup
-			if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
-				return err
-			}
-			oFace_.FaceGroup = &faceGroup
-			log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID)
-			log.Println("   Faceoup Label: ", oFace_.FaceGroup.Label)
-		}
 						if oFace_.FaceGroup.Label == nil {
 							log.Println("delete 1: ", oIdx)
 							if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
