@@ -397,15 +397,15 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					log.Println("  Old FaceID: ", oFace_.ID, "  FaceGroup: ", oFace_.FaceGroupID, oFace_.FaceGroup != nil)
 					log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
 					log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
-					if oFace_.FaceGroup == nil {
-						log.Println("FAIL oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
-						var faceGroup models.FaceGroup
-						if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
-							return err
-						}
-						oldFaces[oIdx].FaceGroup = &faceGroup
-						oFace_.FaceGroup = &faceGroup
-					}
+					// if oFace_.FaceGroup == nil {
+						// log.Println("FAIL oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
+						// var faceGroup models.FaceGroup
+						// if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
+							// return err
+						// }
+						// oldFaces[oIdx].FaceGroup = &faceGroup
+						// oFace_.FaceGroup = &faceGroup
+					// }
 					if oFace_.FaceGroup.Label == nil {
 						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", oFace_.FaceGroup.Label, " oIdx: ", oIdx)
 					} else {
@@ -423,16 +423,16 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 						} else {
 							log.Println("check keep 1: ", keep, oldFaces[keep].FaceGroup == nil)
 							if oldFaces[keep].FaceGroup.Label == nil || !oFace_.Confirmed {
-								log.Println("delete 2: ", oIdx, "  keep:", keep)
-								if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
-									return errors.Wrap(err, "error deleting face")
-								}
-							} else {
-								log.Println("delete 3: ", keep, "  keep:", oIdx)
+								log.Println("delete 2: ", keep, "  keep:", oIdx)
 								if err := db.Where("id = ?", oldFaces[keep].ID).Delete(models.ImageFace{}).Error; err != nil {
 									return errors.Wrap(err, "error deleting face")
 								}
 								keep = oIdx
+							} else {
+								log.Println("delete 3: ", oIdx, "  keep:", keep)
+								if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
+									return errors.Wrap(err, "error deleting face")
+								}
 							}
 						}
 					}
