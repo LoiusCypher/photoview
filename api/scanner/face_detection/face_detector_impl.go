@@ -153,13 +153,13 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		return errors.Wrap(err, "error classify face")
 	}
 	log.Println("  existing Faces", len(oldFaces))
-	for _, oFace_ := range oldFaces {
-		if oFace_.FaceGroup == nil {
+	for oIdx := range len( oldFaces) {
+		if oldFaces[oIdx].FaceGroup == nil {
 			var faceGroup models.FaceGroup
-			if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
+			if err := db.Model(&oldFaces[oIdx]).Association("FaceGroup").Find(&faceGroup); err != nil {
 				return err
 			}
-			oFace_.FaceGroup = &faceGroup
+			oldFaces[oIdx].FaceGroup = &faceGroup
 		}
 	}
 
@@ -343,14 +343,6 @@ if 1 == 0 {
 
 func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.ImageFace, faces []face.Face, media *models.Media, width float64, height float64, detection int) error {
 
-    if false {
-	for _, face_ := range oldFaces {
-		log.Println("  Old FaceID: ", face_.ID, "  FaceGroup: ", face_.FaceGroupID)
-		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
-	}
-    }
-
 	log.Println("  ", len(faces), " Faces found")
 	matches := make([][]bool, len(faces))
 	matchedOld := make([]int, len(oldFaces))
@@ -393,6 +385,7 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 	}
 	for nIdx, nFace := range faces {
 		if matchedNew[nIdx] == 0 {
+			log.Println("NEW face found: ", nIdx)
 			if err := fd.classifyFace(db, &nFace, media, width, height, detection); err != nil {
 				return errors.Wrap(err, "error classify face")
 			}
@@ -405,13 +398,12 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
 					log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
 					if oFace_.FaceGroup == nil {
+						log.Println("FAIL oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
 						var faceGroup models.FaceGroup
 						if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
 							return err
 						}
-						log.Println("check oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
 						oldFaces[oIdx].FaceGroup = &faceGroup
-						log.Println("check oFace 1: ", oIdx, oFace_.FaceGroup == nil)
 						oFace_.FaceGroup = &faceGroup
 					}
 					if oFace_.FaceGroup.Label == nil {
@@ -424,23 +416,23 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 						log.Println("keep 1: ", keep)
 					} else {
 						if oFace_.FaceGroup.Label == nil {
-							log.Println("delete 1: ", oIdx)
+							log.Println("delete 1: ", oIdx, "  keep:", keep)
 							if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
 								return errors.Wrap(err, "error deletim#ng face")
 							}
 						} else {
 							log.Println("check keep 1: ", keep, oldFaces[keep].FaceGroup == nil)
 							if oldFaces[keep].FaceGroup.Label == nil || !oFace_.Confirmed {
-								log.Println("delete 2: ", oIdx)
+								log.Println("delete 2: ", oIdx, "  keep:", keep)
 								if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
-									return errors.Wrap(err, "error deletim#ng face")
+									return errors.Wrap(err, "error deleting face")
 								}
 							} else {
+								log.Println("delete 3: ", keep, "  keep:", oIdx)
 								if err := db.Where("id = ?", oldFaces[keep].ID).Delete(models.ImageFace{}).Error; err != nil {
-									return errors.Wrap(err, "error deletim#ng face")
+									return errors.Wrap(err, "error deleting face")
 								}
 								keep = oIdx
-								log.Println("keep 1: ", keep)
 							}
 						}
 					}
