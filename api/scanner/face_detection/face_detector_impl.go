@@ -380,7 +380,8 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 		//log.Println("   matchedOld: ", matchedOld)
 		for oIdx, oFace_ := range oldFaces {
 			if matchedOld[oIdx] == 0 {
-				for nIdx, nFace_ := range faces {
+				for _, nFace_ := range faces {
+					eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
 					o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
 					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 					d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
