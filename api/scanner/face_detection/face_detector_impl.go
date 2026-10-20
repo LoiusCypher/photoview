@@ -377,7 +377,20 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 	}
 	log.Println("   matchedOld: ", matchedOld)
 	if slices.Contains( matchedOld, 0) {
-		log.Println("   matchedOld: ", matchedOld)
+		//log.Println("   matchedOld: ", matchedOld)
+		for oIdx, oFace_ := range oldFaces {
+			if matchedOld[oIdx] == 0 {
+				for nIdx, nFace_ := range faces {
+					o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
+					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
+					d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
+					d_MaxX := (float64(nFace_.Rectangle.Max.X) / width) - oFace_.Rectangle.MaxX
+					d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
+					d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
+					log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
+				}
+			}
+		}
 	}
 	log.Println("   matchedNew: ", matchedNew)
 	if slices.Contains( matchedNew, 0) {
