@@ -153,9 +153,17 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 		return errors.Wrap(err, "error classify face")
 	}
 	log.Println("  existing Faces", len(oldFaces))
+	for oIdx := range len( oldFaces) {
+		if oldFaces[oIdx].FaceGroup == nil {
+			var faceGroup models.FaceGroup
+			if err := db.Model(&oldFaces[oIdx]).Association("FaceGroup").Find(&faceGroup); err != nil {
+				return err
+			}
+			oldFaces[oIdx].FaceGroup = &faceGroup
+		}
+	}
 
 	var faces []face.Face
-	var thumbnailPath string
 	var img_width float64
 	var img_height float64
 	for _, url := range media.MediaURL {
@@ -210,8 +218,6 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				// return errors.Wrap(err, "error read faces")
 				continue
 			}
-			img_width = float64(mt.GetImageWidth())
-			img_height = float64(mt.GetImageHeight())
 			fd.mutex.Lock()
 			log.Printf("RecognizeFile MediaOriginal %s\n", cachedPath)
 			if faces, err = fd.rec.Recognize(blob); err != nil {
@@ -221,7 +227,7 @@ func mediaDetectFaces(db *gorm.DB, fd *faceDetector, media *models.Media, detect
 				continue
 			}
 			fd.mutex.Unlock()
-			thumbnailPath = cachedPath
+			return fd.reClassifyMediaFaces(db, oldFaces, faces, media, float64(mt.GetImageWidth()), float64(mt.GetImageHeight()), detection)
 
 if 1 == 0 {
 			depth := mw.GetImageDepth()
@@ -303,15 +309,11 @@ if 1 == 0 {
 				continue
 			}
 			fd.mutex.Unlock()
-
-			thumbnailPath = cachedPath
-}
 			break
 		}
+}
 
 		if url.Purpose == models.PhotoThumbnail {
-			log.Println("  Thumbnail URL found %s", cachedPath)
-
 			fd.mutex.Lock()
 			log.Printf("RecognizeFile Thumbnail %s\n", cachedPath)
 			faces, err = fd.rec.RecognizeFile(cachedPath)
@@ -325,7 +327,6 @@ if 1 == 0 {
 			if err != nil {
 				return errors.Wrap(err, "error get dimensions")
 			}
-			thumbnailPath = cachedPath
 			continue
 		}
 
@@ -337,71 +338,158 @@ if 1 == 0 {
 		// }
 	}
 
-	for _, face_ := range oldFaces {
-		log.Println("  Old FaceID: ", face_.ID, "  FaceGroup: ", face_.FaceGroupID)
-		log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-		log.Println("   Detection: ", face_.Detection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
-	}
-	//for _, face_ := range faces {
-	//	log.Println("  New FaceGroup: ", face_.FaceGroupID)
-	//	log.Println("   Rectangle: ", face_.Rectangle.MinX, face_.Rectangle.MinY, face_.Rectangle.MaxX, face_.Rectangle.MaxY)
-	//	log.Println("   Detection: ", face_.Dectection, "  Confirmed: ", face_.Confirmed, "  Subgroup: ", face_.Subgroup)
-	//}
+	return fd.reClassifyMediaFaces(db, oldFaces, faces, media, float64(img_width), float64(img_height), detection)
+}
 
-	log.Println("  ", len(faces), " Faces found for: ", thumbnailPath)
-	var keepFaces []models.ImageFace
-	for _, nFace_ := range faces {
-		if err := fd.classifyFace(db, &nFace_, media, thumbnailPath, detection); err != nil {
-			return errors.Wrap(err, "error classify face")
-		}
+func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.ImageFace, faces []face.Face, media *models.Media, width float64, height float64, detection int) error {
+
+	log.Println("  ", len(faces), " Faces found")
+	matches := make([][]bool, len(faces))
+	matchedOld := make([]int, len(oldFaces))
+	matchedNew := make([]int, len(faces))
+	for nIdx, nFace_ := range faces {
+		matches[nIdx] = make([]bool, len(oldFaces))
 		for oIdx, oFace_ := range oldFaces {
 			eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
+			matches[nIdx][oIdx] = eu_dist == 0
 			if eu_dist == 0 {
-				keepFaces = append( keepFaces, oldFaces[oIdx])
-				oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
-				oldFaces = oldFaces[:len(oldFaces)-1]
-				log.Println("   Keep identical face: EuD", eu_dist)
-				break
+				matchedOld[oIdx] += 1
+				matchedNew[nIdx] += 1
+				// oldFaces[oIdx] = oldFaces[len(oldFaces)-1]
+				// oldFaces = oldFaces[:len(oldFaces)-1]
+				//log.Println("   Keep identical face: EuD", eu_dist)
+				// break
+			} else {
+			    if false {
+				o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
+				o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
+				d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
+				d_MaxX := (float64(nFace_.Rectangle.Max.X) / width) - oFace_.Rectangle.MaxX
+				d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
+				d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
+				log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
+			    }
 			}
-			o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
-			o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
-			d_MinX := (float64(nFace_.Rectangle.Min.X) / img_width) - oFace_.Rectangle.MinX
-			d_MaxX := (float64(nFace_.Rectangle.Max.X) / img_width) - oFace_.Rectangle.MaxX
-			d_MinY := (float64(nFace_.Rectangle.Min.Y) / img_height) - oFace_.Rectangle.MinY
-			d_MaxY := (float64(nFace_.Rectangle.Max.Y) / img_height) - oFace_.Rectangle.MaxY
-			log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
+		}
+	}
+	for nIdx, _ := range faces {
+		log.Println("   matches: ", matches[nIdx])
+	}
+	log.Println("   matchedOld: ", matchedOld)
+	if slices.Contains( matchedOld, 0) {
+		//log.Println("   matchedOld: ", matchedOld)
+		for oIdx, oFace_ := range oldFaces {
+			if matchedOld[oIdx] == 0 {
+				for nIdx, nFace_ := range faces {
+					eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
+					// log.Println("   Eucidean Dist: ", eu_dist)
+					o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
+					d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
+					d_MaxX := (float64(nFace_.Rectangle.Max.X) / width) - oFace_.Rectangle.MaxX
+					// log.Println("   DiffRectangle: X Span ", o_span_X, " Diff ", d_MinX, d_MaxX)
+					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
+					d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
+					d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
+					// log.Println("   DiffRectangle: Y Span ", o_span_Y, " Diff ", d_MinY, d_MaxY)
+					p_MinX := 100 * max(d_MinX,-d_MinX) / o_span_X
+					p_MaxX := 100 * max(d_MaxX,-d_MaxX) / o_span_X
+					p_MinY := 100 * max(d_MinY,-d_MinY) / o_span_Y
+					p_MaxY := 100 * max(d_MaxY,-d_MaxY) / o_span_Y
+					log.Println("   DiffPercent: X ", p_MinX, p_MaxX, "  Y ", p_MinY, p_MaxY)
+					if p_MinX < 2 && p_MaxX < 2 && p_MinY < 2 && p_MaxY < 2 {
+						log.Println("   Eucidean Dist: ", eu_dist)
+						log.Println("delete: ", oIdx, "  same space as:", nIdx)
+						if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
+							return errors.Wrap(err, "error deleting face")
+						}
+					}
+				}
+			}
+		}
+	}
+	log.Println("   matchedNew: ", matchedNew)
+	if slices.Contains( matchedNew, 0) {
+		log.Println("   matchedNew: ", matchedNew)
+	}
+	for nIdx, nFace := range faces {
+		if matchedNew[nIdx] == 0 {
+			log.Println("NEW face found: ", nIdx)
+			if err := fd.classifyFace(db, &nFace, media, width, height, detection); err != nil {
+				return errors.Wrap(err, "error classify face")
+			}
+		}
+		if matchedNew[nIdx] > 1 {
+			var keep int = -1
+			for oIdx, oFace_ := range oldFaces {
+				if matches[nIdx][oIdx] {
+					log.Println("  Old FaceID: ", oFace_.ID, "  FaceGroup: ", oFace_.FaceGroupID, oFace_.FaceGroup != nil)
+					log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
+					log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
+					// if oFace_.FaceGroup == nil {
+						// log.Println("FAIL oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
+						// var faceGroup models.FaceGroup
+						// if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
+							// return err
+						// }
+						// oldFaces[oIdx].FaceGroup = &faceGroup
+						// oFace_.FaceGroup = &faceGroup
+					// }
+					if oFace_.FaceGroup.Label == nil {
+						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", oFace_.FaceGroup.Label, " oIdx: ", oIdx)
+					} else {
+						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", *oFace_.FaceGroup.Label, " oIdx: ", oIdx)
+					}
+					if keep < 0 {
+						keep = oIdx
+						log.Println("keep 1: ", keep)
+					} else {
+						if oFace_.FaceGroup.Label == nil {
+							log.Println("delete 1: ", oIdx, "  keep:", keep)
+							if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
+								return errors.Wrap(err, "error deletim#ng face")
+							}
+						} else {
+							log.Println("check keep 1: ", keep, oldFaces[keep].FaceGroup == nil)
+							if oldFaces[keep].FaceGroup.Label == nil || !oFace_.Confirmed {
+								log.Println("delete 2: ", keep, "  keep:", oIdx)
+								if err := db.Where("id = ?", oldFaces[keep].ID).Delete(models.ImageFace{}).Error; err != nil {
+									return errors.Wrap(err, "error deleting face")
+								}
+								keep = oIdx
+							} else {
+								log.Println("delete 3: ", oIdx, "  keep:", keep)
+								if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
+									return errors.Wrap(err, "error deleting face")
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
-	//if err := db.Where("id IN (?)", oldFace).Delete(models.ImageFace{}).Error; err != nil {
-	//	return errors.Wrap(err, "error classify face")
-	//}
 	fd.ReloadFacesFromDatabase(db)
 
 	return nil
 }
 
-func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, imagePath string, detection int) error {
+func (fd *faceDetector) classifyFace(db *gorm.DB, face *face.Face, media *models.Media, width float64, height float64, detection int) error {
 	fd.mutex.Lock()
 	defer fd.mutex.Unlock()
 
 	log.Println("classifyFace threshold: ", fd.classifyThreshold, "len(fd.descriptors):", len(fd.faceDescriptors))
 	match := int32(fd.rec.ClassifyThreshold(face.Descriptor, fd.classifyThreshold))
 
-	dimension, err := media_encoding.GetPhotoDimensions(imagePath)
-	if err != nil {
-		return err
-	}
-
 	imageFace := models.ImageFace{
 		MediaID:    media.ID,
 		Descriptor: models.FaceDescriptor(face.Descriptor),
 		Rectangle: models.FaceRectangle{
 			// Converts a pixel absolute rectangle to a relative FaceRectangle.
-			MinX: float64(face.Rectangle.Min.X) / float64(dimension.Width),
-			MaxX: float64(face.Rectangle.Max.X) / float64(dimension.Width),
-			MinY: float64(face.Rectangle.Min.Y) / float64(dimension.Height),
-			MaxY: float64(face.Rectangle.Max.Y) / float64(dimension.Height),
+			MinX: float64(face.Rectangle.Min.X) / width,
+			MaxX: float64(face.Rectangle.Max.X) / width,
+			MinY: float64(face.Rectangle.Min.Y) / height,
+			MaxY: float64(face.Rectangle.Max.Y) / height,
 		},
 		Detection: detection,
 	}

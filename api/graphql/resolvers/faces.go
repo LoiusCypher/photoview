@@ -337,13 +337,13 @@ func (r *mutationResolver) MoveImageFaces(ctx context.Context, imageFaceIDs []in
 			userOwnedImageFaceIDs = append(userOwnedImageFaceIDs, imageFace.ID)
 		}
 
-		hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
-		if err != nil {
-			return err
-		}
-		if hasDuplicateMedia {
-			return errors.New("cannot move faces because the destination would contain duplicate images")
-		}
+		//hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
+		//if err != nil {
+			//return err
+		//}
+		//if hasDuplicateMedia {
+			//return errors.New("cannot move faces because the destination would contain duplicate images")
+		//}
 
 		var sourceFaceGroups []*models.FaceGroup
 		if err := tx.
