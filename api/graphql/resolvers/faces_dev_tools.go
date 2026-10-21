@@ -254,6 +254,7 @@ func (r *mutationResolver) ToggleConfirmFaceGroup(ctx context.Context, imageFace
 		Where("id = ?", imageFaceID).
 		Model(&models.ImageFace{}).
 		UpdateColumn("confirmed", gorm.Expr("NOT confirmed")).
+		UpdateColumn("subgroup", 0).
 		Error; err != nil {
 
 		return false, err

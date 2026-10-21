@@ -855,7 +855,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	}
 	log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
-		return dists[index[i]] > dists[index[j]]
+		return dists[index[i]] < dists[index[j]]
 	})
 	log.Println("index", index)
 

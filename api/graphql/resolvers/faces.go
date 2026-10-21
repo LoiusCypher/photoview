@@ -47,8 +47,8 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 			Joins("Media").
 			Where(faceGroupIDIsQuestion, obj.ID).
 			Where("album_id IN (?)", userAlbumIDs).
-			Order("subgroup ASC").
-			Order("confirmed DESC")
+			Order("confirmed DESC").
+			Order("subgroup DESC")
 
 		query = models.FormatSQL(query, nil, paginate)
 
@@ -68,8 +68,8 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 		Joins("Media").
 		Joins("JOIN user_albums ON user_albums.album_id = Media.album_id").Where("user_albums.user_id = ?", user.ID).
 		Where(faceGroupIDIsQuestion, obj.ID).
-		Order("subgroup ASC").
-		Order("confirmed DESC")
+		Order("confirmed DESC").
+		Order("subgroup DESC")
 
 	query2 = models.FormatSQL(query2, nil, paginate)
 
