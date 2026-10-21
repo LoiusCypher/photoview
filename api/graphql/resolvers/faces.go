@@ -337,13 +337,14 @@ func (r *mutationResolver) MoveImageFaces(ctx context.Context, imageFaceIDs []in
 			userOwnedImageFaceIDs = append(userOwnedImageFaceIDs, imageFace.ID)
 		}
 
-		//hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
-		//if err != nil {
-			//return err
-		//}
-		//if hasDuplicateMedia {
-			//return errors.New("cannot move faces because the destination would contain duplicate images")
-		//}
+		// This check is not correct implemented: media can contain person multiple times (collage, mirror..)
+		hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
+		if err != nil {
+			return err
+		}
+		if hasDuplicateMedia {
+			return errors.New("cannot move faces because the destination would contain duplicate images")
+		}
 
 		var sourceFaceGroups []*models.FaceGroup
 		if err := tx.

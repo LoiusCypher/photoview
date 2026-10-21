@@ -359,16 +359,6 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 				// oldFaces = oldFaces[:len(oldFaces)-1]
 				//log.Println("   Keep identical face: EuD", eu_dist)
 				// break
-			} else {
-			    if false {
-				o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
-				o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
-				d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
-				d_MaxX := (float64(nFace_.Rectangle.Max.X) / width) - oFace_.Rectangle.MaxX
-				d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
-				d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
-				log.Println("   DiffRectangle: EuD", eu_dist, " X", o_span_X, d_MinX, d_MaxX, " Y", o_span_Y, d_MinY, d_MaxY)
-			    }
 			}
 		}
 	}
@@ -396,12 +386,14 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					p_MinY := 100 * max(d_MinY,-d_MinY) / o_span_Y
 					p_MaxY := 100 * max(d_MaxY,-d_MaxY) / o_span_Y
 					log.Println("   DiffPercent: X ", p_MinX, p_MaxX, "  Y ", p_MinY, p_MaxY)
-					if p_MinX < 2 && p_MaxX < 2 && p_MinY < 2 && p_MaxY < 2 {
+					max_perc := float64(7.0)
+					if p_MinX < max_perc && p_MaxX < max_perc && p_MinY < max_perc && p_MaxY < max_perc {
 						log.Println("   Eucidean Dist: ", eu_dist)
 						log.Println("delete: ", oIdx, "  same space as:", nIdx)
 						if err := db.Where("id = ?", oFace_.ID).Delete(models.ImageFace{}).Error; err != nil {
 							return errors.Wrap(err, "error deleting face")
 						}
+						break // we deleted this unmatched one, go to next unmatched
 					}
 				}
 			}
@@ -425,15 +417,6 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					log.Println("  Old FaceID: ", oFace_.ID, "  FaceGroup: ", oFace_.FaceGroupID, oFace_.FaceGroup != nil)
 					log.Println("   Rectangle: ", oFace_.Rectangle.MinX, oFace_.Rectangle.MinY, oFace_.Rectangle.MaxX, oFace_.Rectangle.MaxY)
 					log.Println("   Detection: ", oFace_.Detection, "  Confirmed: ", oFace_.Confirmed, "  Subgroup: ", oFace_.Subgroup)
-					// if oFace_.FaceGroup == nil {
-						// log.Println("FAIL oIdx 1: ", oIdx, oldFaces[oIdx].FaceGroup == nil)
-						// var faceGroup models.FaceGroup
-						// if err := db.Model(&oFace_).Association("FaceGroup").Find(&faceGroup); err != nil {
-							// return err
-						// }
-						// oldFaces[oIdx].FaceGroup = &faceGroup
-						// oFace_.FaceGroup = &faceGroup
-					// }
 					if oFace_.FaceGroup.Label == nil {
 						log.Println("   Faceoup ID: ", oFace_.FaceGroup.ID, " Label: ", oFace_.FaceGroup.Label, " oIdx: ", oIdx)
 					} else {
