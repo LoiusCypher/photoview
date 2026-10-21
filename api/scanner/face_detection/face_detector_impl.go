@@ -818,7 +818,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	fd.ReloadFacesFromDatabase(db)
 
 	var grpConfirmedImageFaces []*models.ImageFace
-	if err := db.Find(&grpConfirmedImageFaces).Where("confirmed = TRUE").Where("face_group_id = ?",groupID).Error; err != nil {
+	if err := db.Where("confirmed = TRUE").Where("face_group_id = ?",groupID).Find(&grpConfirmedImageFaces).Error; err != nil {
 		return
 	}
 	log.Println("Confirmed", len(grpConfirmedImageFaces))
@@ -828,7 +828,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	}
 
 	var grpUnConfirmedImageFaces []*models.ImageFace
-	if err := db.Find(&grpUnConfirmedImageFaces).Where("confirmed = FALSE").Where("face_group_id = ?",groupID).Error; err != nil {
+	if err := db.Where("confirmed = FALSE").Where("face_group_id = ?",groupID).Find(&grpUnConfirmedImageFaces).Error; err != nil {
 		return
 	}
 	log.Println("UnConfirmed", len(grpUnConfirmedImageFaces))
@@ -854,6 +854,8 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		index[uIdx] = uIdx
 		dists[uIdx] = minDist
 		log.Printf("uIdx %d minDist %f\n", uIdx, minDist)
+
+		return
 	}
 	log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
