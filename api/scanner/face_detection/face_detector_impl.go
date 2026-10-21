@@ -811,16 +811,6 @@ func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex 
 	return false, groups, dists
 }
 
-type Slice struct {
-    sort.Interface
-    idx []int
-}
-
-func (s Slice) Swap(i, j int) {
-    s.Interface.Swap(i, j)
-    s.idx[i], s.idx[j] = s.idx[j], s.idx[i]
-}
-
 func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("splitFaceGroupNew groupID %d\n", groupID)
@@ -828,7 +818,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	fd.ReloadFacesFromDatabase(db)
 
 	var grpConfirmedImageFaces []*models.ImageFace
-	if err := db.Find(&grpConfirmedImageFaces).Where("confirmed = TRUE").Where("FaceGroupID = ?",groupID).Error; err != nil {
+	if err := db.Find(&grpConfirmedImageFaces).Where("confirmed = TRUE").Where("face_group_id = ?",groupID).Error; err != nil {
 		return
 	}
 	log.Println("Confirmed", len(grpConfirmedImageFaces))
@@ -838,7 +828,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	}
 
 	var grpUnConfirmedImageFaces []*models.ImageFace
-	if err := db.Find(&grpUnConfirmedImageFaces).Where("confirmed = FALSE").Where("FaceGroupID = ?",groupID).Error; err != nil {
+	if err := db.Find(&grpUnConfirmedImageFaces).Where("confirmed = FALSE").Where("face_group_id = ?",groupID).Error; err != nil {
 		return
 	}
 	log.Println("UnConfirmed", len(grpUnConfirmedImageFaces))
@@ -846,7 +836,8 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	for i, imgFace := range grpUnConfirmedImageFaces {
 		unConfDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
-		return
+
+	return
 
 	index := make([]int, len(grpUnConfirmedImageFaces))
 	dists := make([]float64, len(grpUnConfirmedImageFaces))
