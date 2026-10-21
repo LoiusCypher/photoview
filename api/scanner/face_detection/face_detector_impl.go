@@ -851,7 +851,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		}
 		index[uIdx] = uIdx
 		dists[uIdx] = minDist
-		log.Printf("uIdx %d minDist %f\n", uIdx, minDist)
+		log.Printf("uIdx %3d ID %6d minDist %f\n", uIdx, grpUnConfirmedImageFaces[uIdx].ID, minDist)
 	}
 	log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
