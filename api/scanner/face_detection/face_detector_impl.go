@@ -380,14 +380,14 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 					d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
 					d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
-					// log.Println("   DiffRectangle: Y Span ", o_span_Y, " Diff ", d_MinY, d_MaxY)
+					 log.Println("   DiffRectangle: Y Span ", o_span_Y, " Diff ", d_MinY, d_MaxY)
 					p_MinX := 100 * max(d_MinX,-d_MinX) / o_span_X
 					p_MaxX := 100 * max(d_MaxX,-d_MaxX) / o_span_X
 					p_MinY := 100 * max(d_MinY,-d_MinY) / o_span_Y
 					p_MaxY := 100 * max(d_MaxY,-d_MaxY) / o_span_Y
 					log.Println("   DiffPercent: X ", p_MinX, p_MaxX, "  Y ", p_MinY, p_MaxY)
-					p_MovX :=  100 * max(d_MaxX-d_MinX,-d_MaxX+d_MinX) / o_span_X
-					p_MovY :=  100 * max(d_MaxY-d_MinY,-d_MaxY+d_MinY) / o_span_Y
+					p_MovX :=  100 * max(d_MaxX+d_MinX,-d_MaxX-d_MinX) / o_span_X / 2.0
+					p_MovY :=  100 * max(d_MaxY+d_MinY,-d_MaxY-d_MinY) / o_span_Y / 2.0
 					log.Println("   MovePercent: X ", p_MovX, "  Y ", p_MovY,)
 					max_perc_diff := float64(40.0)
 					max_perc_move := float64(10.0)
