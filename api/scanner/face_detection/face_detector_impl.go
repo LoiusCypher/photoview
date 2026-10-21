@@ -870,8 +870,8 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	log.Println("index", index)
 
 	for uIdx := range len(grpUnConfirmedImageFaces) {
-		if err := setImageFaceSubGroup(db, grpUnConfImageFace[uIdx].ID, index[uIdx]); err != nil {
-			log.Println("Saved Subgroup", index[uIdx], "succeeded for FaceImageId", grpUnConfImageFace[uIdx].ID)
+		if err := setImageFaceSubGroup(db, grpUnConfirmedImageFaces[uIdx].ID, index[uIdx]); err != nil {
+			log.Println("Saved Subgroup", index[uIdx], "succeeded for FaceImageId", grpUnConfirmedImageFaces[uIdx].ID)
 		}
 	}
 }
