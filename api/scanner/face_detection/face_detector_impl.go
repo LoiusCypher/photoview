@@ -384,18 +384,18 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					eu_dist := euclidean_distance( nFace_.Descriptor, face.Descriptor(oFace_.Descriptor))
 					log.Println("   Eucidean Dist: ", eu_dist)
 					o_span_X := oFace_.Rectangle.MaxX - oFace_.Rectangle.MinX
-					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 					d_MinX := (float64(nFace_.Rectangle.Min.X) / width) - oFace_.Rectangle.MinX
 					d_MaxX := (float64(nFace_.Rectangle.Max.X) / width) - oFace_.Rectangle.MaxX
-					log.Println("   DiffRectangle: X Span ", o_span_X, " Diff ". d_MinX, d_MaxX)
+					log.Println("   DiffRectangle: X Span ", o_span_X, " Diff ", d_MinX, d_MaxX)
+					o_span_Y := oFace_.Rectangle.MaxY - oFace_.Rectangle.MinY
 					d_MinY := (float64(nFace_.Rectangle.Min.Y) / height) - oFace_.Rectangle.MinY
 					d_MaxY := (float64(nFace_.Rectangle.Max.Y) / height) - oFace_.Rectangle.MaxY
-					log.Println("   DiffRectangle: Y Span ", o_span_Y, " Diff ". d_MinY, d_MaxY)
-					p_MinX := abs( 100 * d_MinX / o_span_X)
-					p_MaxX := abs( 100 * d_MaxX / o_span_X)
+					log.Println("   DiffRectangle: Y Span ", o_span_Y, " Diff ", d_MinY, d_MaxY)
+					p_MinX := 100 * max(d_MinX,-d_MinX) / o_span_X
+					p_MaxX := 100 * max(d_MaxX,-d_MaxX) / o_span_X
 					log.Println("   DiffPercent: X ", p_MinX, p_MaxX)
-					p_MinY := abs( 100 * d_MinY / o_span_Y)
-					p_MaxY := abs( 100 * d_MaxY / o_span_Y)
+					p_MinY := 100 * max(d_MinY,-d_MinY) / o_span_Y
+					p_MaxY := 100 * max(d_MaxY,-d_MaxY) / o_span_Y
 					log.Println("   DiffPercent: Y ", p_MinY, p_MaxY)
 				}
 			}
