@@ -846,6 +846,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	for i, imgFace := range grpUnConfirmedImageFaces {
 		unConfDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
+		return
 
 	index := make([]int, len(grpUnConfirmedImageFaces))
 	dists := make([]float64, len(grpUnConfirmedImageFaces))
