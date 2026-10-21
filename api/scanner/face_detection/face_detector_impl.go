@@ -859,6 +859,9 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	})
 	log.Println("index", index)
 
+	for uIdx := range len(grpUnConfirmedImageFaces) {
+		log.Println(dists[index[uIdx]], "succeeded for FaceImageId", grpUnConfirmedImageFaces[index[uIdx]].ID)
+	}
 	return
 
 	for uIdx := range len(grpUnConfirmedImageFaces) {
