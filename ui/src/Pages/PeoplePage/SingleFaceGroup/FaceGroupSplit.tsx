@@ -18,7 +18,7 @@ const SPLIT_FACE_GROUP_MUTATION = gql`
 
 const ORDER_FACE_GROUP_MUTATION = gql`
   mutation orderFaceGroupAction( $groupId: ID!) {
-    orderFaceGroup( groupId: $groupId) {
+    orderFacesOfFaceGroup( groupId: $groupId) {
       success
       message
     }
