@@ -236,10 +236,22 @@ func (r *mutationResolver) SetFaceClassifyThreshold(ctx context.Context, thresho
 
 // SplitFaceGroup
 func (r *mutationResolver) SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error) {
-	log.Printf("SplitFaceGroup: %d\n", groupID)
+	//log.Printf("SplitFaceGroup: %d\n", groupID)
 	face_detection.GlobalFaceDetector.SplitFaceGroup(r.DB(ctx), int32(groupID))
 
 	startMessage := "Split face group Done"
+	return &models.DevCmdResult{
+		Success: true,
+		Message: &startMessage,
+	}, nil
+}
+
+// OrderFacesOfFaceGroup
+func (r *mutationResolver) OrderFacesOfFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error) {
+	//log.Printf("OrderFacesOfFaceGroup: %d\n", groupID)
+	face_detection.GlobalFaceDetector.OrderFacesOfFaceGroup(r.DB(ctx), int32(groupID))
+
+	startMessage := "Ordering faces of a group Done"
 	return &models.DevCmdResult{
 		Success: true,
 		Message: &startMessage,

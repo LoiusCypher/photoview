@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../primitives/form/Input'
 import classNames from 'classnames'
 import { splitFaceGroupAction, splitFaceGroupVariables } from './__generated__/splitFaceGroupAction'
+import { orderFaceGroupAction, orderFaceGroupVariables } from './__generated__/orderFaceGroupAction'
 
 const SPLIT_FACE_GROUP_MUTATION = gql`
   mutation splitFaceGroupAction( $groupId: ID!) {
@@ -15,8 +16,38 @@ const SPLIT_FACE_GROUP_MUTATION = gql`
   }
 `
 
+const ORDER_FACE_GROUP_MUTATION = gql`
+  mutation orderFaceGroupAction( $groupId: ID!) {
+    orderFaceGroup( groupId: $groupId) {
+      success
+      message
+    }
+  }
+`
+
 export type FaceGroupSplitButtonProps = {
   groupID: int,
+}
+
+export type FaceGroupOrderButtonProps = {
+  groupID: int,
+}
+
+const FaceGroupOrderButton = ({
+  groupID,
+}: FaceGroupOrderButtonProps) => {
+  const { t } = useTranslation()
+  const [startFaceGroupOrder, { calledOrder }] = useMutation<orderFaceGroupAction,orderFaceGroupVariables>(ORDER_FACE_GROUP_MUTATION)
+
+  return (
+    <Button
+      className="mb-1"
+      onClick={() => { startFaceGroupOrder({variables: {groupId: groupID}});}}
+      disabled={calledSplit}
+    >
+      {t('face_group.order', 'Order face group')}
+    </Button>
+  )
 }
 
 const FaceGroupSplitButton = ({
@@ -36,8 +67,26 @@ const FaceGroupSplitButton = ({
   )
 }
 
+type FaceGroupOrderProps = {
+  groupID: int,
+}
+
 type FaceGroupSplitProps = {
   groupID: int,
+}
+
+const FaceGroupOrder = ({
+  groupID,
+}: FaceGroupOrderProps) => {
+  return (
+    <div className="flex items-end gap-4 flex-wrap mb-4">
+      {authToken() && (
+        <FaceGroupOrderButton
+          groupID={groupID}
+        />
+      )}
+    </div>
+  )
 }
 
 const FaceGroupSplit = ({
@@ -54,4 +103,4 @@ const FaceGroupSplit = ({
   )
 }
 
-export default FaceGroupSplit
+export default FaceGroupSplit, FaceGroupOrder

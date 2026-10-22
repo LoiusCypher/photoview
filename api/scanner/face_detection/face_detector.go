@@ -15,6 +15,7 @@ type FaceDetector interface {
 	RecognizeUnlabeledFaces(db *gorm.DB, user *models.User) ([]*models.ImageFace, error)
 	ReloadFacesFromDatabase(db *gorm.DB) error
 	SplitFaceGroup(db *gorm.DB, groupID int32)
+	OrderFacesOfFaceGroup(db *gorm.DB, groupID int32)
 }
 
 var GlobalFaceDetector FaceDetector = nil
