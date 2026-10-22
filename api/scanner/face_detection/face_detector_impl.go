@@ -819,11 +819,16 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	var faceGrp models.FaceGroup
 	if err := db.Select(&faceGrp).Where("id = ?",groupID).Error; err != nil {
+		log.Println(" SplitFaceGroup err", err)
 		return
 	}
 
 	if faceGrp.Label != nil {
+		log.Println(" SplitFaceGroup ", faceGrp.Label)
 		fd.reOrderFaceGroupUnconfirmed(db, groupID)
+	} else {
+		log.Println(" SplitFaceGroup Label is nii")
+		fd.moveToClosestFaceGroup(db, groupID)
 	}
 }
 
