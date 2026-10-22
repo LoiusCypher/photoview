@@ -19,7 +19,8 @@ import MergeFaceGroupsModal, {
 } from './MergeFaceGroupsModal'
 import MoveImageFacesModal from './MoveImageFacesModal'
 import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
-import FaceGroupSplit, FaceGroupOrder from './FaceGroupSplit'
+import FaceGroupSplit from './FaceGroupSplit'
+import { FaceGroupOrder } from './FaceGroupSplit'
 
 type FaceGroupTitleProps = {
   faceGroup?: singleFaceGroup_faceGroup
