@@ -99,6 +99,11 @@ const FaceGroupSplit = ({
           groupID={groupID}
         />
       )}
+      {authToken() && (
+        <FaceGroupOrderButton
+          groupID={groupID}
+        />
+      )}
     </div>
   )
 }
