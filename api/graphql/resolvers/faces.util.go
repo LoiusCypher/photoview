@@ -120,10 +120,12 @@ func doesFaceGroupContainImages(db *gorm.DB, faceGroupID int, imageFaceIDs []int
 		Table("image_faces AS candidate").
 		Select("candidate.media_id").
 		Where(
-			"(candidate.face_group_id = ? AND candidate.id NOT IN ?) OR candidate.id IN ?",
+			//"(candidate.face_group_id = ? AND candidate.id NOT IN ?) OR candidate.id IN ?",
+			"(candidate.face_group_id = ? AND candidate.id NOT IN ?) OR (candidate.face_group_id != ? AND candidate.id IN ?)",
 			faceGroupID,
 			imageFaceIDs,
-			imageFaceIDs,
+			//imageFaceIDs,
+			faceGroupID, imageFaceIDs,
 		).
 		Group("candidate.media_id").
 		Having("COUNT(*) > 1")
