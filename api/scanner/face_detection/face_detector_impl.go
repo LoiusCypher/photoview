@@ -818,7 +818,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	fd.ReloadFacesFromDatabase(db)
 
 	var faceGrp models.FaceGroup
-	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupId).First(&faceGroup).Error; err != nil {
+	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupID).First(&faceGrp).Error; err != nil {
 		log.Println(" SplitFaceGroup err", err)
 		return
 	}
