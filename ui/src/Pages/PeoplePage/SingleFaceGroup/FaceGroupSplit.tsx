@@ -43,7 +43,7 @@ const FaceGroupOrderButton = ({
     <Button
       className="mb-1"
       onClick={() => { startFaceGroupOrder({variables: {groupId: groupID}});}}
-      disabled={calledSplit}
+      disabled={calledOrder}
     >
       {t('face_group.order', 'Order face group')}
     </Button>
