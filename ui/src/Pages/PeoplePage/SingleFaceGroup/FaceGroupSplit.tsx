@@ -103,4 +103,5 @@ const FaceGroupSplit = ({
   )
 }
 
-export default FaceGroupSplit, FaceGroupOrder
+export default FaceGroupSplit
+export default FaceGroupOrder
