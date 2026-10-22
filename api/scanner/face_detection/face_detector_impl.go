@@ -813,12 +813,12 @@ func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex 
 
 func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
-	log.Printf("splitFaceGroupNew groupID %d\n", groupID)
+	log.Printf("SplitFaceGroup groupID %d\n", groupID)
 
 	fd.ReloadFacesFromDatabase(db)
 
 	var faceGrp models.FaceGroup
-	if err := db.Select(&faceGrp).Where("id = ?",groupID).Error; err != nil {
+	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupId).First(&faceGroup).Error; err != nil {
 		log.Println(" SplitFaceGroup err", err)
 		return
 	}
@@ -834,8 +834,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32) {
 
-	log.Printf("splitFaceGroupNew groupID %d\n", groupID)
-
+	log.Printf("moveToClosestFaceGroup groupID %d\n", groupID)
 
 	var grpImageFaces []*models.ImageFace
 	if err := db.Where("face_group_id = ?",groupID).Find(&grpImageFaces).Error; err != nil {
@@ -897,7 +896,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32) {
 
 func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) {
 
-	log.Printf("splitFaceGroupNew groupID %d\n", groupID)
+	log.Printf("reOrderFaceGroupUnconfirmed groupID %d\n", groupID)
 
 	var grpConfirmedImageFaces []*models.ImageFace
 	if err := db.Where("confirmed = TRUE").Where("face_group_id = ?",groupID).Find(&grpConfirmedImageFaces).Error; err != nil {
