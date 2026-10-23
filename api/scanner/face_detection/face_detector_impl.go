@@ -95,6 +95,14 @@ func setImageFaceSubGroup(db *gorm.DB, imageFaceID int, subGroup int) (err error
 	return nil
 }
 
+func setImageFaceGroup(db *gorm.DB, imageFaceID int, faceGroup int) (err error) {
+
+	if err := db.Where("id = ?", imageFaceID).Model(&models.ImageFace{}).UpdateColumn("face_group_id", faceGroup).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // ReloadFacesFromDatabase replaces the in-memory face descriptors with the ones in the database
 func (fd *faceDetector) ReloadFacesFromDatabase(db *gorm.DB) error {
 	faceDescriptors, faceGroupIDs, imageFaceIDs, err := getSamplesFromDatabase(db)
@@ -828,7 +836,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		fd.searchFacesForFaceGroup(db, groupID)
 	} else {
 		log.Println(" SplitFaceGroup Label is nii")
-		fd.moveToClosestFaceGroup(db, groupID)
+		fd.moveToClosestFaceGroup(db, groupID, False)
 	}
 }
 
@@ -849,7 +857,7 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 		fd.reOrderFaceGroupUnconfirmed(db, groupID)
 	} else {
 		log.Println(" SplitFaceGroup Label is nii")
-		fd.moveToClosestFaceGroup(db, groupID)
+		fd.moveToClosestFaceGroup(db, groupID, True)
 	}
 }
 
@@ -923,7 +931,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	// }
 }
 
-func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32) {
+func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt bool) {
 
 	log.Printf("moveToClosestFaceGroup groupID %d\n", groupID)
 
@@ -973,17 +981,22 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32) {
 	log.Println("index", index)
 
 	for gIdx := range len(grpImageFaces) {
-		if otherImageFaces[distIdx[index[gIdx]]].FaceGroup == nil {
+		otherImg := otherImageFaces[distIdx[index[gIdx]]]
+		if otherImg.FaceGroup == nil {
 			var faceGroup models.FaceGroup
-			if err := db.Model(&otherImageFaces[distIdx[index[gIdx]]]).Association("FaceGroup").Find(&faceGroup); err != nil {
+			if err := db.Model(&otherImg).Association("FaceGroup").Find(&faceGroup); err != nil {
 				return
 			}
 			otherImageFaces[distIdx[index[gIdx]]].FaceGroup = &faceGroup
+			otherImg = otherImageFaces[distIdx[index[gIdx]]]
 		}
-		if otherImageFaces[distIdx[index[gIdx]]].FaceGroup.Label == nil {
-			log.Println("FaceImageId", otherImageFaces[distIdx[index[gIdx]]].ID, "FaceGroupId", otherImageFaces[distIdx[index[gIdx]]].FaceGroupID, "dist", dists[index[gIdx]])
+		if otherImg.FaceGroup.Label == nil {
+			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]])
 		} else {
-			log.Println("FaceImageId", otherImageFaces[distIdx[index[gIdx]]].ID, "FaceGroupId", otherImageFaces[distIdx[index[gIdx]]].FaceGroupID, "dist", dists[index[gIdx]], *otherImageFaces[distIdx[index[gIdx]]].FaceGroup.Label)
+			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]], *otherImg.FaceGroup.Label)
+		}
+		if doIt && dists[index[gIdx]] < 0.200 {
+			setImageFaceGroup(db, grpImageFaces[gIdx].ID, FaceGroupID) (err error) {
 		}
 	}
 }

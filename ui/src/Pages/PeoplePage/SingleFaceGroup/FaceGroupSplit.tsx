@@ -45,7 +45,7 @@ const FaceGroupOrderButton = ({
       onClick={() => { startFaceGroupOrder({variables: {groupId: groupID}});}}
       disabled={calledOrder}
     >
-      {t('face_group.order', 'ReOrder / MoveTo face group')}
+      {t('face_group.order', 'ReOrder / Exec MoveTo face group')}
     </Button>
   )
 }
@@ -62,7 +62,7 @@ const FaceGroupSplitButton = ({
       onClick={() => { startFaceGroupSplit({variables: {groupId: groupID}});}}
       disabled={calledSplit}
     >
-      {t('face_group.spllit', 'Search others / MoveTo face group')}
+      {t('face_group.spllit', 'Search others / Check MoveTo face group')}
     </Button>
   )
 }
