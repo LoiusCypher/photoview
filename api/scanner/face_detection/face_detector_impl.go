@@ -836,7 +836,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		fd.searchFacesForFaceGroup(db, groupID)
 	} else {
 		log.Println(" SplitFaceGroup Label is nii")
-		fd.moveToClosestFaceGroup(db, groupID, False)
+		fd.moveToClosestFaceGroup(db, groupID, false)
 	}
 }
 
@@ -857,7 +857,7 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 		fd.reOrderFaceGroupUnconfirmed(db, groupID)
 	} else {
 		log.Println(" SplitFaceGroup Label is nii")
-		fd.moveToClosestFaceGroup(db, groupID, True)
+		fd.moveToClosestFaceGroup(db, groupID, true)
 	}
 }
 
@@ -996,7 +996,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]], *otherImg.FaceGroup.Label)
 		}
 		if doIt && dists[index[gIdx]] < 0.200 {
-			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, FaceGroupID); err != nil {
+			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, otherImg.FaceGroupID); err != nil {
 				log.Println(" moveToClosestFaceGroup err", err)
 				return
 			}
