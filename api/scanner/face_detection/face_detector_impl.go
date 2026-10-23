@@ -950,7 +950,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 			return
 		}
 		var media models.Media
-		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[index[uIdx]].ID).First(&media).Error; err != nil {
+		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[index[uIdx]].MediaID).First(&media).Error; err != nil {
 			log.Println(" searchFacesForFaceGroup err", err)
 			return
 		}
@@ -1012,6 +1012,11 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		index[gIdx] = gIdx
 		dists[gIdx] = minDist
 		distIdx[gIdx] = minDistIdx
+
+		minDist, minDistIdx = calcImgMinDistGrp( grpImageFace, otherDesc)
+		if minDist != dists[gIdx] || minDistIdx != distIdx[gIdx] {
+			log.Printf("gIdx %3d ID %6d minDist %f / %f\n", gIdx, grpImageFaces[gIdx].ID, minDist, dists[gIdx], minDistIdx, distIdx[gIdx])
+		}
 	}
 	log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
@@ -1082,6 +1087,11 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 		index[uIdx] = uIdx
 		dists[uIdx] = minDist
 		log.Printf("uIdx %3d ID %6d minDist %f\n", uIdx, grpUnConfirmedImageFaces[uIdx].ID, minDist)
+
+		minDist, _ = calcImgMinDistGrp( unConfImageFace, confDesc)
+		if minDist != dists[uIdx] {
+			log.Printf("gIdx %3d ID %6d minDist %f / %f\n", uIdx, grpUnConfirmedImageFaces[uIdx].ID, minDist, dists[uIdx])
+		}
 	}
 	log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
