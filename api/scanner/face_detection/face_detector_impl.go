@@ -996,7 +996,10 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]], *otherImg.FaceGroup.Label)
 		}
 		if doIt && dists[index[gIdx]] < 0.200 {
-			setImageFaceGroup(db, grpImageFaces[gIdx].ID, FaceGroupID) (err error) {
+			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, FaceGroupID); err != nil {
+				log.Println(" moveToClosestFaceGroup err", err)
+				return
+			}
 		}
 	}
 }
