@@ -967,12 +967,12 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		}
 		oldConfDist, _ := calcImgMinDistGrp( otherDesc[index[uIdx]], oldConfDesc)
 		log.Println("Img", grpOtherImageFaces[index[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
-		if dists[index[uIdx]] < 0.200 {
+		if (dists[index[uIdx]] < 0.250) && (dists[index[uIdx]] < (0.75 * oldConfDist)) {
 			if err := setImageFaceGroup(db, grpOtherImageFaces[index[uIdx]].ID, int(groupID)); err != nil {
 				log.Println(" searchFacesForFaceGroup err", err)
 				return
 			}
-			log.Println(" searchFacesForFaceGroup moved img")
+			log.Println(" Moved Img to current GROUP")
 		}
 	}
 }
