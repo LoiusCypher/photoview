@@ -45,7 +45,7 @@ const FaceGroupOrderButton = ({
       onClick={() => { startFaceGroupOrder({variables: {groupId: groupID}});}}
       disabled={calledOrder}
     >
-      {t('face_group.order', 'Order face group')}
+      {t('face_group.order', 'ReOrder / MoveTo face group')}
     </Button>
   )
 }
@@ -62,7 +62,7 @@ const FaceGroupSplitButton = ({
       onClick={() => { startFaceGroupSplit({variables: {groupId: groupID}});}}
       disabled={calledSplit}
     >
-      {t('face_group.spllit', 'Split face group')}
+      {t('face_group.spllit', 'Search others / MoveTo face group')}
     </Button>
   )
 }
@@ -75,21 +75,7 @@ type FaceGroupSplitProps = {
   groupID: int,
 }
 
-const FaceGroupOrder = ({
-  groupID,
-}: FaceGroupOrderProps) => {
-  return (
-    <div className="flex items-end gap-4 flex-wrap mb-4">
-      {authToken() && (
-        <FaceGroupOrderButton
-          groupID={groupID}
-        />
-      )}
-    </div>
-  )
-}
-
-const FaceGroupSplit = ({
+const FaceGroupRow = ({
   groupID,
 }: FaceGroupSplitProps) => {
   return (
@@ -108,5 +94,4 @@ const FaceGroupSplit = ({
   )
 }
 
-// export default FaceGroupSplit
-export { FaceGroupSplit, FaceGroupOrder }
+export default FaceGroupRow
