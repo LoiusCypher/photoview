@@ -861,6 +861,37 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 	}
 }
 
+func loadFaceGroupWithDescriptor(db *gorm.DB, groupSel bool, groupID int32, confirmed bool) ( []*models.ImageFace, []face.Descriptor) {
+	var grpOtherImageFaces []*models.ImageFace
+	grpCond := "face_group_id = ?"
+	if !groupSel {
+		grpCond = "face_group_id != ?"
+	}
+	if err := db.Where("confirmed = ?", confirmed).Where(grpCond,groupID).Find(&grpOtherImageFaces).Error; err != nil {
+		return nil, nil
+	}
+	log.Println("Loaded Faces", len(grpOtherImageFaces))
+	otherDesc := make([]face.Descriptor, len(grpOtherImageFaces))
+	for i, imgFace := range grpOtherImageFaces {
+		otherDesc[i] = face.Descriptor(imgFace.Descriptor)
+	}
+	return grpOtherImageFaces, otherDesc
+}
+
+func calcImgMinDistGrp( imgDesc face.Descriptor, groupDesc []face.Descriptor) (float64, int) {
+	var minDist float64
+	var minDistIdx int
+	for cIdx, confImageFace := range groupDesc {
+		curDist := euclidean_distance( imgDesc, confImageFace)
+		if (cIdx == 0) || (curDist < minDist) {
+			minDist = curDist
+			minDistIdx = cIdx
+		}
+		// log.Printf("cIdx %d minDist %d %f\n", cIdx, minDistIdx, minDist)
+	}
+	return minDist, minDistIdx
+}
+
 func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("searchFacesForFaceGroup groupID %d\n", groupID)
@@ -874,9 +905,10 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	for i, imgFace := range grpConfirmedImageFaces {
 		confDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
+	grpConfirmedImageFaces, confDesc = loadFaceGroupWithDescriptor(db, true, groupID, true)
 
 	var grpOtherImageFaces []*models.ImageFace
-	if err := db.Where("face_group_id != ?",groupID).Find(&grpOtherImageFaces).Error; err != nil {
+	if err := db.Where("confirmed = FALSE").Where("face_group_id != ?",groupID).Find(&grpOtherImageFaces).Error; err != nil {
 		return
 	}
 	log.Println("Other Group", len(grpOtherImageFaces))
@@ -884,6 +916,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	for i, imgFace := range grpOtherImageFaces {
 		otherDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
+	grpOtherImageFaces, otherDesc = loadFaceGroupWithDescriptor(db, false, groupID, false)
 
 	index := make([]int, len(grpOtherImageFaces))
 	dists := make([]float64, len(grpOtherImageFaces))
@@ -899,7 +932,10 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		}
 		index[uIdx] = uIdx
 		dists[uIdx] = minDist
-		// log.Printf("uIdx %3d ID %6d minDist %f\n", uIdx, grpOtherImageFaces[uIdx].ID, minDist)
+		minDist, _ = calcImgMinDistGrp( otherImageFace, confDesc)
+		if minDist != dists[uIdx] {
+			log.Printf("uIdx %3d ID %6d minDist %f / %f\n", uIdx, grpOtherImageFaces[uIdx].ID, minDist, dists[uIdx])
+		}
 	}
 	// log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
@@ -913,11 +949,18 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 			log.Println(" searchFacesForFaceGroup err", err)
 			return
 		}
+		var media models.Media
+		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[index[uIdx]].ID).First(&media).Error; err != nil {
+			log.Println(" searchFacesForFaceGroup err", err)
+			return
+		}
 		label := "Label is nil"
 		if faceGrp.Label != nil {
 			label = *faceGrp.Label
 		}
-		log.Println("ImgId", grpOtherImageFaces[index[uIdx]].ID, grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]])
+		_, oldConfDesc := loadFaceGroupWithDescriptor(db, true, int32(faceGrp.ID), true)
+		oldConfDist, _ := calcImgMinDistGrp( confDesc[index[uIdx]], oldConfDesc)
+		log.Println("Img", grpOtherImageFaces[index[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
 		if dists[index[uIdx]] < 0.200 {
 			if err := setImageFaceGroup(db, grpOtherImageFaces[index[uIdx]].ID, int(groupID)); err != nil {
 				log.Println(" searchFacesForFaceGroup err", err)
