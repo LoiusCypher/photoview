@@ -919,7 +919,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		}
 		log.Println("ImgId", grpOtherImageFaces[index[uIdx]].ID, grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]])
 		if dists[index[uIdx]] < 0.200 {
-			if err := setImageFaceGroup(db, grpOtherImageFaces[index[uIdx]].ID, groupID); err != nil {
+			if err := setImageFaceGroup(db, grpOtherImageFaces[index[uIdx]].ID, int(groupID)); err != nil {
 				log.Println(" searchFacesForFaceGroup err", err)
 				return
 			}
