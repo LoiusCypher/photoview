@@ -62,7 +62,7 @@ const FaceGroupSplitButton = ({
       onClick={() => { startFaceGroupSplit({variables: {groupId: groupID}});}}
       disabled={calledSplit}
     >
-      {t('face_group.spllit', 'Search others / Check MoveTo face group')}
+      {t('face_group.split', 'Search others / Check MoveTo face group')}
     </Button>
   )
 }
