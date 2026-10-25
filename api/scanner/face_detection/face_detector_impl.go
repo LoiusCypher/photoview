@@ -1011,7 +1011,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
 		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
 		if odists[uIdx] != dists[uIdx] {
-			log.Println("Check", odists[uIdx] == oIdx, index[uIdx], oIdx)
+			log.Println("Check", odists[uIdx] == odists[uIdx], odists[uIdx], odists[uIdx])
 		}
 	}
 
