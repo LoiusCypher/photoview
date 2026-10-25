@@ -1004,12 +1004,12 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	// dists := make([]float64, len(noGrpUnConfIndexes))
 	for uIdx, oIdx := range noGrpUnConfIndexes {
 		// index[uIdx] = oIdx
-		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oId)
+		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
 		if index[uIdx] != oIdx {
-			log.Println("Check", index[uIdx] == oIdx, index[uIdx], oId)
+			log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
 		}
 		// dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
-		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oId)
+		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
 	}
 
 	// log.Println("dists", dists)
