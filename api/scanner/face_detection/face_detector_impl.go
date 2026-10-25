@@ -982,8 +982,8 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	}
 
 	for i, idx := range grpConfIndexes {
-		if fd.imageFaceIDs[idx] != int32(grpConfirmedImageFaces[i].ID) {
-			log.Println("Check", fd.faceGroupIDs[idx] == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
+		if int32(fd.imageFaceIDs[idx]) != int32(grpConfirmedImageFaces[i].ID) {
+			log.Println("Check", int32(fd.faceGroupIDs[idx]) == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
 		}
 	}
 
