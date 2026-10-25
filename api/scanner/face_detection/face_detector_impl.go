@@ -943,7 +943,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	log.Println("Confirmed", len(grpConfIndexes) == len(grpConfirmedImageFaces), len(grpConfirmedImageFaces))
 
 	grpOtherImageFaces, otherDesc := loadFaceGroupWithDescriptor(db, false, groupID, false)
-	log.Println("Other Group", len(noGrpInConfIndexes) == len(grpOtherImageFaces), len(grpOtherImageFaces))
+	log.Println("Other Group", len(noGrpUnConfIndexes) == len(grpOtherImageFaces), len(grpOtherImageFaces))
 
 	for i, idx := range grpConfIndexes {
 		log.Println("Check", fd.faceGroupIDs[idx] == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
@@ -953,19 +953,19 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
 	}
 
-	// index := make([]int, len(grpOtherImageFaces))
-	// dists := make([]float64, len(grpOtherImageFaces))
-	// for uIdx, otherImageFace := range otherDesc {
-		// index[uIdx] = uIdx
-		// dists[uIdx], _ = calcImgMinDistGrp( otherImageFace, confDesc)
-	// }
-
 	index := make([]int, len(grpOtherImageFaces))
 	dists := make([]float64, len(grpOtherImageFaces))
 	for uIdx, otherImageFace := range otherDesc {
 		index[uIdx] = uIdx
 		dists[uIdx], _ = calcImgMinDistGrp( otherImageFace, confDesc)
 	}
+	// index := make([]int, len(noGrpUnConfIndexes))
+	// dists := make([]float64, len(noGrpUnConfIndexes))
+	// for uIdx, oIdx := range noGrpUnConfIndexes {
+		// index[uIdx] = oIdx
+		// dists[uIdx], _ = calcImgMinDistGrp( fd.faceGroupIDs[oIdx], confDesc)
+	// }
+
 	// log.Println("dists", dists)
 	sort.Slice( index, func( i, j int) bool {
 		return dists[index[i]] < dists[index[j]]
