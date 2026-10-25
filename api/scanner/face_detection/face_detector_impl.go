@@ -889,16 +889,17 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []int, confirmed bool) ( []int) {
 	confIndexes := make([]int, 0)
 	for _, idx := range groupIdIndexes {
-		var conf bool
+		var conf []bool
 		//if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
-		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Pluck("confirmed",&conf).Error; err != nil {
+		//if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Pluck("confirmed",&conf).Error; err != nil {
+		if err := db.Model(models.ImageFace{}).Where("id = ?", fd.imageFaceIDs[idx]).Pluck("confirmed",&conf).Error; err != nil {
 			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
 		if confirmed {
-			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf, "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
+			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf[0], "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
 		}
-		if conf == confirmed {
+		if conf[0] == confirmed {
 			confIndexes = append( confIndexes, idx)
 		}
 	}
