@@ -877,6 +877,7 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 	for i, id := range fd.faceGroupIDs {
 		if id == groupID {
 			grpIdxes = append( grpIdxes, i)
+			log.Println(" findFaceGroupIndices", i, id, fd.imageFaceIDs[i], grpIdxes)
 		} else {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
@@ -890,8 +891,10 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 	for idx := range groupIdIndexes {
 		var conf bool
 		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
+			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
+		log.Println(" ffindConfirmedFaceIndices", idx, conf)
 		if conf == confirmed {
 			confIndexes = append( confIndexes, idx)
 		}
