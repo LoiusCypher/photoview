@@ -872,18 +872,18 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 }
 
 func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
-	grpIdxes := make([]int, 0)
+	grpIndexes := make([]int, 0)
 	noGrpIdxes := make([]int, 0)
 	for i, id := range fd.faceGroupIDs {
 		if id == groupID {
-			grpIdxes = append( grpIdxes, i)
-			log.Println(" findFaceGroupIndices", i, id, fd.imageFaceIDs[i], grpIdxes)
+			grpIndexes = append( grpIndexes, i)
+			log.Println(" findFaceGroupIndices", i, id, fd.imageFaceIDs[i], grpIndexes)
 		} else {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
 	}
-	log.Println(" findFaceGroupIndices", grpIdxes, len(noGrpIdxes))
-	return grpIdxes, noGrpIdxes
+	log.Println(" findFaceGroupIndices", grpnIndexes, len(noGrpIdxes))
+	return grpIndexes, noGrpIdxes
 }
 
 func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []int, confirmed bool) ( []int) {
@@ -894,8 +894,10 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
-		log.Println(" ffindConfirmedFaceIndices", idx, conf)
 		if conf == confirmed {
+			if confirmed {
+				log.Println(" findConfirmedFaceIndices", idx, confirmed, conf)
+			}
 			confIndexes = append( confIndexes, idx)
 		}
 	}
