@@ -837,15 +837,15 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	var faceGrp models.FaceGroup
 	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupID).First(&faceGrp).Error; err != nil {
-		log.Println(" SplitFaceGroup err", err)
+		log.Println("SplitFaceGroup err", err)
 		return
 	}
 
 	if faceGrp.Label != nil {
-		log.Println(" SearchFacesForFaceGroup for", *faceGrp.Label)
+		log.Println("SearchFacesForFaceGroup for", *faceGrp.Label)
 		fd.searchFacesForFaceGroup(db, groupID)
 	} else {
-		log.Println(" SplitFaceGroup Label is nii")
+		log.Println("SplitFaceGroup Label is nii")
 		fd.moveToClosestFaceGroup(db, groupID, false)
 	}
 }
@@ -858,15 +858,15 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 
 	var faceGrp models.FaceGroup
 	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupID).First(&faceGrp).Error; err != nil {
-		log.Println(" SplitFaceGroup err", err)
+		log.Println("SplitFaceGroup err", err)
 		return
 	}
 
 	if faceGrp.Label != nil {
-		log.Println(" SplitFaceGroup ", *faceGrp.Label)
+		log.Println("SplitFaceGroup ", *faceGrp.Label)
 		fd.reOrderFaceGroupUnconfirmed(db, groupID)
 	} else {
-		log.Println(" SplitFaceGroup Label is nii")
+		log.Println("SplitFaceGroup Label is nii")
 		fd.moveToClosestFaceGroup(db, groupID, true)
 	}
 }
@@ -877,12 +877,12 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 	for i, id := range fd.faceGroupIDs {
 		if id == groupID {
 			grpIndexes = append( grpIndexes, i)
-			// log.Println(" findFaceGroupIndices", "index", i, "grp id", id, "faceGroupID", fd.faceGroupIDs[i], "imgFaceID", fd.imageFaceIDs[i], "grpIndexes", grpIndexes)
+			// log.Println("findFaceGroupIndices", "index", i, "grp id", id, "faceGroupID", fd.faceGroupIDs[i], "imgFaceID", fd.imageFaceIDs[i], "grpIndexes", grpIndexes)
 		} else {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
 	}
-	log.Println(" findFaceGroupIndices", grpIndexes, len(noGrpIdxes))
+	log.Println("findFaceGroupIndices", grpIndexes, len(noGrpIdxes))
 	return grpIndexes, noGrpIdxes
 }
 
@@ -895,20 +895,20 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 		if err := db.Model(models.ImageFace{}).Where("id = ?", fd.imageFaceIDs[idx]).Pluck("confirmed",&conf).Error; err != nil {
 		//var imgface models.ImageFace
 		//if err := db.Model(imageFace, fd.imageFaceIDs[idx]).Take(imageFace).Error; err != nil {
-			log.Println(" findConfirmedFaceIndices err", err)
+			log.Println("findConfirmedFaceIndices err", err)
 			return nil
 		}
 		if confirmed {
-			// log.Println(" findConfirmedFaceIndices", idx, confirmed, conf[0], "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
+			// log.Println("findConfirmedFaceIndices", idx, confirmed, conf[0], "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
 		}
 		if conf[0] == confirmed {
 			confIndexes = append( confIndexes, idx)
 		}
 	}
 	if confirmed {
-		log.Println(" findConfirmedFaceIndices", confIndexes, len(confIndexes))
+		log.Println("findConfirmedFaceIndices", confIndexes, len(confIndexes))
 	} else {
-		log.Println(" findConfirmedFaceIndices", len(confIndexes))
+		log.Println("findConfirmedFaceIndices", len(confIndexes))
 	}
 	return confIndexes
 }
@@ -983,14 +983,14 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 
 	for i, idx := range grpConfIndexes {
 		if int32(fd.imageFaceIDs[idx]) != int32(grpConfirmedImageFaces[i].ID) {
-			log.Println("Check 1", int32(fd.faceGroupIDs[idx]) == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
+			log.Println("Check confirmed image id", int32(fd.imageFaceIDs[idx]) == int32(grpConfirmedImageFaces[i].ID), fd.imageFaceIDs[idx], grpConfirmedImageFaces[i].ID)
 		}
 	}
 
 	for i, idx := range noGrpUnConfIndexes {
 		// log.Println("Check 2", fd.imageFaceIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.imageFaceIDs[idx], grpOtherImageFaces[i].ID)
 		if int32(fd.imageFaceIDs[idx]) != int32(grpOtherImageFaces[i].ID) {
-			log.Println("Check 3", int32(fd.imageFaceIDs[idx]) == int32(grpOtherImageFaces[i].ID), fd.imageFaceIDs[idx], grpOtherImageFaces[i].ID)
+			log.Println("Check unconfirmed image id", int32(fd.imageFaceIDs[idx]) == int32(grpOtherImageFaces[i].ID), fd.imageFaceIDs[idx], grpOtherImageFaces[i].ID)
 		}
 	}
 
@@ -1005,14 +1005,14 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	dists := make([]float64, len(noGrpUnConfIndexes))
 	for uIdx, oIdx := range noGrpUnConfIndexes {
 		// index[uIdx] = oIdx
-		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
+		// log.Println("Check 4", index[uIdx] == oIdx, index[uIdx], oIdx)
 		// if index[uIdx] != oIdx {
-			// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
+			// log.Println("Check 5", index[uIdx] == oIdx, index[uIdx], oIdx)
 		// }
 		dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
-		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oIdx)
+		// log.Println("Check 6", index[uIdx] == oIdx, index[uIdx], oIdx)
 		if odists[uIdx] != dists[uIdx] {
-			log.Println("Check", odists[uIdx] == odists[uIdx], odists[uIdx], odists[uIdx])
+			log.Println("Check 7", odists[uIdx] == dists[uIdx], odists[uIdx], dists[uIdx])
 		}
 	}
 
@@ -1025,12 +1025,12 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	for uIdx := range min( 10, len(grpOtherImageFaces)) {
 		var faceGrp models.FaceGroup
 		if err := db.Model(models.FaceGroup{}).Where("id = ?", grpOtherImageFaces[index[uIdx]].FaceGroupID).First(&faceGrp).Error; err != nil {
-			log.Println(" searchFacesForFaceGroup err", err)
+			log.Println("searchFacesForFaceGroup err", err)
 			return
 		}
 		var media models.Media
 		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[index[uIdx]].MediaID).First(&media).Error; err != nil {
-			log.Println(" searchFacesForFaceGroup err", err)
+			log.Println("searchFacesForFaceGroup err", err)
 			return
 		}
 		label := "Label is nil"
@@ -1043,10 +1043,10 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		log.Println("Img", grpOtherImageFaces[index[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
 		if (dists[index[uIdx]] < 0.250) && (len(oldConfDesc) == 0 || (dists[index[uIdx]] < (0.75 * oldConfDist))) {
 			if err := setImageFaceGroup(db, grpOtherImageFaces[index[uIdx]].ID, int(groupID)); err != nil {
-				log.Println(" searchFacesForFaceGroup err", err)
+				log.Println("searchFacesForFaceGroup err", err)
 				return
 			}
-			log.Println(" Moved Img to current GROUP")
+			log.Println("Moved Img to current GROUP")
 		}
 	}
 }
@@ -1128,7 +1128,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		}
 		if doIt && dists[index[gIdx]] < 0.200 {
 			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, otherImg.FaceGroupID); err != nil {
-				log.Println(" moveToClosestFaceGroup err", err)
+				log.Println("moveToClosestFaceGroup err", err)
 				return
 			}
 		}
@@ -1161,7 +1161,7 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	for uIdx := range len(unConfDesc) {
 		var media models.Media
 		if err := db.Model(models.Media{}).Where("id = ?", grpUnConfirmedImageFaces[index[uIdx]].MediaID).First(&media).Error; err != nil {
-			log.Println(" reOrderFaceImages err", err)
+			log.Println("reOrderFaceImages err", err)
 			return
 		}
 		log.Println( "distance for FaceImageId", grpUnConfirmedImageFaces[index[uIdx]].ID, dists[index[uIdx]], "Media", media.ID, "Album", media.AlbumID)
