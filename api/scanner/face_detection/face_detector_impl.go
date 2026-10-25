@@ -1054,7 +1054,9 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 			return
 		}
 		var media models.Media
-		if err := db.Model(models.ImageFace{}).Where("id = ?", fd.imageFaceIDs[oIdx]).Association("Media").Find(&media); err != nil {
+		if err := db.Model(&models.ImageFace{ID: fd.imageFaceIDs[oIdx]}).
+				// Where("id = ?", fd.imageFaceIDs[oIdx]).
+				Association("Media").Find(&media); err != nil {
 			log.Println("searchFacesForFaceGroup media err", err)
 			return
 		}
