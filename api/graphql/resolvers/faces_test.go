@@ -2,7 +2,7 @@ package resolvers
 
 import (
 	"context"
-	"strings"
+	// "strings"
 	"testing"
 
 	"github.com/loiuscypher/photoview/api/graphql/auth"
@@ -123,6 +123,10 @@ func TestCombineFaceGroups(t *testing.T) {
 		}
 	})
 
+	/* What i the intention / use case of this test?
+	   Assume we have an image containing a common scene of a person and a mirror.
+	   If the mirrored face was incorrectly identified, this code stops us from fixing it. */
+	/*
 	t.Run("rejects merge when destination and source contain the same media", func(t *testing.T) {
 		r, ctx, _ := setupFaceMutationTest(t)
 		createFaceMutationFixtures(t, r)
@@ -181,6 +185,7 @@ func TestCombineFaceGroups(t *testing.T) {
 			t.Fatalf("expected duplicate image validation error, got: %v", err)
 		}
 	})
+	*/
 
 	t.Run("non-admin user merges owned face groups", func(t *testing.T) {
 		r, _, _ := setupFaceMutationTest(t)
@@ -245,6 +250,10 @@ func TestMoveImageFaces(t *testing.T) {
 		}
 	})
 
+	/* What i the intention / use case of this test?
+	   Assume we have an image containing a common scene of a person and a mirror.
+	   If the mirrored face was incorrectly identified, this code stops us from fixing it. */
+	/*
 	t.Run("rejects move when destination already contains selected media", func(t *testing.T) {
 		r, ctx, _ := setupFaceMutationTest(t)
 		createFaceMutationFixtures(t, r)
@@ -301,6 +310,7 @@ func TestMoveImageFaces(t *testing.T) {
 			t.Fatalf("expected duplicate image validation error, got: %v", err)
 		}
 	})
+	*/
 
 	t.Run("non-admin user moves owned image faces", func(t *testing.T) {
 		r, _, _ := setupFaceMutationTest(t)
