@@ -983,14 +983,14 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 
 	for i, idx := range grpConfIndexes {
 		if int32(fd.imageFaceIDs[idx]) != int32(grpConfirmedImageFaces[i].ID) {
-			log.Println("Check", int32(fd.faceGroupIDs[idx]) == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
+			log.Println("Check 1", int32(fd.faceGroupIDs[idx]) == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
 		}
 	}
 
 	for i, idx := range noGrpUnConfIndexes {
-		// log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
-		if int32(fd.faceGroupIDs[idx]) != int32(grpOtherImageFaces[i].ID) {
-			log.Println("Check", int32(fd.faceGroupIDs[idx]) == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
+		// log.Println("Check 2", fd.imageFaceIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.imageFaceIDs[idx], grpOtherImageFaces[i].ID)
+		if int32(fd.imageFaceIDs[idx]) != int32(grpOtherImageFaces[i].ID) {
+			log.Println("Check 3", int32(fd.imageFaceIDs[idx]) == int32(grpOtherImageFaces[i].ID), fd.imageFaceIDs[idx], grpOtherImageFaces[i].ID)
 		}
 	}
 
@@ -1000,6 +1000,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		index[uIdx] = uIdx
 		odists[uIdx], _ = calcImgMinDistGrp( otherImageFace, confDesc)
 	}
+	log.Println("Check dists:")
 	// index := make([]int, len(noGrpUnConfIndexes))
 	dists := make([]float64, len(noGrpUnConfIndexes))
 	for uIdx, oIdx := range noGrpUnConfIndexes {
