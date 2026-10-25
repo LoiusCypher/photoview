@@ -871,6 +871,33 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 	}
 }
 
+func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
+	grpIdxes := make([]int, 0)
+	noGrpIdxes := make([]int, 0)
+	for i, id := range fd.faceGroupIDs {
+		if id == groupID {
+			grpIdxes.append( i)
+		} else {
+			noGrpIdxes.append( i)
+		}
+	}
+	return grpIdxes, noGrpIdxes
+}
+
+func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []int, confirmed bool) ( []int) {
+	confIndexes := make([]int, 0)
+	for idx := range groupIdIndexes {
+		var conf bool
+		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
+			return nil
+		}
+		if conf == confirmed{
+			confIndexes.append( idx)
+		}
+	}
+	return confIndexes
+}
+
 func loadFaceGroupWithDescriptor(db *gorm.DB, groupSel bool, groupID int32, confirmed bool) ( []*models.ImageFace, []face.Descriptor) {
 	var grpOtherImageFaces []*models.ImageFace
 	grpCond := "face_group_id = ?"
@@ -906,8 +933,16 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("searchFacesForFaceGroup groupID %d\n", groupID)
 
+	grpIndexes, noGroupIndexes := fd.findFaceGroupIndices( groupID)
+	grpConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, true)
+	log.Println("Confirmed", len(grpConfIndexes))
+
 	grpConfirmedImageFaces, confDesc := loadFaceGroupWithDescriptor(db, true, groupID, true)
 	log.Println("Confirmed", len(grpConfirmedImageFaces))
+
+	for i, idx = range grpConfIndexes {
+		log.Println("Check", fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
+	}
 
 	grpOtherImageFaces, otherDesc := loadFaceGroupWithDescriptor(db, false, groupID, false)
 	log.Println("Other Group", len(grpOtherImageFaces))
@@ -966,6 +1001,9 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		grpDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
 
+	grpConfirmedImageFaces, confDesc := loadFaceGroupWithDescriptor(db, true, groupID, false)
+	log.Println("Confirmed", len(grpConfirmedImageFaces))
+
 	var otherImageFaces []*models.ImageFace
 	if err := db.Where("face_group_id != ?",groupID).Find(&otherImageFaces).Error; err != nil {
 		return
@@ -975,6 +1013,9 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 	for i, imgFace := range otherImageFaces {
 		otherDesc[i] = face.Descriptor(imgFace.Descriptor)
 	}
+	grpConfirmedImageFaces, confDesc := loadFaceGroupWithDescriptor(db, false, groupID, true)
+	log.Println("Confirmed", len(grpConfirmedImageFaces))
+
 
 	index := make([]int, len(grpDesc))
 	dists := make([]float64, len(grpDesc))
@@ -1034,14 +1075,14 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 
 	log.Printf("reOrderFaceGroupUnconfirmed groupID %d\n", groupID)
 
-	grpConfirmedImageFaces, confDesc := loadFaceGroupWithDescriptor(db, true, groupID, true)
-	log.Println("Confirmed", len(grpConfirmedImageFaces))
+	_, confDesc := loadFaceGroupWithDescriptor(db, true, groupID, true)
+	log.Println("Confirmed", len(confDesc))
 
 	grpUnConfirmedImageFaces, unConfDesc := loadFaceGroupWithDescriptor(db, true, groupID, false)
-	log.Println("Other Group", len(grpUnConfirmedImageFaces))
+	log.Println("Other Group", len(unConfDesc))
 
-	index := make([]int, len(grpUnConfirmedImageFaces))
-	dists := make([]float64, len(grpUnConfirmedImageFaces))
+	index := make([]int, len(unConfDesc))
+	dists := make([]float64, len(unConfDesc))
 	for uIdx, unConfImageFace := range unConfDesc {
 		index[uIdx] = uIdx
 		dists[uIdx], _ = calcImgMinDistGrp( unConfImageFace, confDesc)
@@ -1053,7 +1094,7 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	})
 	// log.Println("index", index)
 
-	for uIdx := range len(grpUnConfirmedImageFaces) {
+	for uIdx := range len(unConfDesc) {
 		var media models.Media
 		if err := db.Model(models.Media{}).Where("id = ?", grpUnConfirmedImageFaces[index[uIdx]].MediaID).First(&media).Error; err != nil {
 			log.Println(" reOrderFaceImages err", err)
