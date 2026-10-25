@@ -408,7 +408,7 @@ func (fd *faceDetector) reClassifyMediaFaces(db *gorm.DB, oldFaces []models.Imag
 					p_MovY :=  100 * max(d_MaxY+d_MinY,-d_MaxY-d_MinY) / o_span_Y / 2.0
 					log.Println("   MovePercent: X ", p_MovX, "  Y ", p_MovY,)
 					max_perc_diff := float64(40.0)
-					max_perc_move := float64(10.0)
+					max_perc_move := float64(15.0)
 					if p_MovX < max_perc_move && p_MovY < max_perc_move && p_MinX < max_perc_diff && p_MaxX < max_perc_diff && p_MinY < max_perc_diff && p_MaxY < max_perc_diff {
 						log.Println("   Eucidean Dist: ", eu_dist)
 						log.Println("delete: ", oIdx, "  same space as:", nIdx)
@@ -949,9 +949,9 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		log.Println("Check", fd.faceGroupIDs[idx] == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
 	}
 
-	for i, idx := range noGrpUnConfIndexes {
-		log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
-	}
+	// for i, idx := range noGrpUnConfIndexes {
+		// log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
+	// }
 
 	index := make([]int, len(grpOtherImageFaces))
 	dists := make([]float64, len(grpOtherImageFaces))
@@ -963,6 +963,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	// dists := make([]float64, len(noGrpUnConfIndexes))
 	// for uIdx, oIdx := range noGrpUnConfIndexes {
 		// index[uIdx] = oIdx
+		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oId)
 		// dists[uIdx], _ = calcImgMinDistGrp( fd.faceGroupIDs[oIdx], confDesc)
 	// }
 
