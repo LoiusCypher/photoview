@@ -890,9 +890,11 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 	confIndexes := make([]int, 0)
 	for _, idx := range groupIdIndexes {
 		var conf []bool
+		var imgface models.ImageFace
 		//if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
 		//if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Pluck("confirmed",&conf).Error; err != nil {
 		if err := db.Model(models.ImageFace{}).Where("id = ?", fd.imageFaceIDs[idx]).Pluck("confirmed",&conf).Error; err != nil {
+		//if err := db.Model(imageFace, fd.imageFaceIDs[idx]).Take(imageFace).Error; err != nil {
 			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
@@ -949,13 +951,13 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	log.Println("Other Group", len(noGrpUnConfIndexes))
 
 	grpConfirmedImageFaces, confDesc := loadFaceGroupWithDescriptor(db, true, groupID, true)
-	log.Println("Confirmed", len(grpConfIndexes) == len(grpConfirmedImageFaces), len(grpConfirmedImageFaces))
+	log.Println("Confirmed old", len(grpConfIndexes) == len(grpConfirmedImageFaces), len(grpConfirmedImageFaces))
 
 	grpOtherImageFaces, otherDesc := loadFaceGroupWithDescriptor(db, false, groupID, false)
-	log.Println("Other Group", len(noGrpUnConfIndexes) == len(grpOtherImageFaces), len(grpOtherImageFaces))
+	log.Println("Other Group old", len(noGrpUnConfIndexes) == len(grpOtherImageFaces), len(grpOtherImageFaces))
 
-	// for i, idx := range grpConfIndexes {
-	for i, idx := range grpIndexes {
+	for i, idx := range grpConfIndexes {
+	// for i, idx := range grpIndexes {
 		if fd.faceGroupIDs[idx] != int32(grpConfirmedImageFaces[i].ID) {
 			log.Println("Check", fd.faceGroupIDs[idx] == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
 		}
