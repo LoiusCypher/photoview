@@ -882,7 +882,7 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
 	}
-	log.Println("findFaceGroupIndices", grpIndexes, len(noGrpIdxes))
+	log.Println("findFaceGroupIndices", groupID, grpIndexes, len(noGrpIdxes))
 	return grpIndexes, noGrpIdxes
 }
 
@@ -1053,11 +1053,6 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 			log.Println("searchFacesForFaceGroup err", err)
 			return
 		}
-		var omedia models.Media
-		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[oindex[uIdx]].MediaID).First(&omedia).Error; err != nil {
-			log.Println("searchFacesForFaceGroup err", err)
-			return
-		}
 		var media models.Media
 		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[oindex[uIdx]].MediaID).First(&media).Error; err != nil {
 			log.Println("searchFacesForFaceGroup err", err)
@@ -1075,24 +1070,27 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		othGrpConfIndexes := fd.findConfirmedFaceIndices( db, othGrpIndexes, true)
 		log.Println("Confirmed", len(othGrpConfIndexes))
 
-		oldConfDist, _ := fd.calcMinDistIndex( oIdx, othGrpConfIndexes)
+		oldGroupMinDist, _ := fd.calcMinDistIndex( oIdx, othGrpConfIndexes)
 
-		if oldConfDist != ooldConfDist {
-			log.Println("Check 16", oldConfDist, ooldConfDist)
+		if oldGroupMinDist != ooldConfDist {
+			log.Println("Check 16", oldGroupMinDist, ooldConfDist)
 		}
 
 		if len(othGrpConfIndexes) == 0 {
 			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]])
-			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", omedia.ID, "Album", omedia.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]])
+			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]])
 		} else {
-			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
-			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", omedia.ID, "Album", omedia.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]], "oldConfDist", ooldConfDist)
+			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldGroupMinDist", oldGroupMinDist)
+			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]], "oldConfDist", ooldConfDist)
 		}
-		if (dists[index[uIdx]] < 0.250) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldConfDist))) {
+		if (dists[index[uIdx]] < 0.250) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], int(groupID)); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
 			}
+			fd.mutex.Lock()
+			fd.faceGroupIDs[oIdx] = groupID
+			fd.mutex.Unlock()
 			log.Println("Moved Img to current GROUP")
 		}
 	}
