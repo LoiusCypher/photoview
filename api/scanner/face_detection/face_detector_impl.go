@@ -882,7 +882,7 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
 	}
-	log.Println(" findFaceGroupIndices", grpnIndexes, len(noGrpIdxes))
+	log.Println(" findFaceGroupIndices", grpIndexes, len(noGrpIdxes))
 	return grpIndexes, noGrpIdxes
 }
 
