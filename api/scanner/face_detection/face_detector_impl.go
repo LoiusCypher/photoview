@@ -877,7 +877,7 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 	for i, id := range fd.faceGroupIDs {
 		if id == groupID {
 			grpIndexes = append( grpIndexes, i)
-			log.Println(" findFaceGroupIndices", i, id, fd.faceGroupIDs[i], fd.imageFaceIDs[i], grpIndexes)
+			log.Println(" findFaceGroupIndices", "index", i, "grp id", id, "faceGroupID", fd.faceGroupIDs[i], "imgFaceID", fd.imageFaceIDs[i], "grpIndexes", grpIndexes)
 		} else {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
@@ -890,12 +890,13 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 	confIndexes := make([]int, 0)
 	for _, idx := range groupIdIndexes {
 		var conf bool
-		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
+		//if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
+		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Pluck("confirmed",&conf).Error; err != nil {
 			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
 		if confirmed {
-			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf, fd.faceGroupIDs[idx], fd.imageFaceIDs[idx])
+			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf, "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
 		}
 		if conf == confirmed {
 			confIndexes = append( confIndexes, idx)
