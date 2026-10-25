@@ -939,6 +939,20 @@ func calcImgMinDistGrp( imgDesc face.Descriptor, groupDesc []face.Descriptor) (f
 	return minDist, minDistIdx
 }
 
+func (fd *faceDetector) calcMinDistIndex( imgIndex int, otherIndexes []int) (float64, int) {
+	var minDist float64
+	var minDistIdx int
+	for cIdx, compIndex := range otherIndexes {
+		curDist := euclidean_distance( fd.faceDescriptors[imgIndex], fd.faceDescriptors[compIndex])
+		if (cIdx == 0) || (curDist < minDist) {
+			minDist = curDist
+			minDistIdx = compIndex
+		}
+		// log.Printf("cIdx %d minDist %d %f\n", cIdx, minDistIdx, minDist)
+	}
+	return minDist, minDistIdx
+}
+
 func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("searchFacesForFaceGroup groupID %d\n", groupID)
@@ -963,15 +977,17 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	}
 
 	for i, idx := range grpConfIndexes {
-	// for i, idx := range grpIndexes {
-		if fd.faceGroupIDs[idx] != int32(grpConfirmedImageFaces[i].ID) {
+		if fd.imageFaceIDs[idx] != int32(grpConfirmedImageFaces[i].ID) {
 			log.Println("Check", fd.faceGroupIDs[idx] == int32(grpConfirmedImageFaces[i].ID), fd.faceGroupIDs[idx], grpConfirmedImageFaces[i].ID)
 		}
 	}
 
-	// for i, idx := range noGrpUnConfIndexes {
+	for i, idx := range noGrpUnConfIndexes {
 		// log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
-	// }
+		if fd.faceGroupIDs[idx] != int32(grpOtherImageFaces[i].ID) {
+			log.Println("Check", fd.faceGroupIDs[idx] == int32(grpOtherImageFaces[i].ID), fd.faceGroupIDs[idx], grpOtherImageFaces[i].ID)
+		}
+	}
 
 	index := make([]int, len(grpOtherImageFaces))
 	dists := make([]float64, len(grpOtherImageFaces))
@@ -984,7 +1000,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	// for uIdx, oIdx := range noGrpUnConfIndexes {
 		// index[uIdx] = oIdx
 		// log.Println("Check", index[uIdx] == oIdx, index[uIdx], oId)
-		// dists[uIdx], _ = calcImgMinDistGrp( fd.faceGroupIDs[oIdx], confDesc)
+		// dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
 	// }
 
 	// log.Println("dists", dists)
@@ -1008,7 +1024,8 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		if faceGrp.Label != nil {
 			label = *faceGrp.Label
 		}
-		_, oldConfDesc := loadFaceGroupWithDescriptor(db, true, int32(faceGrp.ID), true)
+		//_, oldConfDesc := loadFaceGroupWithDescriptor(db, true, int32(faceGrp.ID), true)
+		_, oldConfDesc := loadFaceGroupWithDescriptor(db, true, int32(grpOtherImageFaces[index[uIdx]].FaceGroupID.ID), true)
 		oldConfDist, _ := calcImgMinDistGrp( otherDesc[index[uIdx]], oldConfDesc)
 		log.Println("Img", grpOtherImageFaces[index[uIdx]].ID, "Media", media.ID, "Album", media.AlbumID, "Group", grpOtherImageFaces[index[uIdx]].FaceGroupID, label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
 		if (dists[index[uIdx]] < 0.250) && (len(oldConfDesc) == 0 || (dists[index[uIdx]] < (0.75 * oldConfDist))) {
