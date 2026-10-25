@@ -888,14 +888,14 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 
 func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []int, confirmed bool) ( []int) {
 	confIndexes := make([]int, 0)
-	for idx := range groupIdIndexes {
+	for _, idx := range groupIdIndexes {
 		var conf bool
 		if err := db.Model(models.ImageFace{ID: fd.imageFaceIDs[idx]}).Select("confirmed").Take(&conf).Error; err != nil {
 			log.Println(" findConfirmedFaceIndices err", err)
 			return nil
 		}
 		if confirmed {
-			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf, fd.imageFaceIDs[idx])
+			log.Println(" findConfirmedFaceIndices", idx, confirmed, conf, fd.imageFaceIDs[idx], fd.faceGroupIDs[idx])
 		}
 		if conf == confirmed {
 			confIndexes = append( confIndexes, idx)
