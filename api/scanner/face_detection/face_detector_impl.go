@@ -1038,17 +1038,18 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		if odists[oindex[idx]] != dists[index[idx]] {
 			log.Println("Check 13", odists[oindex[idx]] == dists[index[idx]], odists[oindex[idx]], dists[index[idx]])
 		}
-		if grpOtherImageFaces[oindex[uIdx]].ID != fd.imageFaceIDs[noGrpUnConfIndexes[index[uIdx]]] {
-			log.Println("Check 14", grpOtherImageFaces[oindex[uIdx]].ID, fd.imageFaceIDs[noGrpUnConfIndexes[index[uIdx]]] )
+		if grpOtherImageFaces[oindex[idx]].ID != fd.imageFaceIDs[noGrpUnConfIndexes[index[idx]]] {
+			log.Println("Check 14", grpOtherImageFaces[oindex[idx]].ID, fd.imageFaceIDs[noGrpUnConfIndexes[index[idx]]] )
 		}
-		if grpOtherImageFaces[oindex[uIdx]].FaceGroupID != fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]] {
-			log.Println("Check 15", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]] )
+		if int32(grpOtherImageFaces[oindex[idx]].FaceGroupID) != fd.faceGroupIDs[noGrpUnConfIndexes[index[idx]]] {
+			log.Println("Check 15", grpOtherImageFaces[oindex[idx]].FaceGroupID, fd.faceGroupIDs[noGrpUnConfIndexes[index[idx]]] )
 		}
 	}
 
 	for uIdx := range min( 10, len(index)) {
+		oIdx := noGrpUnConfIndexes[index[uIdx]]
 		var faceGrp models.FaceGroup
-		if err := db.Model(models.FaceGroup{}).Where("id = ?", fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]]).First(&faceGrp).Error; err != nil {
+		if err := db.Model(models.FaceGroup{}).Where("id = ?", fd.faceGroupIDs[oIdx]).First(&faceGrp).Error; err != nil {
 			log.Println("searchFacesForFaceGroup err", err)
 			return
 		}
@@ -1069,26 +1070,26 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		_, ooldConfDesc := loadFaceGroupWithDescriptor(db, true, int32(grpOtherImageFaces[oindex[uIdx]].FaceGroupID), true)
 		ooldConfDist, _ := calcImgMinDistGrp( otherDesc[oindex[uIdx]], ooldConfDesc)
 
-		othGrpIndexes, _ := fd.findFaceGroupIndices( fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]])
+		othGrpIndexes, _ := fd.findFaceGroupIndices( fd.faceGroupIDs[oIdx])
 		log.Println("in group:", len(othGrpIndexes))
 		othGrpConfIndexes := fd.findConfirmedFaceIndices( db, othGrpIndexes, true)
 		log.Println("Confirmed", len(othGrpConfIndexes))
 
-		oldConfDist, _ = fd.calcMinDistIndex( noGrpUnConfIndexes[index[uIdx]], othGrpConfIndexes)
+		oldConfDist, _ := fd.calcMinDistIndex( oIdx, othGrpConfIndexes)
 
 		if oldConfDist != ooldConfDist {
 			log.Println("Check 16", oldConfDist, ooldConfDist)
 		}
 
-		if len(oldConfDesc) == 0 {
-			log.Println("Img", fd.imageFaceIDs[noGrpUnConfIndexes[index[uIdx]]], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]], label, "distance", dists[index[uIdx]])
+		if len(othGrpConfIndexes) == 0 {
+			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]])
 			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", omedia.ID, "Album", omedia.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]])
 		} else {
-			log.Println("Img", fd.imageFaceIDs[noGrpUnConfIndexes[index[uIdx]]], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[noGrpUnConfIndexes[index[uIdx]]], label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
+			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldConfDist", oldConfDist)
 			log.Println("Img", grpOtherImageFaces[oindex[uIdx]].ID, "Media", omedia.ID, "Album", omedia.AlbumID, "Group", grpOtherImageFaces[oindex[uIdx]].FaceGroupID, label, "distance", odists[oindex[uIdx]], "oldConfDist", ooldConfDist)
 		}
-		if (dists[index[uIdx]] < 0.250) && ((len(oldConfDesc) == 0) || (dists[index[uIdx]] < (0.75 * oldConfDist))) {
-			if err := setImageFaceGroup(db, grpOtherImageFaces[oindex[uIdx]].ID, int(groupID)); err != nil {
+		if (dists[index[uIdx]] < 0.250) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldConfDist))) {
+			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], int(groupID)); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
 			}
