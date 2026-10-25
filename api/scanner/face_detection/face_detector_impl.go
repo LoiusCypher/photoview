@@ -1053,13 +1053,20 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 			log.Println("searchFacesForFaceGroup err", err)
 			return
 		}
-		var media models.Media
-		if err := db.Model(&models.ImageFace{ID: fd.imageFaceIDs[oIdx]}).
-				Where("id = ?", fd.imageFaceIDs[oIdx]).
-				Association("Media").Find(&media); err != nil {
+		var img models.ImageFace
+		if err := db.Model(models.ImageFace{}).Where("id = ?", fd.imageFaceIDs[oIdx]).First(&img).Error; err != nil {
+		//if err := db.Model(&models.ImageFace{ID: fd.imageFaceIDs[oIdx]}).
+		//		Where("id = ?", fd.imageFaceIDs[oIdx]).
+		//		Association("Media").Find(&media); err != nil {
 			log.Println("searchFacesForFaceGroup media err", err)
 			return
 		}
+		log.Println("searchFacesForFaceGroup", img)
+		if err := img.FillMedia(db); err != nil {
+			log.Println("searchFacesForFaceGroup err", err)
+			return
+		}
+		media := img.Media
 		log.Println("searchFacesForFaceGroup", media)
 		var omedia models.Media
 		if err := db.Model(models.Media{}).Where("id = ?", grpOtherImageFaces[oindex[uIdx]].MediaID).First(&omedia).Error; err != nil {
