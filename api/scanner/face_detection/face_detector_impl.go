@@ -882,7 +882,7 @@ func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
 			noGrpIdxes = append( noGrpIdxes, i)
 		}
 	}
-	log.Println("findFaceGroupIndices", groupID, grpIndexes, len(noGrpIdxes))
+	// log.Println("findFaceGroupIndices", groupID, grpIndexes, len(noGrpIdxes))
 	return grpIndexes, noGrpIdxes
 }
 
@@ -905,11 +905,11 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 			confIndexes = append( confIndexes, idx)
 		}
 	}
-	if confirmed {
-		log.Println("findConfirmedFaceIndices", confIndexes, len(confIndexes))
-	} else {
-		log.Println("findConfirmedFaceIndices", len(confIndexes))
-	}
+	// if confirmed {
+		// log.Println("findConfirmedFaceIndices", confIndexes, len(confIndexes))
+	// } else {
+		// log.Println("findConfirmedFaceIndices", len(confIndexes))
+	// }
 	return confIndexes
 }
 
@@ -1140,8 +1140,14 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	log.Println("in group:", len(grpIndexes))
 	grpConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, true)
 	log.Println("Confirmed", len(grpConfIndexes))
+	if len(grpConfIndexes) == 0 {
+		log.Println("Need confirmed reference")
+	}
 	grpUnConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, false)
 	log.Println("Other Group", len(grpUnConfIndexes))
+	if len(grpUnConfIndexes) == 0 {
+		log.Println("No unconfirmed left")
+	}
 
 	index := make([]int, len(grpUnConfIndexes))
 	dists := make([]float64, len(grpUnConfIndexes))
@@ -1159,7 +1165,7 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 
 	for uIdx := range len(grpUnConfIndexes) {
 		log.Println( "distance for FaceImageId", fd.imageFaceIDs[index[uIdx]], dists[index[uIdx]])
-		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[index[uIdx]], uIdx); err != nil {
+		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[index[uIdx]], uIdx+1); err != nil {
 			log.Println("Saved Subgroup", uIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[index[uIdx]], err)
 		}
 	}
