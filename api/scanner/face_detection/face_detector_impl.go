@@ -953,8 +953,16 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 	log.Println("in group:", len(grpIndexes), "out group:", len(noGroupIndexes))
 	grpConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, true)
 	log.Println("Confirmed", len(grpConfIndexes))
+	if len(grpConfIndexes) == 0 {
+		log.Println("Need confirmed reference")
+		return
+	}
 	noGrpUnConfIndexes := fd.findConfirmedFaceIndices( db, noGroupIndexes, false)
 	log.Println("Other Group", len(noGrpUnConfIndexes))
+	if len(noGrpUnConfIndexes) == 0 {
+		log.Println("No unconfirmed left")
+		return
+	}
 
 	index := make([]int, len(noGrpUnConfIndexes))
 	dists := make([]float64, len(noGrpUnConfIndexes))
@@ -1146,11 +1154,13 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	log.Println("Confirmed", len(grpConfIndexes))
 	if len(grpConfIndexes) == 0 {
 		log.Println("Need confirmed reference")
+		return
 	}
 	grpUnConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, false)
 	log.Println("Other Group", len(grpUnConfIndexes))
 	if len(grpUnConfIndexes) == 0 {
 		log.Println("No unconfirmed left")
+		return
 	}
 
 	index := make([]int, len(grpUnConfIndexes))
