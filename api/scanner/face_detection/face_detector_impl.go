@@ -1168,9 +1168,9 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	// log.Println("index", index)
 
 	for uIdx := range len(grpUnConfIndexes) {
-		log.Println( "distance for FaceImageId", fd.imageFaceIDs[index[uIdx]], dists[index[uIdx]])
-		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[index[uIdx]], uIdx+1); err != nil {
-			log.Println("Saved Subgroup", uIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[index[uIdx]], err)
+		log.Println( uIdx, "distance for FaceImageId", index[uIdx], grpUnConfIndexes[index[uIdx]], fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], dists[index[uIdx]])
+		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], uIdx+1); err != nil {
+			log.Println("Saved Subgroup", uIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], err)
 		}
 	}
 }
