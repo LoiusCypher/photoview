@@ -898,22 +898,22 @@ func (fd *faceDetector) findConfirmedFaceIndices( db *gorm.DB, groupIdIndexes []
 			log.Println("findConfirmedFaceIndices err", err)
 			return nil
 		}
-		if len(conf) < 1 {
-			log.Println("findConfirmedFaceIndices no values", idx, confirmed, "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
+		if len(conf) != 1 {
+			log.Println("findConfirmedFaceIndices no values", idx, confirmed, "len conf", len(conf), "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
 			return nil
 		}
-		if confirmed {
-			log.Println("findConfirmedFaceIndices", idx, confirmed, conf[0], "len conf", len(conf), "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
-		}
+		// if confirmed {
+			// log.Println("findConfirmedFaceIndices", idx, confirmed, conf[0], "len conf", len(conf), "faceGroupID", fd.faceGroupIDs[idx], "imgFaceID", fd.imageFaceIDs[idx])
+		// }
 		if conf[0] == confirmed {
 			confIndexes = append( confIndexes, idx)
 		}
 	}
-	if confirmed {
-		log.Println("findConfirmedFaceIndices", confIndexes, len(confIndexes))
-	} else {
-		log.Println("findConfirmedFaceIndices", len(confIndexes))
-	}
+	// if confirmed {
+		// log.Println("findConfirmedFaceIndices", confIndexes, len(confIndexes))
+	// } else {
+		// log.Println("findConfirmedFaceIndices", len(confIndexes))
+	// }
 	return confIndexes
 }
 
