@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../primitives/form/Input'
 import classNames from 'classnames'
 import { splitFaceGroupAction, splitFaceGroupVariables } from './__generated__/splitFaceGroupAction'
+import { orderFaceGroupAction, orderFaceGroupVariables } from './__generated__/orderFaceGroupAction'
 
 const SPLIT_FACE_GROUP_MUTATION = gql`
   mutation splitFaceGroupAction( $groupId: ID!) {
@@ -15,8 +16,38 @@ const SPLIT_FACE_GROUP_MUTATION = gql`
   }
 `
 
+const ORDER_FACE_GROUP_MUTATION = gql`
+  mutation orderFaceGroupAction( $groupId: ID!) {
+    orderFacesOfFaceGroup( groupId: $groupId) {
+      success
+      message
+    }
+  }
+`
+
 export type FaceGroupSplitButtonProps = {
   groupID: int,
+}
+
+export type FaceGroupOrderButtonProps = {
+  groupID: int,
+}
+
+const FaceGroupOrderButton = ({
+  groupID,
+}: FaceGroupOrderButtonProps) => {
+  const { t } = useTranslation()
+  const [startFaceGroupOrder, { calledOrder }] = useMutation<orderFaceGroupAction,orderFaceGroupVariables>(ORDER_FACE_GROUP_MUTATION)
+
+  return (
+    <Button
+      className="mb-1"
+      onClick={() => { startFaceGroupOrder({variables: {groupId: groupID}});}}
+      disabled={calledOrder}
+    >
+      {t('face_group.order', 'ReOrder / Exec MoveTo face group')}
+    </Button>
+  )
 }
 
 const FaceGroupSplitButton = ({
@@ -31,16 +62,20 @@ const FaceGroupSplitButton = ({
       onClick={() => { startFaceGroupSplit({variables: {groupId: groupID}});}}
       disabled={calledSplit}
     >
-      {t('face_group.spllit', 'Split face group')}
+      {t('face_group.split', 'Search others / Check MoveTo face group')}
     </Button>
   )
+}
+
+type FaceGroupOrderProps = {
+  groupID: int,
 }
 
 type FaceGroupSplitProps = {
   groupID: int,
 }
 
-const FaceGroupSplit = ({
+const FaceGroupRow = ({
   groupID,
 }: FaceGroupSplitProps) => {
   return (
@@ -50,8 +85,13 @@ const FaceGroupSplit = ({
           groupID={groupID}
         />
       )}
+      {authToken() && (
+        <FaceGroupOrderButton
+          groupID={groupID}
+        />
+      )}
     </div>
   )
 }
 
-export default FaceGroupSplit
+export default FaceGroupRow

@@ -47,8 +47,8 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 			Joins("Media").
 			Where(faceGroupIDIsQuestion, obj.ID).
 			Where("album_id IN (?)", userAlbumIDs).
-			Order("subgroup ASC").
-			Order("confirmed DESC")
+			Order("confirmed DESC").
+			Order("subgroup DESC")
 
 		query = models.FormatSQL(query, nil, paginate)
 
@@ -68,8 +68,8 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 		Joins("Media").
 		Joins("JOIN user_albums ON user_albums.album_id = Media.album_id").Where("user_albums.user_id = ?", user.ID).
 		Where(faceGroupIDIsQuestion, obj.ID).
-		Order("subgroup ASC").
-		Order("confirmed DESC")
+		Order("confirmed DESC").
+		Order("subgroup DESC")
 
 	query2 = models.FormatSQL(query2, nil, paginate)
 
@@ -261,14 +261,15 @@ func (r *mutationResolver) CombineFaceGroups(ctx context.Context, destinationFac
 
 	// Perform the merge
 	updateError := db.Transaction(func(tx *gorm.DB) error {
-		faceGroupIDs := append([]int{destinationFaceGroup.ID}, sourceFaceGroupIDs...)
-		hasDuplicateMedia, err := hasDuplicateMediaInFaceGroupsUnion(tx, faceGroupIDs...)
-		if err != nil {
-			return err
-		}
-		if hasDuplicateMedia {
-			return errors.New("cannot merge face groups because the destination would contain duplicate images")
-		}
+		// This check is not correct: media can contain person multiple times (collage, mirror, pic in pic..)
+		// faceGroupIDs := append([]int{destinationFaceGroup.ID}, sourceFaceGroupIDs...)
+		// hasDuplicateMedia, err := hasDuplicateMediaInFaceGroupsUnion(tx, faceGroupIDs...)
+		// if err != nil {
+			// return err
+		// }
+		// if hasDuplicateMedia {
+			// return errors.New("cannot merge face groups because the destination would contain duplicate images")
+		// }
 
 		if err := tx.
 			Model(&models.ImageFace{}).
@@ -337,13 +338,14 @@ func (r *mutationResolver) MoveImageFaces(ctx context.Context, imageFaceIDs []in
 			userOwnedImageFaceIDs = append(userOwnedImageFaceIDs, imageFace.ID)
 		}
 
-		//hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
-		//if err != nil {
-			//return err
-		//}
-		//if hasDuplicateMedia {
-			//return errors.New("cannot move faces because the destination would contain duplicate images")
-		//}
+		// This check is not correct: media can contain person multiple times (collage, mirror..)
+		// hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
+		// if err != nil {
+			// return err
+		// }
+		// if hasDuplicateMedia {
+			// return errors.New("cannot move faces because the destination would contain duplicate images")
+		// }
 
 		var sourceFaceGroups []*models.FaceGroup
 		if err := tx.

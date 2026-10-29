@@ -20,6 +20,9 @@ extend type Mutation {
   "See if group contains several persons"
   splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
 
+  "Order unconfirmed faces in a FaceGroup"
+  orderFacesOfFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
   "Toggle Faces FaceGroup Confirmation flag "
   toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
 

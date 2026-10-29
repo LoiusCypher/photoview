@@ -163,6 +163,7 @@ type ComplexityRoot struct {
 		InitialSetupWizard          func(childComplexity int, username string, password string, rootPath string) int
 		MirrorMedia                 func(childComplexity int, mediaID int) int
 		MoveImageFaces              func(childComplexity int, imageFaceIDs []int, destinationFaceGroupID int) int
+		OrderFacesOfFaceGroup       func(childComplexity int, groupID int) int
 		ProtectShareToken           func(childComplexity int, token string, password *string) int
 		ReScanMedia                 func(childComplexity int, mediaID int) int
 		RecognizeUnlabeledFaces     func(childComplexity int) int
@@ -341,6 +342,7 @@ type MutationResolver interface {
 	CheckFaceGroup(ctx context.Context, faceGroupID int) (*models.DevCmdResult, error)
 	SetFaceClassifyThreshold(ctx context.Context, threshold float64) (float64, error)
 	SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
+	OrderFacesOfFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
 	ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error)
 	RotateMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
 	MirrorMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
@@ -998,6 +1000,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.MoveImageFaces(childComplexity, args["imageFaceIDs"].([]int), args["destinationFaceGroupID"].(int)), true
+	case "Mutation.orderFacesOfFaceGroup":
+		if e.ComplexityRoot.Mutation.OrderFacesOfFaceGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_orderFacesOfFaceGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.OrderFacesOfFaceGroup(childComplexity, args["groupId"].(int)), true
 	case "Mutation.protectShareToken":
 		if e.ComplexityRoot.Mutation.ProtectShareToken == nil {
 			break
@@ -2640,6 +2653,20 @@ func (ec *executionContext) field_Mutation_moveImageFaces_args(ctx context.Conte
 		return nil, err
 	}
 	args["destinationFaceGroupID"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_orderFacesOfFaceGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "groupId",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNID2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["groupId"] = arg0
 	return args, nil
 }
 
@@ -5847,6 +5874,63 @@ func (ec *executionContext) fieldContext_Mutation_splitFaceGroup(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_splitFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_orderFacesOfFaceGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_orderFacesOfFaceGroup(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().OrderFacesOfFaceGroup(ctx, fc.Args["groupId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
+			return ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_orderFacesOfFaceGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DevCmdResult(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_orderFacesOfFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12146,6 +12230,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "splitFaceGroup":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_splitFaceGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "orderFacesOfFaceGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_orderFacesOfFaceGroup(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
