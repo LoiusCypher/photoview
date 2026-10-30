@@ -265,10 +265,10 @@ func (r *mutationResolver) CombineFaceGroups(ctx context.Context, destinationFac
 		// faceGroupIDs := append([]int{destinationFaceGroup.ID}, sourceFaceGroupIDs...)
 		// hasDuplicateMedia, err := hasDuplicateMediaInFaceGroupsUnion(tx, faceGroupIDs...)
 		// if err != nil {
-			// return err
+		// return err
 		// }
 		// if hasDuplicateMedia {
-			// return errors.New("cannot merge face groups because the destination would contain duplicate images")
+		// return errors.New("cannot merge face groups because the destination would contain duplicate images")
 		// }
 
 		if err := tx.
@@ -341,10 +341,10 @@ func (r *mutationResolver) MoveImageFaces(ctx context.Context, imageFaceIDs []in
 		// This check is not correct: media can contain person multiple times (collage, mirror..)
 		// hasDuplicateMedia, err := doesFaceGroupContainImages(tx, destFaceGroup.ID, userOwnedImageFaceIDs)
 		// if err != nil {
-			// return err
+		// return err
 		// }
 		// if hasDuplicateMedia {
-			// return errors.New("cannot move faces because the destination would contain duplicate images")
+		// return errors.New("cannot move faces because the destination would contain duplicate images")
 		// }
 
 		var sourceFaceGroups []*models.FaceGroup
