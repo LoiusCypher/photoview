@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
@@ -182,7 +183,7 @@ const SearchBar = () => {
           selectedItemId ? `search-item-${selectedItemId}` : ''
         }
         aria-expanded={expanded}
-        className="w-full py-2 px-3 z-10 relative rounded-md bg-gray-50 focus:bg-white border border-gray-50 focus:border-blue-400 outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 dark:bg-dark-bg2 dark:border-dark-bg2 dark:focus:bg-[#2a2f35]"
+        className="w-full py-2 px-3 z-10 relative rounded-md bg-gray-50 focus:bg-white border border-gray-50 focus:border-blue-400 outline-hidden focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 dark:bg-dark-bg2 dark:border-dark-bg2 dark:focus:bg-[#2a2f35]"
         type="search"
         placeholder={t('header.search.placeholder', 'Search')}
         onChange={fetchEvent}
@@ -241,6 +242,16 @@ const SearchResults = ({
     />
   ))
 
+  const faceGroupElements = facegroups.map((facegroup, i) => (
+    <FaceGroupRow
+      key={facegroup.id}
+      query={query}
+      facegroup={facegroup}
+      selected={selectedItem == i}
+      setSelected={() => setSelectedItem(i)}
+    />
+  ))
+
   let message = null
   if (loading) message = t('header.search.loading', 'Loading results...')
   else if (media.length == 0 && albums.length == 0 && facegroups.length == 0)
@@ -278,6 +289,14 @@ const SearchResults = ({
             {t('header.search.result_type.media', 'Media')}
           </ResultTitle>
           <ul aria-label="media">{mediaElements}</ul>
+        </>
+      )}
+      {faceGroupElements.length > 0 && (
+        <>
+          <ResultTitle>
+            {t('header.search.result_type.facegroups', 'People')}
+          </ResultTitle>
+          <ul aria-label="facegroups">{faceGroupElements}</ul>
         </>
       )}
     </div>
@@ -340,6 +359,30 @@ const SearchRow = ({
     </li>
   )
 }
+
+type FaceGroupRowArgs = {
+  query: string
+  facegroup: searchQuery_search_facegroups
+  selected: boolean
+  setSelected(): void
+}
+
+const FaceGroupRow = ({ query, facegroup, selected, setSelected }: FaceGroupRowArgs) => (
+  <SearchRow
+    key={facegroup.id}
+    id={facegroup.id}
+    link={`/people/${facegroup.id}`}
+    preview={
+      <ProtectedImage
+        src={facegroup?.imageFaces?.media?.thumbnail?.url}
+        className="w-14 h-14 rounded object-cover"
+      />
+    }
+    label={searchHighlighted(query, facegroup.label)}
+    selected={selected}
+    setSelected={setSelected}
+  />
+)
 
 type PhotoRowArgs = {
   query: string

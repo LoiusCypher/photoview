@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -12,9 +14,20 @@ html {
   font-family: 'Source Sans Pro', sans-serif;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --shadow-separator: 0 0 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+@theme {
+  --color-dark-bg: #24292e;		/*Y bg-dark-bg */
+  --color-dark-bg2: #30363e;		/*y bg-dark-bg2 border-dark-bg2 */
+  --color-dark-text: #eee;		/*Y text-dark-text */
+  --color-dark-border: #3b3b3b;		/*Y border-dark-border*/
+  --color-dark-border2: #202020;	/*y border-dark-border2*/
+  --color-dark-input-bg: #383e46;	/*y bg-dark-input-bg */
+  --color-dark-input-border: #4a515a;	/*  border-dark-input-border */
+  --color-dark-input-text: #ccdbe4;	/*  text-dark-input-text */
+}
 
 @layer utilities {
   .flip-y {

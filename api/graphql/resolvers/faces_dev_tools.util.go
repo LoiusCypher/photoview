@@ -6,30 +6,51 @@ import (
 	"log"
 	"os"
 	"time"
+	"sync"
 )
 
-var rec1 map[string]time.Duration
-var rec2 map[string]time.Duration
+type t struct {
+	cnt int
+	rec1 time.Duration
+	rec2 time.Duration
+}
+
+type recorder struct {
+	m sync.Mutex
+	sums map[string]t
+}
+
+var rec recorder
+
+func recInit() {
+	if rec.sums == nil {
+		rec.sums = make(map[string]t)
+	}
+}
+
+func (sum t) recordTiming( time1 time.Duration, time2 time.Duration) t{
+	sum.cnt++
+	sum.rec1 += time1
+	sum.rec2 += time2
+	return sum
+}
 
 func recordTiming( caller string, time1 time.Duration, time2 time.Duration) {
-	if rec1 == nil {
-		rec1 = make(map[string]time.Duration)
-		rec2 = make(map[string]time.Duration)
-	}
-	rec1[caller] = rec1[caller] + time1
-	rec2[caller] = rec2[caller] + time2
+	recInit()
+	rec.m.Lock()
+	defer rec.m.Unlock()
+	rec.sums[caller] = rec.sums[caller].recordTiming( time1, time2)
 }
 
 func logTiming() {
-	if rec1 == nil {
-		log.Println("TRACE rec1 is uninitialized")
-		return
-	}
-	for _caller, _ := range rec1 {
-		log.Println("TRACE Diff", _caller, rec1[_caller]-rec2[_caller],
-				"Sum1", rec1[_caller],
-				"Sum2", rec2[_caller],
-				"Diff %", 100*float64(rec1[_caller]-rec2[_caller])/float64(rec1[_caller]))
+	recInit()
+	rec.m.Lock()
+	defer rec.m.Unlock()
+	for _caller, _sum := range rec.sums {
+		log.Println("TRACE Diff", _caller, _sum.cnt, _sum.rec1-_sum.rec2,
+				"Sum1", _sum.rec1,
+				"Sum2", _sum.rec2,
+				"Diff %", 100*float64(_sum.rec1-_sum.rec2)/float64(_sum.rec1))
 	}
 }
 

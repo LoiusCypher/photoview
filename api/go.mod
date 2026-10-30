@@ -2,6 +2,8 @@ module github.com/loiuscypher/photoview/api
 
 go 1.26.0
 
+toolchain go1.27.2
+
 require (
 	github.com/99designs/gqlgen v0.17.90
 	github.com/Kagami/go-face v0.0.0-20210630145111-0c14797b4d0e
@@ -52,6 +54,7 @@ require (
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/urfave/cli/v3 v3.8.0 // indirect
+	golang.org/dl v0.0.0-20261020012710-a46f0086a8ec // indirect
 	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect

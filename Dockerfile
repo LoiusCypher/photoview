@@ -1,5 +1,5 @@
 ### Build UI ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} node:24 AS ui
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:26 AS ui
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -10,7 +10,7 @@ WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
 # NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@11.16.0 \
+RUN npm install --global npm@10.8.2 \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \

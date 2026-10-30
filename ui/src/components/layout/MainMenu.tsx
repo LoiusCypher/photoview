@@ -47,7 +47,7 @@ const MenuButton = ({
       end={exact}
       className={({ isActive }) =>
         tailwindClassNames(
-          `rounded-lg my-2 outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-bg`,
+          `rounded-lg my-2 outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-bg`,
           className,
           {
             [`ring-4 lg:ring-4 ${activeClasses ?? ''}`]: isActive,

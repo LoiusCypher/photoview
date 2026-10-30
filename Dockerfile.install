@@ -10,13 +10,15 @@ WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
 # NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@11.16.0 \
+RUN npm install --global npm@11.16.0 && npm approve-scripts --all && npm i graphql && npm i -D typescript @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/add \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \
+        npm ls; \
     else \
         echo "Installing all dependencies..."; \
         npm ci --no-audit --no-fund; \
+        npm ls; \
     fi
 
 COPY ui/ /app/ui
@@ -34,6 +36,7 @@ ENV VERSION=${VERSION}
 ARG TARGETARCH
 ENV TARGETARCH=${TARGETARCH}
 # hadolint ignore=SC2155
+RUN npm explain glob inflight loadash.get @apollo/federation
 RUN export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"; \
     export REACT_APP_BUILD_COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-"; \
     export REACT_APP_BUILD_VERSION="${VERSION}-${TARGETARCH}"; \

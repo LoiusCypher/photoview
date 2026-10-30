@@ -57,7 +57,8 @@ const wsLink = new GraphQLWsLink(
 
 const link = split(
   // split based on operation type
-  ({ query }) => { return definition.kind === 'OperationTypeNode.SUBSCRIPTION' },
+  //({ query }) => { return operation.operationType === 'OperationTypeNode.SUBSCRIPTION' },
+  ( operation ) => { return operation.operationType === 'OperationTypeNode.SUBSCRIPTION' },
   wsLink,
   httpLink
 )

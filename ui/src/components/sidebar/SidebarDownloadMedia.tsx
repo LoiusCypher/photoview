@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client'
-import { useLazyQuery } from '@apollo/client/react'
+import { useQuery, skipToken } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { authToken } from '../../helpers/authentication'
@@ -255,21 +255,19 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   if (!media || !media.id) return null
 
-  const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
+  const { data, loading } = useQuery<
     sidebarDownloadQuery,
     sidebarDownloadQueryVariables
-  >(SIDEBAR_DOWNLOAD_QUERY, { variables: { mediaId: media.id } })
+  >(SIDEBAR_DOWNLOAD_QUERY, (authToken() && media) ? { variables: { mediaId: media.id } } : skipToken )
 
   let downloads: sidebarDownloadQuery_media_downloads[] = []
 
-  if (called) {
+  if (authToken() && media) {
     if (!loading) {
       downloads = (data && data.media.downloads) || []
     }
   } else {
-    if (!media.downloads) {
-      loadPhotoDownloads()
-    } else {
+    if (media.downloads) {
       downloads = media.downloads
     }
   }

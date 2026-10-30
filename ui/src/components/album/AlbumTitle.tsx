@@ -1,10 +1,12 @@
-import React, { useEffect, useContext } from 'react'
+//import React, { useEffect, useContext } from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
 import { gql } from '@apollo/client'
-import { useLazyQuery } from '@apollo/client/react'
+//import { useLazyQuery } from '@apollo/client/react'
+import { useQuery, skipToken } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { albumPathQuery } from './__generated__/albumPathQuery'
 import useDelay from '../../hooks/useDelay'
@@ -48,29 +50,18 @@ type AlbumTitleProps = {
 }
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
-  const [fetchPath, { data: pathData }] =
-    useLazyQuery<albumPathQuery>(ALBUM_PATH_QUERY)
+//  const [fetchPath, { data: pathData }] =
+//    useLazyQuery<albumPathQuery>(ALBUM_PATH_QUERY)
+  const { data: pathData, loading } =
+    //useQuery<albumPathQuery>(ALBUM_PATH_QUERY, (album && authToken() ) ? { variables: { id: album.id, } } : skipToken )
+    useQuery<albumPathQuery>(ALBUM_PATH_QUERY, (album && authToken() && (disableLink != true)) ? { variables: { id: album.id, } } : skipToken )
   const { updateSidebar } = useContext(SidebarContext)
-
-  useEffect(() => {
-    if (!album) return
-
-    if (authToken() && disableLink == true) {
-      fetchPath({
-        variables: {
-          id: album.id,
-        },
-      })
-    }
-  }, [album])
-
-  const delay = useDelay(200, [album])
 
   if (!album) {
     return (
       <div
         className={`flex mb-6 flex-col h-14 transition-opacity animate-pulse ${
-          delay ? 'opacity-100' : 'opacity-0'
+          !loading ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className="w-32 h-4 bg-gray-100 mb-2 mt-1"></div>

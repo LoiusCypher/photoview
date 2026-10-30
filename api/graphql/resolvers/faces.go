@@ -77,7 +77,7 @@ func (r *faceGroupResolver) ImageFaces(ctx context.Context, obj *models.FaceGrou
 	}
 	if utils.DevelopmentCheckSqlTiming() {
 		time2 := time.Since(begin2)
-		recordTiming("Cs", time1, time2)
+		recordTiming("Is", time1, time2)
 		if count != len(imageFaces2) {
 			log.Println("ERROR ImageFaces len", count, "!=", len(imageFaces2))
 		} else {
