@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '../../../primitives/form/Input'
@@ -12,7 +13,7 @@ import styled from 'styled-components'
 import { scanMediaAction, scanMediaActionVariables } from './__generated__/scanMediaAction'
 import { reScanMediaAction, reScanMediaActionVariables } from './__generated__/reScanMediaAction'
 import { InputLabelDescription } from '../../../Pages/SettingsPage/SettingsPage'
-import { ReactComponent as LoadingSpinnerIcon } from '../../../primitives/form/icons/textboxLoadingSpinner.svg'
+import LoadingSpinnerIcon from '../../../primitives/form/icons/textboxLoadingSpinner.svg?react'
 
 const SCAN_MEDIA_MUTATION = gql`
   mutation scanMediaAction( $mediaId: ID!) {

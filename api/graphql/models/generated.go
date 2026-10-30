@@ -89,6 +89,8 @@ type SearchResult struct {
 	Albums []*Album `json:"albums"`
 	// A list of media that matched the query
 	Media []*Media `json:"media"`
+	// A list of faceGroup labels that matched the query
+	FaceGroups []*FaceGroup `json:"faceGroups"`
 }
 
 // Credentials used to identify and authenticate a share token

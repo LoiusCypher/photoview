@@ -227,9 +227,10 @@ type ComplexityRoot struct {
 	}
 
 	SearchResult struct {
-		Albums func(childComplexity int) int
-		Media  func(childComplexity int) int
-		Query  func(childComplexity int) int
+		Albums     func(childComplexity int) int
+		FaceGroups func(childComplexity int) int
+		Media      func(childComplexity int) int
+		Query      func(childComplexity int) int
 	}
 
 	ShareToken struct {
@@ -1473,6 +1474,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SearchResult.Albums(childComplexity), true
+	case "SearchResult.faceGroups":
+		if e.ComplexityRoot.SearchResult.FaceGroups == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SearchResult.FaceGroups(childComplexity), true
 	case "SearchResult.media":
 		if e.ComplexityRoot.SearchResult.Media == nil {
 			break
@@ -2081,6 +2088,8 @@ func (ec *executionContext) childFields_SearchResult(ctx context.Context, field 
 		return ec.fieldContext_SearchResult_albums(ctx, field)
 	case "media":
 		return ec.fieldContext_SearchResult_media(ctx, field)
+	case "faceGroups":
+		return ec.fieldContext_SearchResult_faceGroups(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type SearchResult", field.Name)
 }
@@ -8392,6 +8401,38 @@ func (ec *executionContext) fieldContext_SearchResult_media(_ context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _SearchResult_faceGroups(ctx context.Context, field graphql.CollectedField, obj *models.SearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SearchResult_faceGroups(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.FaceGroups, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.FaceGroup) graphql.Marshaler {
+			return ec.marshalNFaceGroup2ᚕᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroupᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SearchResult_faceGroups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_FaceGroup(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ShareToken_id(ctx context.Context, field graphql.CollectedField, obj *models.ShareToken) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12646,6 +12687,11 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.Selection
 			}
 		case "media":
 			out.Values[i] = ec._SearchResult_media(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "faceGroups":
+			out.Values[i] = ec._SearchResult_faceGroups(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

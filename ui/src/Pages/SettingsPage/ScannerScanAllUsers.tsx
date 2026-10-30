@@ -1,5 +1,6 @@
 import React from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import { scanAllMutation } from './__generated__/scanAllMutation'

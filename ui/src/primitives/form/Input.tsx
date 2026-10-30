@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import classNames, { Argument as ClassNamesArg } from 'classnames'
-import { ReactComponent as ActionArrowIcon } from './icons/textboxActionArrow.svg'
-import { ReactComponent as LoadingSpinnerIcon } from './icons/textboxLoadingSpinner.svg'
+import ActionArrowIcon from './icons/textboxActionArrow.svg?react'
+import LoadingSpinnerIcon from './icons/textboxLoadingSpinner.svg?react'
 import styled from 'styled-components'
 import { tailwindClassNames } from '../../helpers/utils'
 

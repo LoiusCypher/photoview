@@ -1,4 +1,5 @@
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../primitives/form/Input'

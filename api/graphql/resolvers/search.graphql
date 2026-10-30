@@ -5,6 +5,8 @@ type SearchResult {
   albums: [Album!]!
   "A list of media that matched the query"
   media: [Media!]!
+  "A list of faceGroup labels that matched the query"
+  faceGroups: [FaceGroup!]!
 }
 
 extend type Query {

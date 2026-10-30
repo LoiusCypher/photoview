@@ -9,6 +9,7 @@ import {
   searchQuery,
   searchQuery_search_albums,
   searchQuery_search_media,
+  searchQuery_search_facegroups,
 } from './__generated__/searchQuery'
 import classNames from 'classnames'
 
@@ -34,6 +35,10 @@ const SEARCH_QUERY = gql`
         album {
           id
         }
+      }
+      faceGroups {
+        id
+        label
       }
     }
   }
@@ -88,9 +93,11 @@ const SearchBar = () => {
   const searchData = fetchResult.data
   let media = searchData?.search.media || []
   let albums = searchData?.search.albums || []
+  let facegroups = searchData?.search.facegroups || []
 
   albums = albums.slice(0, 5)
   media = media.slice(0, 5)
+  facegroups = facegroups.slice(0, 5)
 
   const selectedItemId =
     selectedItem !== null
@@ -123,7 +130,7 @@ const SearchBar = () => {
   }, [searchData])
 
   useEffect(() => {
-    const totalItems = albums.length + media.length
+    const totalItems = albums.length + media.length + facegroups.length
 
     const keydownEvent = (event: KeyboardEvent) => {
       if (!expanded) return
@@ -153,6 +160,7 @@ const SearchBar = () => {
       <SearchResults
         albums={albums}
         media={media}
+        facegroups={facegroups}
         query={fetchResult.data?.search.query || ''}
         selectedItem={selectedItem}
         setSelectedItem={setSelectedItem}
@@ -193,6 +201,7 @@ const ResultTitle = styled.h1.attrs({
 type SearchResultsProps = {
   albums: searchQuery_search_albums[]
   media: searchQuery_search_media[]
+  facegroups: searchQuery_search_facegroups[]
   loading: boolean
   selectedItem: number | null
   setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
@@ -203,6 +212,7 @@ type SearchResultsProps = {
 const SearchResults = ({
   albums,
   media,
+  facegroups,
   loading,
   selectedItem,
   setSelectedItem,
@@ -233,7 +243,7 @@ const SearchResults = ({
 
   let message = null
   if (loading) message = t('header.search.loading', 'Loading results...')
-  else if (media.length == 0 && albums.length == 0)
+  else if (media.length == 0 && albums.length == 0 && facegroups.length == 0)
     message = t('header.search.no_results', 'No results found')
 
   if (message) message = <div className="mt-8 text-center">{message}</div>

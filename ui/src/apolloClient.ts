@@ -7,9 +7,10 @@ import {
   ServerError,
   FieldMergeFunction,
 } from '@apollo/client'
-import { getMainDefinition } from '@apollo/client/utilities'
+import { OperationTypeNode } from "graphql"
 import { onError } from '@apollo/client/link/error'
-import { WebSocketLink } from '@apollo/client/link/ws'
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 import urlJoin from 'url-join'
 import { authToken, clearTokenCookie } from './helpers/authentication'
@@ -35,32 +36,28 @@ const apiProtocol = new URL(GRAPHQL_ENDPOINT).protocol
 const websocketUri = new URL(GRAPHQL_ENDPOINT)
 websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
 
-const wsLink = new WebSocketLink({
-  uri: websocketUri.toString(),
-  options: {
-    reconnect: true,
-    lazy: true,
-    connectionParams: () => {
-      const token = authToken()
-      if (token) {
-        return {
-          Authorization: `Bearer ${token}`
-        }
-      }
-      return {}
-    }
-  }
-})
+const wsLink = new GraphQLWsLink(
+   createClient({
+     uri: websocketUri.toString(),
+     options: {
+       reconnect: true,
+       lazy: true,
+       connectionParams: () => {
+         const token = authToken()
+         if (token) {
+           return {
+             Authorization: `Bearer ${token}`
+           }
+         }
+         return {}
+       }
+     }
+   })
+ );
 
 const link = split(
   // split based on operation type
-  ({ query }) => {
-    const definition = getMainDefinition(query)
-    return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
-    )
-  },
+  ({ query }) => { return definition.kind === 'OperationTypeNode.SUBSCRIPTION' },
   wsLink,
   httpLink
 )

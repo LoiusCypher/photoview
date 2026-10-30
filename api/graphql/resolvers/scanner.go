@@ -14,11 +14,10 @@ import (
 
 	"github.com/loiuscypher/photoview/api/database/drivers"
 	"github.com/loiuscypher/photoview/api/graphql/models"
+	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 	"github.com/loiuscypher/photoview/api/scanner/periodic_scanner"
 	"github.com/loiuscypher/photoview/api/scanner/scanner_queue"
 	"gorm.io/gorm"
-
-	"github.com/loiuscypher/photoview/api/scanner/face_detection"
 )
 
 // ScanAll is the resolver for the scanAll field.
@@ -93,7 +92,7 @@ func (r *mutationResolver) ReScanMedia(ctx context.Context, mediaID int) (*model
 	}
 
 	if err := face_detection.GlobalFaceDetector.DetectFaces(r.DB(ctx), &media); err != nil {
-		return nil, fmt.Errorf( "Error detecting faces in image (%s): %s", media.Path, err)
+		return nil, fmt.Errorf("Error detecting faces in image (%s): %s", media.Path, err)
 	}
 
 	startMessage := "Album ReScan"

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { scanFacesOnOriginalFilesQuery } from './__generated__/scanFacesOnOriginalFilesQuery'
 

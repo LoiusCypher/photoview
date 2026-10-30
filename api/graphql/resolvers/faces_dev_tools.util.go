@@ -5,7 +5,33 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
+
+var rec1 map[string]time.Duration
+var rec2 map[string]time.Duration
+
+func recordTiming( caller string, time1 time.Duration, time2 time.Duration) {
+	if rec1 == nil {
+		rec1 = make(map[string]time.Duration)
+		rec2 = make(map[string]time.Duration)
+	}
+	rec1[caller] = rec1[caller] + time1
+	rec2[caller] = rec2[caller] + time2
+}
+
+func logTiming() {
+	if rec1 == nil {
+		log.Println("TRACE rec1 is uninitialized")
+		return
+	}
+	for _caller, _ := range rec1 {
+		log.Println("TRACE Diff", _caller, rec1[_caller]-rec2[_caller],
+				"Sum1", rec1[_caller],
+				"Sum2", rec2[_caller],
+				"Diff %", 100*float64(rec1[_caller]-rec2[_caller])/float64(rec1[_caller]))
+	}
+}
 
 func recordChange( path string, incMirror bool, incRotate bool, remove bool) {
 	log.Printf("recordChange Path %s\n", path)

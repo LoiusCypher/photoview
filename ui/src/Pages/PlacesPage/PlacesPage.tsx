@@ -1,4 +1,5 @@
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type mapboxgl from 'mapbox-gl'
 import React, { useReducer } from 'react'
 import { Helmet } from 'react-helmet'

@@ -13,6 +13,7 @@ import (
 func Search(db *gorm.DB, query string, userID int, limitMedia *int, limitAlbums *int) (*models.SearchResult, error) {
 	limitMediaInternal := 10
 	limitAlbumsInternal := 10
+	limitFacesInternal := 10
 
 	if limitMedia != nil {
 		limitMediaInternal = *limitMedia
@@ -66,10 +67,30 @@ func Search(db *gorm.DB, query string, userID int, limitMedia *int, limitAlbums 
 		return nil, errors.Wrapf(err, "searching albums")
 	}
 
+//////
+	var faceGroups []*models.FaceGroup
+ 
+	err = db.
+                Joins("JOIN image_faces ON image_faces.face_group_id = face_groups.id").
+                Joins("JOIN media ON media.id = image_faces.face_group_id").
+                Joins("JOIN user_albums ON user_albums.album_id = media.album_id").
+                Group("face_groups.id").
+                Where("face_groups.label IS NOT NULL").
+		Where("user_albums.user_id = ?", userID).
+		Where("face_groups.label LIKE ?", wildQuery).
+                Order("face_groups.label ASC").
+		Limit(limitFacesInternal).
+		Find(&faceGroups).Error
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "searching faceGroups")
+	}
+
 	result := models.SearchResult{
 		Query:  query,
 		Media:  media,
 		Albums: albums,
+		FaceGroups: faceGroups,
 	}
 
 	return &result, nil
