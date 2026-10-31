@@ -17,11 +17,14 @@ extend type Mutation {
   "Set threshold for face classification"
   setFaceClassifyThreshold(threshold: Float!): Float! @isAdmin
 
-  "See if group contains several persons"
-  splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
-
   "Order unconfirmed faces in a FaceGroup"
   orderFacesOfFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
+  "See if we could find faces for current group"
+  searchForFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
+  "Try to isolate unconfirmed faces that could be split from current group"
+  splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
 
   "Toggle Faces FaceGroup Confirmation flag "
   toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
