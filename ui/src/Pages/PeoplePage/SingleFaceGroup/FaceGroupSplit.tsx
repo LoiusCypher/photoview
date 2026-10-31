@@ -19,7 +19,7 @@ const ORDER_FACE_GROUP_MUTATION = gql`
 
 const SEARCH_FACE_GROUP_MUTATION = gql`
   mutation searchFaceGroupAction( $groupId: ID!) {
-    searchFaceGroup( groupId: $groupId) {
+    searchForFaceGroup( groupId: $groupId) {
       success
       message
     }
