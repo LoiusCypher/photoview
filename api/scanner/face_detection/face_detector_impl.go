@@ -903,6 +903,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	})
 	log.Println("index", index)
 
+	// set subgroup according to our computations
 	for _, gIdx := range index {
 		log.Println("Save Group", gIdx, "dist", dists[gIdx], "len", len(indexGrps[gIdx]), "first imageFace", fd.imageFaceIDs[indexGrps[gIdx][0]])
 		for mIdx := range len(indexGrps[gIdx]) {
