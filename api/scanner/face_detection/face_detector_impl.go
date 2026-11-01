@@ -877,10 +877,10 @@ for i := range 5 {
 			}
 		}
 	}
-	log.Println("Mindist of Groups", minDist, minDistIndexes)
+	log.Println("Mindist of Groups", i, minDist, minDistIndexes)
 	indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
 	indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
-	log.Println("Merged Groups", indexGrps)
+	log.Println("Merged Groups", i, indexGrps)
 }
 
 /*
