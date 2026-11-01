@@ -877,6 +877,9 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		}
 	}
 	log.Println("Mindist of Groups", minDist, minDistIndexes)
+	indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
+	indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
+	log.Println("Merged Groups", indexGrps)
 
 /*
 	index := make([]int, len(grpUnConfIndexes))
