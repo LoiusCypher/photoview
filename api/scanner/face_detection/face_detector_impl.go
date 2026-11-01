@@ -69,7 +69,7 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 
 	var imageFaces []*models.ImageFace
 
-	if err = db.Find(&imageFaces).Order("confirmed").Order("subgroup").Error; err != nil {
+	if err = db.Find(&imageFaces).Order("face_group_id").Order("confirmed").Order("subgroup").Error; err != nil {
 		return
 	}
 
@@ -876,28 +876,29 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	var minDist float64
 	minDistIndexes := make([]int, 2, 2)
-i := 0
-for len(indexGrps) > 2 {
-	for sIdx := range len(indexGrps)-1 {
-		for dIdx := sIdx+1; dIdx < len(indexGrps); dIdx++ {
-			curDist := fd.calcMinDistGroups( indexGrps[dIdx], indexGrps[sIdx])
-			if ((sIdx == 0) && (dIdx == 1)) || (curDist < minDist) {
-				minDist = curDist
-				minDistIndexes[0] = sIdx
-				minDistIndexes[1] = dIdx
+	i := 0
+	for len(indexGrps) > 2 {
+		for sIdx := range len(indexGrps)-1 {
+			for dIdx := sIdx+1; dIdx < len(indexGrps); dIdx++ {
+				curDist := fd.calcMinDistGroups( indexGrps[dIdx], indexGrps[sIdx])
+				if ((sIdx == 0) && (dIdx == 1)) || (curDist < minDist) {
+					minDist = curDist
+					minDistIndexes[0] = sIdx
+					minDistIndexes[1] = dIdx
+				}
 			}
 		}
+		log.Println("Mindist of Groups", i, minDist, minDistIndexes)
+		if minDist > 0.2 {
+			break
+		}
+		indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
+		indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
+		log.Println("Merged Groups", i, indexGrps)
+		i++
 	}
-	log.Println("Mindist of Groups", i, minDist, minDistIndexes)
-	if minDist > 0.2 {
-		break
-	}
-	indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
-	indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
-	log.Println("Merged Groups", i, indexGrps)
-	i++
-}
 	for sIdx := range len(indexGrps) {
+		log.Println("Save Group", sIdx, len(indexGrps[sIdx], fd.imageFaceIDs[indexGrps[sIdx][0]])
 		for dIdx := range len(indexGrps[sIdx]) {
 			if err := setImageFaceSubGroup(db, fd.imageFaceIDs[indexGrps[sIdx][dIdx]], sIdx*100); err != nil {
 				log.Println("Saved Subgroup", sIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[indexGrps[sIdx][dIdx]], err)
@@ -1148,7 +1149,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		} else {
 			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldGroupMinDist", oldGroupMinDist)
 		}
-		if (dists[index[uIdx]] < 0.10) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
+		if (dists[index[uIdx]] < 0.15) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], groupID); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
@@ -1249,7 +1250,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		} else {
 			log.Println("FaceImageId", fd.imageFaceIDs[otherIndex], "FaceGroupId", fd.faceGroupIDs[otherIndex], "dist", dists[index[gIdx]], faceGroup.Label)
 		}
-		if doIt && dists[index[gIdx]] < 0.100 {
+		if doIt && dists[index[gIdx]] < 0.10 {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[gIdx], fd.faceGroupIDs[otherIndex]); err != nil {
 				log.Println("moveToClosestFaceGroup err", err)
 				return
@@ -1272,7 +1273,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		} else {
 			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]], *otherImg.FaceGroup.Label)
 		}
-		if doIt && dists[index[gIdx]] < 0.100 {
+		if doIt && dists[index[gIdx]] < 0.10 {
 			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, int32(otherImg.FaceGroupID)); err != nil {
 				log.Println("moveToClosestFaceGroup err", err)
 				return
