@@ -830,6 +830,77 @@ func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex 
 }
 
 func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
+
+	log.Printf("SplitFaceGroup groupID %d\n", groupID)
+
+	fd.ReloadFacesFromDatabase(db)
+
+	var faceGrp models.FaceGroup
+	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupID).First(&faceGrp).Error; err != nil {
+		log.Println("SplitFaceGroup err", err)
+		return
+	}
+
+	grpIndexes, _ := fd.findFaceGroupIndices( groupID)
+	log.Println("in group:", len(grpIndexes))
+	grpConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, true)
+	log.Println("Confirmed", len(grpConfIndexes))
+	if len(grpConfIndexes) == 0 {
+		log.Println("Need confirmed reference")
+		return
+	}
+	grpUnConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, false)
+	log.Println("Other Group", len(grpUnConfIndexes))
+	if len(grpUnConfIndexes) == 0 {
+		log.Println("No unconfirmed left")
+		return
+	}
+
+	// every unconfirmed face is its own group first
+	indexGrps := make([][]int, len(grpUnConfIndexes) + 1)
+	indexGrps[0] = grpConfIndexes
+	for uIdx, oIdx := range grpUnConfIndexes {
+		indexGrps[uIdx+1] = append(make([]int,1), oIdx)
+	}
+	log.Println("Groups of Group initialzed", indexGrps)
+
+	var minDist float64
+	minDistIndexes := make([]int, 2, 2)
+	for sIdx := range len(indexGrps)-1 {
+		for dIdx := sIdx+1; dIdx < len(indexGrps); dIdx++ {
+			curDist := fd.calcMinDistGroups( indexGrps[dIdx], indexGrps[sIdx])
+			if ((sIdx == 0) && (dIdx == 0)) || (curDist < minDist) {
+				minDist = curDist
+				minDistIndexes[0] = sIdx
+				minDistIndexes[1] = dIdx
+			}
+		}
+	}
+	log.Println("Mindist of Groups", minDist, minDistIndexes)
+
+/*
+	index := make([]int, len(grpUnConfIndexes))
+	dists := make([]float64, len(grpUnConfIndexes))
+	for uIdx, oIdx := range grpUnConfIndexes {
+		index[uIdx] = uIdx
+		dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
+		// log.Printf("uIdx %3d oIdx %6d ID %6d minDist %f\n", uIdx, oIdx, fd.imageFaceIDs[oIdx], dists[uIdx])
+	}
+
+	// sort with highest distance first
+	// log.Println("dists", dists)
+	sort.Slice( index, func( i, j int) bool {
+		return dists[index[i]] > dists[index[j]]
+	})
+	// log.Println("index", index)
+
+	for uIdx := range len(grpUnConfIndexes) {
+		log.Println( uIdx, "distance for FaceImageId", index[uIdx], grpUnConfIndexes[index[uIdx]], fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], dists[index[uIdx]])
+		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], uIdx+1); err != nil {
+			log.Println("Saved Subgroup", uIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], err)
+		}
+	}
+*/
 }
 
 func (fd *faceDetector) SearchFaceGroup(db *gorm.DB, groupID int32) {
@@ -935,7 +1006,6 @@ func calcImgMinDistGrp( imgDesc face.Descriptor, groupDesc []face.Descriptor) (f
 }
 
 func euclidean_distance(src face.Descriptor, dst face.Descriptor) (r float64) {
-
 	sum_of_squares := 0.0
 	for i, coord := range src {
 		//sum_of_squares += math.Pow(float64(coord-dst[i]), 2)
