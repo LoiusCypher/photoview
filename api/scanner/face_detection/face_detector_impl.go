@@ -866,6 +866,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	var minDist float64
 	minDistIndexes := make([]int, 2, 2)
+for sIdx := range 3 {
 	for sIdx := range len(indexGrps)-1 {
 		for dIdx := sIdx+1; dIdx < len(indexGrps); dIdx++ {
 			curDist := fd.calcMinDistGroups( indexGrps[dIdx], indexGrps[sIdx])
@@ -880,6 +881,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
 	indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
 	log.Println("Merged Groups", indexGrps)
+}
 
 /*
 	index := make([]int, len(grpUnConfIndexes))
