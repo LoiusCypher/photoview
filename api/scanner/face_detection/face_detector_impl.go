@@ -860,7 +860,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 	indexGrps := make([][]int, len(grpUnConfIndexes) + 1)
 	indexGrps[0] = grpConfIndexes
 	for uIdx, oIdx := range grpUnConfIndexes {
-		indexGrps[uIdx+1] = append(make([]int,1), oIdx)
+		indexGrps[uIdx+1] = []int{oIdx}
 	}
 	log.Println("Groups of Group initialzed", indexGrps)
 
@@ -903,7 +903,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 */
 }
 
-func (fd *faceDetector) SearchFaceGroup(db *gorm.DB, groupID int32) {
+func (fd *faceDetector) SearchForFaceGroup(db *gorm.DB, groupID int32) {
 
 	log.Printf("SearchFaceGroup groupID %d\n", groupID)
 
@@ -1110,7 +1110,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		} else {
 			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldGroupMinDist", oldGroupMinDist)
 		}
-		if (dists[index[uIdx]] < 0.20) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
+		if (dists[index[uIdx]] < 0.10) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], groupID); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
@@ -1211,7 +1211,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		} else {
 			log.Println("FaceImageId", fd.imageFaceIDs[otherIndex], "FaceGroupId", fd.faceGroupIDs[otherIndex], "dist", dists[index[gIdx]], faceGroup.Label)
 		}
-		if doIt && dists[index[gIdx]] < 0.200 {
+		if doIt && dists[index[gIdx]] < 0.100 {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[gIdx], fd.faceGroupIDs[otherIndex]); err != nil {
 				log.Println("moveToClosestFaceGroup err", err)
 				return
@@ -1234,7 +1234,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		} else {
 			log.Println("FaceImageId", otherImg.ID, "FaceGroupId", otherImg.FaceGroupID, "dist", dists[index[gIdx]], *otherImg.FaceGroup.Label)
 		}
-		if doIt && dists[index[gIdx]] < 0.200 {
+		if doIt && dists[index[gIdx]] < 0.100 {
 			if err := setImageFaceGroup(db, grpImageFaces[gIdx].ID, int32(otherImg.FaceGroupID)); err != nil {
 				log.Println("moveToClosestFaceGroup err", err)
 				return
