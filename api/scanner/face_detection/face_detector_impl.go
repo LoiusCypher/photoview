@@ -866,7 +866,8 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 
 	var minDist float64
 	minDistIndexes := make([]int, 2, 2)
-for i := range 5 {
+i := 0
+for len(indexGrps) > 2 {
 	for sIdx := range len(indexGrps)-1 {
 		for dIdx := sIdx+1; dIdx < len(indexGrps); dIdx++ {
 			curDist := fd.calcMinDistGroups( indexGrps[dIdx], indexGrps[sIdx])
@@ -878,34 +879,22 @@ for i := range 5 {
 		}
 	}
 	log.Println("Mindist of Groups", i, minDist, minDistIndexes)
+	if minDist > 0.2 {
+		break
+	}
 	indexGrps[minDistIndexes[0]] = append( indexGrps[minDistIndexes[0]], indexGrps[minDistIndexes[1]]...)
 	indexGrps= append(indexGrps[:minDistIndexes[1]], indexGrps[minDistIndexes[1]+1:]...)
 	log.Println("Merged Groups", i, indexGrps)
+	i++
 }
-
-/*
-	index := make([]int, len(grpUnConfIndexes))
-	dists := make([]float64, len(grpUnConfIndexes))
-	for uIdx, oIdx := range grpUnConfIndexes {
-		index[uIdx] = uIdx
-		dists[uIdx], _ = fd.calcMinDistIndex( oIdx, grpConfIndexes)
-		// log.Printf("uIdx %3d oIdx %6d ID %6d minDist %f\n", uIdx, oIdx, fd.imageFaceIDs[oIdx], dists[uIdx])
-	}
-
-	// sort with highest distance first
-	// log.Println("dists", dists)
-	sort.Slice( index, func( i, j int) bool {
-		return dists[index[i]] > dists[index[j]]
-	})
-	// log.Println("index", index)
-
-	for uIdx := range len(grpUnConfIndexes) {
-		log.Println( uIdx, "distance for FaceImageId", index[uIdx], grpUnConfIndexes[index[uIdx]], fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], dists[index[uIdx]])
-		if err := setImageFaceSubGroup(db, fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], uIdx+1); err != nil {
-			log.Println("Saved Subgroup", uIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[grpUnConfIndexes[index[uIdx]]], err)
+	for sIdx := range len(indexGrps) {
+		for dIdx := range len(indexGrps[sIdx]) {
+			if err := setImageFaceSubGroup(db, fd.imageFaceIDs[indexGrps[sIdx][dIdx]], sIdx*100); err != nil {
+				log.Println("Saved Subgroup", sIdx, "error saving Subgroup for FaceImageId", fd.imageFaceIDs[indexGrps[sIdx][dIdx]], err)
+			}
 		}
 	}
-*/
+
 }
 
 func (fd *faceDetector) SearchForFaceGroup(db *gorm.DB, groupID int32) {
