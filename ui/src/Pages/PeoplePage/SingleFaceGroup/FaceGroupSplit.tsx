@@ -4,17 +4,9 @@ import { useMutation, gql } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../primitives/form/Input'
 import classNames from 'classnames'
-import { splitFaceGroupAction, splitFaceGroupVariables } from './__generated__/splitFaceGroupAction'
 import { orderFaceGroupAction, orderFaceGroupVariables } from './__generated__/orderFaceGroupAction'
-
-const SPLIT_FACE_GROUP_MUTATION = gql`
-  mutation splitFaceGroupAction( $groupId: ID!) {
-    splitFaceGroup( groupId: $groupId) {
-      success
-      message
-    }
-  }
-`
+import { searchFaceGroupAction, searchFaceGroupVariables } from './__generated__/searchFaceGroupAction'
+import { splitFaceGroupAction, splitFaceGroupVariables } from './__generated__/splitFaceGroupAction'
 
 const ORDER_FACE_GROUP_MUTATION = gql`
   mutation orderFaceGroupAction( $groupId: ID!) {
@@ -25,11 +17,33 @@ const ORDER_FACE_GROUP_MUTATION = gql`
   }
 `
 
-export type FaceGroupSplitButtonProps = {
+const SEARCH_FACE_GROUP_MUTATION = gql`
+  mutation searchFaceGroupAction( $groupId: ID!) {
+    searchForFaceGroup( groupId: $groupId) {
+      success
+      message
+    }
+  }
+`
+
+const SPLIT_FACE_GROUP_MUTATION = gql`
+  mutation splitFaceGroupAction( $groupId: ID!) {
+    splitFaceGroup( groupId: $groupId) {
+      success
+      message
+    }
+  }
+`
+
+export type FaceGroupOrderButtonProps = {
   groupID: int,
 }
 
-export type FaceGroupOrderButtonProps = {
+export type FaceGroupSearchButtonProps = {
+  groupID: int,
+}
+
+export type FaceGroupSplitButtonProps = {
   groupID: int,
 }
 
@@ -50,6 +64,23 @@ const FaceGroupOrderButton = ({
   )
 }
 
+const FaceGroupSearchButton = ({
+  groupID,
+}: FaceGroupSearchButtonProps) => {
+  const { t } = useTranslation()
+  const [startFaceGroupSearch, { calledSearch }] = useMutation<searchFaceGroupAction,searchFaceGroupVariables>(SEARCH_FACE_GROUP_MUTATION)
+
+  return (
+    <Button
+      className="mb-1"
+      onClick={() => { startFaceGroupSearch({variables: {groupId: groupID}});}}
+      disabled={calledSearch}
+    >
+      {t('face_group.search', 'Search others / Check MoveTo face group')}
+    </Button>
+  )
+}
+
 const FaceGroupSplitButton = ({
   groupID,
 }: FaceGroupSplitButtonProps) => {
@@ -62,12 +93,16 @@ const FaceGroupSplitButton = ({
       onClick={() => { startFaceGroupSplit({variables: {groupId: groupID}});}}
       disabled={calledSplit}
     >
-      {t('face_group.split', 'Search others / Check MoveTo face group')}
+      {t('face_group.split', 'Split group')}
     </Button>
   )
 }
 
 type FaceGroupOrderProps = {
+  groupID: int,
+}
+
+type FaceGroupSearchProps = {
   groupID: int,
 }
 
@@ -81,12 +116,17 @@ const FaceGroupRow = ({
   return (
     <div className="flex items-end gap-4 flex-wrap mb-4">
       {authToken() && (
-        <FaceGroupSplitButton
+        <FaceGroupOrderButton
           groupID={groupID}
         />
       )}
       {authToken() && (
-        <FaceGroupOrderButton
+        <FaceGroupSearchButton
+          groupID={groupID}
+        />
+      )}
+      {authToken() && (
+        <FaceGroupSplitButton
           groupID={groupID}
         />
       )}

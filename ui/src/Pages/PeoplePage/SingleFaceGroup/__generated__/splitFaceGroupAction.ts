@@ -15,7 +15,7 @@ export interface splitFaceGroupAction_splitFaceGroup {
 
 export interface splitFaceGroupAction {
   /**
-   * See if group contains several persons
+   * Try to isolate unconfirmed faces that could be split from current group
    */
   splitFaceGroup: splitFaceGroupAction_splitFaceGroup
 }
