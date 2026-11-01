@@ -4,7 +4,7 @@ package face_detection
 
 import (
 	"log"
-	"math"
+	//"math"
 	"slices"
 	"sort"
 	"sync"
@@ -830,8 +830,11 @@ func mergeGroupsIfPossible(groups [][]int, dists []distElem, tId int, sGrpIndex 
 }
 
 func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
+}
 
-	log.Printf("SplitFaceGroup groupID %d\n", groupID)
+func (fd *faceDetector) SearchFaceGroup(db *gorm.DB, groupID int32) {
+
+	log.Printf("SearchFaceGroup groupID %d\n", groupID)
 
 	fd.ReloadFacesFromDatabase(db)
 
@@ -931,6 +934,20 @@ func calcImgMinDistGrp( imgDesc face.Descriptor, groupDesc []face.Descriptor) (f
 	return minDist, minDistIdx
 }
 
+func euclidean_distance(src face.Descriptor, dst face.Descriptor) (r float64) {
+
+	sum_of_squares := 0.0
+	for i, coord := range src {
+		//sum_of_squares += math.Pow(float64(coord-dst[i]), 2)
+		diff := float64(coord - dst[i])
+		sum_of_squares += diff * diff
+	}
+	//return 1 / (1 + math.Sqrt(sum_of_squares))
+	//return math.Sqrt(sum_of_squares)
+	//return 0.5 * sum_of_squares
+	return sum_of_squares
+}
+
 func (fd *faceDetector) calcMinDistIndex( imgIndex int, otherIndexes []int) (float64, int) {
 	var minDist float64
 	var minDistIdx int
@@ -943,6 +960,18 @@ func (fd *faceDetector) calcMinDistIndex( imgIndex int, otherIndexes []int) (flo
 		// log.Printf("cIdx %d minDist %d %f\n", cIdx, minDistIdx, minDist)
 	}
 	return minDist, minDistIdx
+}
+
+func (fd *faceDetector) calcMinDistGroups( groupIndexes []int, otherIndexes []int) (float64) {
+	var minDist float64
+	for gIdx, groupIndex := range groupIndexes {
+		curDist, _ := fd.calcMinDistIndex( groupIndex, otherIndexes)
+		if (gIdx == 0) || (curDist < minDist) {
+			minDist = curDist
+		}
+		// log.Printf("gIdx %d minDist %f\n", gIdx, minDist)
+	}
+	return minDist
 }
 
 func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
@@ -1011,7 +1040,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		} else {
 			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldGroupMinDist", oldGroupMinDist)
 		}
-		if (dists[index[uIdx]] < 0.250) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
+		if (dists[index[uIdx]] < 0.20) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], groupID); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
@@ -1321,17 +1350,4 @@ func (fd *faceDetector) SplitFaceGroupOld(db *gorm.DB, groupID int32) {
 		log.Println(" Group", j, i, "len", len(grp), grp)
 		j += 1
 	}
-}
-
-func euclidean_distance(src face.Descriptor, dst face.Descriptor) (r float64) {
-
-	sum_of_squares := 0.0
-	for i, coord := range src {
-		//sum_of_squares += math.Pow(float64(coord-dst[i]), 2)
-		diff := float64(coord - dst[i])
-		sum_of_squares += diff * diff
-	}
-	//return 1 / (1 + math.Sqrt(sum_of_squares))
-	return math.Sqrt(sum_of_squares)
-	//return 0.5 * sum_of_squares
 }
