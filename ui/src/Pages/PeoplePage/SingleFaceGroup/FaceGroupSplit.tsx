@@ -120,16 +120,6 @@ const FaceGroupRow = ({
           groupID={groupID}
         />
       )}
-      {authToken() && (
-        <FaceGroupSearchButton
-          groupID={groupID}
-        />
-      )}
-      {authToken() && (
-        <FaceGroupSplitButton
-          groupID={groupID}
-        />
-      )}
     </div>
   )
 }
