@@ -26,6 +26,9 @@ extend type Mutation {
   "Try to isolate unconfirmed faces that could be split from current group"
   splitFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
 
+  "Confirm all ImageFaces of given group"
+  confirmAllFacesInFaceGroup(groupId: ID!): DevCmdResult! @isAdmin
+
   "Toggle Faces FaceGroup Confirmation flag "
   toggleConfirmFaceGroup(imageFaceId: ID!): Boolean! @isAdmin
 

@@ -153,6 +153,7 @@ type ComplexityRoot struct {
 		ChangeUserPreferences       func(childComplexity int, language *string) int
 		CheckFaceGroup              func(childComplexity int, faceGroupID int) int
 		CombineFaceGroups           func(childComplexity int, destinationFaceGroupID int, sourceFaceGroupIDs []int) int
+		ConfirmAllFacesInFaceGroup  func(childComplexity int, groupID int) int
 		CreateUser                  func(childComplexity int, username string, password *string, admin bool, rootPath *string) int
 		DeleteShareToken            func(childComplexity int, token string) int
 		DeleteUser                  func(childComplexity int, id int) int
@@ -345,6 +346,7 @@ type MutationResolver interface {
 	OrderFacesOfFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
 	SearchForFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
 	SplitFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
+	ConfirmAllFacesInFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error)
 	ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error)
 	RotateMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
 	MirrorMedia(ctx context.Context, mediaID int) (*models.DevCmdResult, error)
@@ -897,6 +899,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CombineFaceGroups(childComplexity, args["destinationFaceGroupID"].(int), args["sourceFaceGroupIDs"].([]int)), true
+	case "Mutation.confirmAllFacesInFaceGroup":
+		if e.ComplexityRoot.Mutation.ConfirmAllFacesInFaceGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_confirmAllFacesInFaceGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ConfirmAllFacesInFaceGroup(childComplexity, args["groupId"].(int)), true
 	case "Mutation.createUser":
 		if e.ComplexityRoot.Mutation.CreateUser == nil {
 			break
@@ -2486,6 +2499,20 @@ func (ec *executionContext) field_Mutation_combineFaceGroups_args(ctx context.Co
 		return nil, err
 	}
 	args["sourceFaceGroupIDs"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_confirmAllFacesInFaceGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "groupId",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNID2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["groupId"] = arg0
 	return args, nil
 }
 
@@ -6031,6 +6058,63 @@ func (ec *executionContext) fieldContext_Mutation_splitFaceGroup(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_splitFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_confirmAllFacesInFaceGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_confirmAllFacesInFaceGroup(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ConfirmAllFacesInFaceGroup(ctx, fc.Args["groupId"].(int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.IsAdmin == nil {
+					var zeroVal *models.DevCmdResult
+					return zeroVal, errors.New("directive isAdmin is not implemented")
+				}
+				return ec.Directives.IsAdmin(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.DevCmdResult) graphql.Marshaler {
+			return ec.marshalNDevCmdResult2ᚖgithubᚗcomᚋloiuscypherᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐDevCmdResult(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_confirmAllFacesInFaceGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DevCmdResult(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_confirmAllFacesInFaceGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -11698,6 +11782,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "splitFaceGroup":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_splitFaceGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "confirmAllFacesInFaceGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_confirmAllFacesInFaceGroup(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

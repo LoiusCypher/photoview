@@ -7,6 +7,7 @@ import classNames from 'classnames'
 import { orderFaceGroupAction, orderFaceGroupVariables } from './__generated__/orderFaceGroupAction'
 import { searchFaceGroupAction, searchFaceGroupVariables } from './__generated__/searchFaceGroupAction'
 import { splitFaceGroupAction, splitFaceGroupVariables } from './__generated__/splitFaceGroupAction'
+import { confirmFaceGroupAction, confirmFaceGroupVariables } from './__generated__/confirmFaceGroupAction'
 
 const ORDER_FACE_GROUP_MUTATION = gql`
   mutation orderFaceGroupAction( $groupId: ID!) {
@@ -35,6 +36,15 @@ const SPLIT_FACE_GROUP_MUTATION = gql`
   }
 `
 
+const CONFIRM_FACE_GROUP_MUTATION = gql`
+  mutation confirmFaceGroupAction( $groupId: ID!) {
+    confirmAllFacesInFaceGroup( groupId: $groupId) {
+      success
+      message
+    }
+  }
+`
+
 export type FaceGroupOrderButtonProps = {
   groupID: int,
 }
@@ -44,6 +54,10 @@ export type FaceGroupSearchButtonProps = {
 }
 
 export type FaceGroupSplitButtonProps = {
+  groupID: int,
+}
+
+export type FaceGroupConfirmButtonProps = {
   groupID: int,
 }
 
@@ -98,6 +112,23 @@ const FaceGroupSplitButton = ({
   )
 }
 
+const FaceGroupConfirmButton = ({
+  groupID,
+}: FaceGroupConfirmButtonProps) => {
+  const { t } = useTranslation()
+  const [startFaceGroupConfirm, { calledConfirm }] = useMutation<ConfirmFaceGroupAction,ConfirmFaceGroupVariables>(CONFIRM_FACE_GROUP_MUTATION)
+
+  return (
+    <Button
+      className="mb-1"
+      onClick={() => { startFaceGroupConfirm({variables: {groupId: groupID}});}}
+      disabled={calledConfirm}
+    >
+      {t('face_group.confirm', 'Confirm group')}
+    </Button>
+  )
+}
+
 type FaceGroupOrderProps = {
   groupID: int,
 }
@@ -107,6 +138,10 @@ type FaceGroupSearchProps = {
 }
 
 type FaceGroupSplitProps = {
+  groupID: int,
+}
+
+type FaceGroupConfirmProps = {
   groupID: int,
 }
 
@@ -127,6 +162,11 @@ const FaceGroupRow = ({
       )}
       {authToken() && (
         <FaceGroupSplitButton
+          groupID={groupID}
+        />
+      )}
+      {authToken() && (
+        <FaceGroupConfirmButton
           groupID={groupID}
         />
       )}

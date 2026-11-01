@@ -69,7 +69,7 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 
 	var imageFaces []*models.ImageFace
 
-	if err = db.Find(&imageFaces).Error; err != nil {
+	if err = db.Find(&imageFaces).Order("confirmed").Order("subgroup").Error; err != nil {
 		return
 	}
 
@@ -88,11 +88,21 @@ func getSamplesFromDatabase(db *gorm.DB) (samples []face.Descriptor, faceGroupID
 }
 
 func setImageFaceSubGroup(db *gorm.DB, imageFaceID int, subGroup int) (err error) {
-
 	if err := db.
 			Where("id = ?", imageFaceID).
 			Model(&models.ImageFace{}).
 			UpdateColumn("subgroup", subGroup).
+			Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func setImageFaceConfirmed(db *gorm.DB, imageFaceID int, confirmed bool) (err error) {
+	if err := db.
+			Where("id = ?", imageFaceID).
+			Model(&models.ImageFace{}).
+			UpdateColumn("confirmed", confirmed).
 			Error; err != nil {
 		return err
 	}
@@ -895,6 +905,40 @@ for len(indexGrps) > 2 {
 		}
 	}
 
+}
+
+func (fd *faceDetector) ConfirmAllFacesInFaceGroup(db *gorm.DB, groupID int32) {
+
+	log.Printf("ConfirmAllFacesInFaceGroup groupID %d\n", groupID)
+
+	fd.ReloadFacesFromDatabase(db)
+
+	var faceGrp models.FaceGroup
+	if err := db.Model(models.FaceGroup{}).Where("id = ?", groupID).First(&faceGrp).Error; err != nil {
+		log.Println("SplitFaceGroup err", err)
+		return
+	}
+
+	if faceGrp.Label == nil {
+		log.Println("ConfirmAllFacesInFaceGroup Label is nii")
+		return
+	}
+
+	grpIndexes, _ := fd.findFaceGroupIndices( groupID)
+	log.Println("in group:", len(grpIndexes))
+	grpUnConfIndexes := fd.findConfirmedFaceIndices( db, grpIndexes, false)
+	log.Println("Other Group", len(grpUnConfIndexes))
+	if len(grpUnConfIndexes) == 0 {
+		log.Println("No unconfirmed left")
+		return
+	}
+
+	for uIdx := range len(grpUnConfIndexes) {
+		log.Println( uIdx, "set confirmed for FaceImageId", uIdx, grpUnConfIndexes[uIdx], fd.imageFaceIDs[grpUnConfIndexes[uIdx]])
+		if err := setImageFaceConfirmed(db, fd.imageFaceIDs[grpUnConfIndexes[uIdx]], true); err != nil {
+			log.Println("Saved Subgroup", uIdx, "error saving Confirmed for FaceImageId", fd.imageFaceIDs[grpUnConfIndexes[uIdx]], err)
+		}
+	}
 }
 
 func (fd *faceDetector) SearchForFaceGroup(db *gorm.DB, groupID int32) {

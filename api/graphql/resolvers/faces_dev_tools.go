@@ -270,6 +270,18 @@ func (r *mutationResolver) SplitFaceGroup(ctx context.Context, groupID int) (*mo
 	}, nil
 }
 
+// ConfirmAllFacesInFaceGroup is the resolver for the confirmAllFacesInFaceGroup field.
+func (r *mutationResolver) ConfirmAllFacesInFaceGroup(ctx context.Context, groupID int) (*models.DevCmdResult, error) {
+	//log.Printf("ConfirmAllFacesInFaceGroup: %d\n", groupID)
+	face_detection.GlobalFaceDetector.ConfirmAllFacesInFaceGroup(r.DB(ctx), int32(groupID))
+
+	startMessage := "Search for face group Done"
+	return &models.DevCmdResult{
+		Success: true,
+		Message: &startMessage,
+	}, nil
+}
+
 // ToggleConfirmFaceGroup is the resolver for the toggleConfirmFaceGroup field.
 func (r *mutationResolver) ToggleConfirmFaceGroup(ctx context.Context, imageFaceID int) (bool, error) {
 	db := r.DB(ctx)
