@@ -1364,7 +1364,7 @@ func deduplicate32(s []int32) []int32 {
 func (fd *faceDetector) Reports(db *gorm.DB) {
 	log.Printf("Reports\n")
 	fd.ReloadFacesFromDatabase(db)
-	log.Printf("Known Image Faces: %d in %d Image Groups\n", len(fd.imageFaceIDs), len(deduplicate32(fd.faceGroupIDs))
+	log.Printf("Known Image Faces: %d in %d Image Groups\n", len(fd.imageFaceIDs), len(deduplicate32(fd.faceGroupIDs)))
 	fd.ReportDuplicateDescriptors(db)
 }
 
