@@ -1373,7 +1373,7 @@ func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
 	start := time.Now()
 	dupCnt := 0
 	for sIdx, sDesc := range fd.faceDescriptors[:len(fd.faceDescriptors)-2] {
-		for cIdx, cDesc := range fd.faceDescriptors[sIdx+1:] {
+		for _, cDesc := range fd.faceDescriptors[sIdx+1:] {
 			currDist := euclidean_distance(sDesc, cDesc)
 			if currDist == 0.0 {
 				dupCnt++
