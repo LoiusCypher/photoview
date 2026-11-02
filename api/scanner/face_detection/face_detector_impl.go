@@ -1174,7 +1174,7 @@ func (fd *faceDetector) searchFacesForFaceGroup(db *gorm.DB, groupID int32) {
 		} else {
 			log.Println("Img", fd.imageFaceIDs[oIdx], "Media", media.ID, "Album", media.AlbumID, "Group", fd.faceGroupIDs[oIdx], label, "distance", dists[index[uIdx]], "oldGroupMinDist", oldGroupMinDist)
 		}
-		if (dists[index[uIdx]] < 0.19) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
+		if (dists[index[uIdx]] < 0.18) && ((len(othGrpConfIndexes) == 0) || (dists[index[uIdx]] < (0.75 * oldGroupMinDist))) {
 			if err := setImageFaceGroup(db, fd.imageFaceIDs[oIdx], groupID); err != nil {
 				log.Println("searchFacesForFaceGroup err", err)
 				return
