@@ -913,8 +913,6 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 			}
 		}
 	}
-
-	fd.ReportDuplicateDescriptors(db)
 }
 
 func (fd *faceDetector) ConfirmAllFacesInFaceGroup(db *gorm.DB, groupID int32) {
@@ -991,6 +989,7 @@ func (fd *faceDetector) OrderFacesOfFaceGroup(db *gorm.DB, groupID int32) {
 		log.Println("SplitFaceGroup Label is nii")
 		fd.moveToClosestFaceGroup(db, groupID, true)
 	}
+	fd.Reports(db)
 }
 
 func (fd *faceDetector) findFaceGroupIndices(groupID int32) ( []int, []int) {
@@ -1350,11 +1349,27 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	}
 }
 
-func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
+func deduplicate32(s []int32) []int32 {
+ var r []int32
+ seen := make(map[int32]struct{})
+ for _, v := range s {
+  if _, ok := seen[v]; !ok {
+   seen[v] = struct{}{}
+   r = append(r, v)
+  }
+ }
+ return r
+}
 
-	log.Printf("ReportDuplicateDescriptors\n")
-
+func (fd *faceDetector) Reports(db *gorm.DB) {
+	log.Printf("Reports\n")
 	fd.ReloadFacesFromDatabase(db)
+	log.Printf("Known Image Faces: %d in %d Image Groups\n", len(fd.imageFaceIDs), len(deduplicate32(fd.faceGroupIDs))
+	fd.ReportDuplicateDescriptors(db)
+}
+
+func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
+	log.Printf("ReportDuplicateDescriptors\n")
 	start := time.Now()
 	dupCnt := 0
 	for sIdx, sDesc := range fd.faceDescriptors[:len(fd.faceDescriptors)-2] {
@@ -1362,12 +1377,13 @@ func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
 			currDist := euclidean_distance(sDesc, cDesc)
 			if currDist == 0.0 {
 				dupCnt++
-				log.Printf(" loop sIdx:%d dIdx:%d dupCnt %d dist: %f\n", sIdx, cIdx, dupCnt, currDist)
-				elapsed := time.Since(start)
-				log.Printf("Calculation took %s", elapsed)
+				// log.Printf(" loop sIdx:%d dIdx:%d dupCnt %d dist: %f\n", sIdx, cIdx, dupCnt, currDist)
+				// elapsed := time.Since(start)
+				// log.Printf("Calculation took %s", elapsed)
 			}
 		}
 	}
 	elapsed := time.Since(start)
+	log.Printf("dupCnt %d\n", dupCnt)
 	log.Printf("Calculation took %s", elapsed)
 }
