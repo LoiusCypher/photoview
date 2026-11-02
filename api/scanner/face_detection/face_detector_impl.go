@@ -8,6 +8,7 @@ import (
 	"slices"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/Kagami/go-face"
 	"github.com/loiuscypher/photoview/api/graphql/models"
@@ -1233,9 +1234,9 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 	})
 	log.Println("index", index)
 
-	oindex := make([]int, len(grpDesc))
-	odists := make([]float64, len(grpDesc))
-	odistIdx := make([]int, len(grpDesc))
+	oindex := make([]int, len(grpImageFaces))
+	odists := make([]float64, len(grpImageFaces))
+	odistIdx := make([]int, len(grpImageFaces))
 	for gIdx, grpImageFace := range grpDesc {
 		var minDist float64
 		var minDistIdx int
@@ -1252,6 +1253,7 @@ func (fd *faceDetector) moveToClosestFaceGroup(db *gorm.DB, groupID int32, doIt 
 		odists[gIdx] = minDist
 		odistIdx[gIdx] = minDistIdx
 
+		// minDist, minDistIdx = calcMinDistIndex( )
 		minDist, minDistIdx = calcImgMinDistGrp( grpImageFace, otherDesc)
 		if minDist != dists[gIdx] || minDistIdx != distIdx[gIdx] {
 			log.Printf("gIdx %3d ID %6d minDist %f %d / %f %d\n", gIdx, grpImageFaces[gIdx].ID, minDist, minDistIdx, odists[gIdx], odistIdx[gIdx])
@@ -1350,15 +1352,17 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 
 func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
 
-	log.Printf("splitFaceGroup groupID %d\n", groupID)
+	log.Printf("ReportDuplicateDescriptors\n")
 
 	fd.ReloadFacesFromDatabase(db)
 	start := time.Now()
+	dupCnt := 0
 	for sIdx, sDesc := range fd.faceDescriptors[:len(fd.faceDescriptors)-2] {
-		for cIdx, dDesc := range fd.faceDescriptors[sIdx+1:] {
-			curDist := euclidean_distance(sDesc, cDesc)
-			if dist == 0.0 {
-				log.Printf(" loop sIdx:%d dIdx:%d dist:%f\n", sIdx, dIdx, currDist)
+		for cIdx, cDesc := range fd.faceDescriptors[sIdx+1:] {
+			currDist := euclidean_distance(sDesc, cDesc)
+			if currDist == 0.0 {
+				dupCnt++
+				log.Printf(" loop sIdx:%d dIdx:%d dupCnt %d dist: %f\n", sIdx, cIdx, dupCnt, currDist)
 				elapsed := time.Since(start)
 				log.Printf("Calculation took %s", elapsed)
 			}
