@@ -913,6 +913,7 @@ func (fd *faceDetector) SplitFaceGroup(db *gorm.DB, groupID int32) {
 		}
 	}
 
+	fd.ReportDuplicateDescriptors(db)
 }
 
 func (fd *faceDetector) ConfirmAllFacesInFaceGroup(db *gorm.DB, groupID int32) {
@@ -1347,140 +1348,22 @@ func (fd *faceDetector) reOrderFaceGroupUnconfirmed(db *gorm.DB, groupID int32) 
 	}
 }
 
-func (fd *faceDetector) SplitFaceGroupOld(db *gorm.DB, groupID int32) {
+func (fd *faceDetector) ReportDuplicateDescriptors(db *gorm.DB) {
 
 	log.Printf("splitFaceGroup groupID %d\n", groupID)
 
 	fd.ReloadFacesFromDatabase(db)
-
-	// collect descriptors and faceIDs of groupID and calculate all distances in this group
-	descr := make([]face.Descriptor, 0)
-	imIds := make([]int, 0)
-	dists := make([]distElem, 0)
-	for i, faceGroupID := range fd.faceGroupIDs {
-		if faceGroupID == groupID {
-			newId := fd.imageFaceIDs[i]
-			for j, dstId := range imIds {
-				var elem distElem
-				elem.sId = newId
-				elem.tId = dstId
-				elem.dist = euclidean_distance(descr[j], fd.faceDescriptors[i])
-				log.Printf(" loop i:%d j:%d newId:%d dstId:%d dist:%f\n", i, j, newId, dstId, elem.dist)
-				dists = append(dists, elem)
-			}
-			descr = append(descr, fd.faceDescriptors[i])
-			imIds = append(imIds, newId)
-		}
-	}
-
-	// log.Printf("splitFaceGroup len(descr) %d len(dists) %d\n", len(descr), len(dists))
-
-	// order distanes ascending
-	sort.Slice(dists, func(i, j int) bool {
-		return dists[i].dist < dists[j].dist
-	})
-
-	var groups [][]int
-	for len(dists) > 0 {
-		log.Printf("0 len(dists) %d len(groups) %d\n", len(dists), len(groups))
-		nextDist := dists[0]
-		dists = dists[1:]
-		log.Printf(" 1 next distance between %d and %d is %f\n", nextDist.sId, nextDist.tId, nextDist.dist)
-		foundA := false
-		foundB := false
-		for i, grp := range groups {
-			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
-				log.Printf("  2 found face %d in group %d\n", nextDist.sId, i)
-				var found bool
-				found, groups, dists = mergeGroupsIfPossible(groups, dists, nextDist.tId, i)
-				if found {
-					foundA = true
-					break
-				}
-				log.Printf("  3 found new face %d for group %d\n", nextDist.tId, i)
-				dists = deleteUnused(grp, nextDist.tId, dists)
-				groups[i] = append(grp, nextDist.tId)
-				log.Println("  3a group", i, groups[i])
-				foundA = true
-				break
-			}
-			if 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
-				log.Printf("  4 found new face %d for group %d\n", nextDist.tId, i)
-				var found bool
-				found, groups, dists = mergeGroupsIfPossible(groups, dists, nextDist.sId, i)
-				if found {
-					foundB = true
-					break
-				}
-				log.Printf("  5 found new face %d for group %d\n", nextDist.sId, i)
-				dists = deleteUnused(grp, nextDist.sId, dists)
-				groups[i] = append(grp, nextDist.sId)
-				log.Println("  5a group", i, groups[i])
-				foundB = true
-				break
-			}
-		}
-		if foundA || foundB {
-			continue
-		}
-		log.Printf("  6 have to create new group for sId %d and tId %d\n", nextDist.sId, nextDist.tId)
-		groups = append(groups, []int{nextDist.sId, nextDist.tId})
-		log.Println("  6a group", len(groups)-1, groups[len(groups)-1])
-		elemCnt := 0
-		for _, grp := range groups {
-			elemCnt += len(grp)
-		}
-		log.Println("  6b elements grouped", elemCnt, "of", len(descr))
-		if elemCnt == len(descr) {
-			log.Printf("ALL faces grouped\n")
-			break
-		}
-	}
-	log.Println("FINISHED groupCnt:", len(groups), "distsCnt", len(dists))
-	// Now sort subgroups
-	var groupsSorted [][]int
-	for len(dists) > 0 {
-		log.Printf("10 len(dists) %d len(groups) %d\n", len(dists), len(groups))
-		nextDist := dists[0]
-		dists = dists[1:]
-		log.Printf(" 11 next distance between %d and %d is %f\n", nextDist.sId, nextDist.tId, nextDist.dist)
-		foundS := false
-		foundD := false
-		for i, grp := range groups {
-			if !foundS && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.sId }) {
-				log.Printf("  12 found face %d in group %d\n", nextDist.sId, i)
-				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i+1)
-				foundS = true
-			}
-			if !foundD && 0 <= slices.IndexFunc(grp, func(c int) bool { return c == nextDist.tId }) {
-				log.Printf("  14 found new face %d for group %d\n", nextDist.sId, i)
-				groupsSorted = append(groupsSorted, groups[i])
-				groups = slices.Delete(groups, i, i+1)
-				foundD = true
+	start := time.Now()
+	for sIdx, sDesc := range fd.faceDescriptors[:len(fd.faceDescriptors)-2] {
+		for cIdx, dDesc := range fd.faceDescriptors[sIdx+1:] {
+			curDist := euclidean_distance(sDesc, cDesc)
+			if dist == 0.0 {
+				log.Printf(" loop sIdx:%d dIdx:%d dist:%f\n", sIdx, dIdx, currDist)
+				elapsed := time.Since(start)
+				log.Printf("Calculation took %s", elapsed)
 			}
 		}
 	}
-	// order remaing group by lng descending
-	sort.Slice(groups, func(i, j int) bool {
-		return len(groups[i]) > len(groups[j])
-	})
-	// Add them in this order
-	for _, grp := range groups {
-		groupsSorted = append(groupsSorted, grp)
-	}
-	log.Println("FINISHED sorting groups sortedCnt:", len(groupsSorted), "groupCnt:", len(groups))
-	//
-	j := -len(groups)
-	for i, grp := range groupsSorted {
-		for _, faceImageId := range grp {
-			if err := setImageFaceSubGroup(db, faceImageId, j); err != nil {
-				log.Println(" Saving Subgroup", j, "failed for FaceImageId", faceImageId, "err", err)
-			} else {
-				log.Println("Saved Subgroup", j, "succeeded for FaceImageId", faceImageId)
-			}
-		}
-		log.Println(" Group", j, i, "len", len(grp), grp)
-		j += 1
-	}
+	elapsed := time.Since(start)
+	log.Printf("Calculation took %s", elapsed)
 }
